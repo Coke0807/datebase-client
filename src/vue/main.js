@@ -4,6 +4,7 @@ import ElementUI from 'element-ui';
 import locale from 'element-ui/lib/locale/lang/zh-CN'
 import VueRouter from 'vue-router'
 import UmyTable from 'umy-table'
+import i18nMixin from './mixin/i18n';
 
 import 'umy-table/lib/theme-chalk/index.css';
 import '@/../public/theme/auto.css'
@@ -13,6 +14,9 @@ import "tailwindcss/tailwind.css"
 Vue.use(VueRouter)
 Vue.use(ElementUI, { locale });
 Vue.use(UmyTable);
+
+// 全局注册 i18n mixin
+Vue.mixin(i18nMixin);
 
 Vue.config.productionTip = false
 

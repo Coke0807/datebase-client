@@ -5,9 +5,9 @@
       <el-form :inline="true">
         <!-- key name -->
         <el-form-item>
-          <el-input ref="keyNameInput" v-model="edit.name" @keyup.enter.native="rename" placeholder="set to rename key">
+          <el-input ref="keyNameInput" v-model="edit.name" @keyup.enter.native="rename" :placeholder="t('redis.keyView.setToRenameKey')">
             <span slot="prepend" class="key-detail-type">{{ key.type }}</span>
-            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="'Click to rename'" @click="rename">
+            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="t('redis.keyView.clickToRename')" @click="rename">
             </i>
           </el-input>
         </el-form-item>
@@ -15,8 +15,8 @@
         <!-- key ttl -->
         <el-form-item>
           <el-input v-model="edit.ttl" @keyup.enter.native="ttlKey" type='number'>
-            <span slot="prepend">TTL</span>
-            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="'Click to change ttl'" @click="ttlKey">
+            <span slot="prepend">{{ t('redis.keyView.ttl') }}</span>
+            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="t('redis.keyView.clickToChangeTtl')" @click="ttlKey">
             </i>
           </el-input>
         </el-form-item>
@@ -33,7 +33,7 @@
             </el-select>
             <!-- save btn -->
             <el-form-item>
-              <el-button type="primary" @click="update()">Save</el-button>
+              <el-button type="primary" @click="update()">{{ t('redis.keyView.save') }}</el-button>
             </el-form-item>
           </template>
         </el-form-item>
@@ -64,37 +64,37 @@
           <el-form :inline="true" size="small">
             <el-form-item>
               <el-button size="small" type="primary" @click='editDialogVisiable=true'>
-                Add New
+                {{ t('redis.keyView.addNew') }}
               </el-button>
             </el-form-item>
           </el-form>
           <!-- edit & add dialog -->
           <el-dialog :title="dialogTitle" :visible.sync="editDialogVisiable">
             <el-form>
-              <el-form-item label="key" v-if="key.type=='hash'">
+              <el-form-item :label="t('redis.keyView.key')" v-if="key.type=='hash'">
                 <el-input v-model="addKey"></el-input>
               </el-form-item>
-              <el-form-item label="Value">
+              <el-form-item :label="t('redis.keyView.value')">
                 <el-input v-model="addData"></el-input>
               </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-              <el-button @click="editDialogVisiable = false">Cancel</el-button>
-              <el-button type="primary" @click="confirmAdd">Confirm</el-button>
+              <el-button @click="editDialogVisiable = false">{{ t('redis.keyView.cancel') }}</el-button>
+              <el-button type="primary" @click="confirmAdd">{{ t('redis.keyView.confirm') }}</el-button>
             </div>
           </el-dialog>
         </div>
         <!-- content table -->
         <div>
           <el-table :data="key.content" stripe size="small" border>
-            <el-table-column type="index" label="ID" sortable width="60" align="center">
+            <el-table-column type="index" :label="t('redis.keyView.id')" sortable width="60" align="center">
             </el-table-column>
-            <el-table-column v-if="key.type=='hash'" resizable sortable label="Key" align="center">
+            <el-table-column v-if="key.type=='hash'" resizable sortable :label="t('redis.keyView.key')" align="center">
               <template slot-scope="scope">
                 {{scope.row.key}}
               </template>
             </el-table-column>
-            <el-table-column resizable sortable show-overflow-tooltip label="Value" align="center">
+            <el-table-column resizable sortable show-overflow-tooltip :label="t('redis.keyView.value')" align="center">
               <template slot-scope="scope">
                 {{key.type=='hash'?scope.row.value:scope.row}}
               </template>
@@ -233,9 +233,9 @@ export default {
       vscodeEvent.emit("deleteLine", row);
     },
     deleteKey() {
-      this.$confirm("Are you sure you want to delete this key?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
+      this.$confirm(this.t('redis.keyView.confirmDeleteKey'), this.t('common.warning'), {
+        confirmButtonText: this.t('common.ok'),
+        cancelButtonText: this.t('common.cancel'),
         type: "warning",
       }).then(() => {
         vscodeEvent.emit("del", { key: { name: this.key.name } });

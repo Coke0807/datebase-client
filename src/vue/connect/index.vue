@@ -1,17 +1,17 @@
 <template>
   <form @submit.prevent="tryConnect" class="flex flex-col mx-auto connect-container">
-    <h1 class="py-4 text-2xl">Connect to Database Server</h1>
+    <h1 class="py-4 text-2xl">{{ t('connect.title') }}</h1>
 
     <blockquote class="p-3 mb-2 panel error" v-if="connect.error">
       <section class="panel__text">
-        <div class="inline-block w-32 mr-5 font-bold">Connection error!</div>
+        <div class="inline-block w-32 mr-5 font-bold">{{ t('connect.error') }}</div>
         <span>{{ connect.errorMessage }}</span>
       </section>
     </blockquote>
 
     <blockquote class="p-3 mb-2 panel success" v-if="connect.success">
       <section class="panel__text">
-        <div class="inline-block mr-5 font-bold w-36">Success!</div>
+        <div class="inline-block mr-5 font-bold w-36">{{ t('connect.success') }}</div>
         <span>
           {{ connect.successMessage }}
         </span>
@@ -20,25 +20,25 @@
 
     <section class="flex flex-wrap items-center">
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block mr-5 font-bold">Connection Name</label>
+        <label class="inline-block mr-5 font-bold">{{ t('connect.connectionName') }}</label>
         <input
           class="field__input"
           style="min-width: 400px"
-          placeholder="Connection name"
+          :placeholder="t('connect.connectionName')"
           v-model="connectionOption.name"
         />
       </div>
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block mr-5 font-bold">Connection Target</label>
+        <label class="inline-block mr-5 font-bold">{{ t('connect.connectionTarget') }}</label>
         <div class="inline-flex items-center">
-          <el-radio v-model="connectionOption.global" :label="true"> Global </el-radio>
-          <el-radio v-model="connectionOption.global" :label="false"> Current Workspace </el-radio>
+          <el-radio v-model="connectionOption.global" :label="true"> {{ t('connect.global') }} </el-radio>
+          <el-radio v-model="connectionOption.global" :label="false"> {{ t('connect.currentWorkspace') }} </el-radio>
         </div>
       </div>
     </section>
 
     <section class="mt-5">
-      <label class="block font-bold">Database Type</label>
+      <label class="block font-bold">{{ t('connect.databaseType') }}</label>
       <ul class="flex-wrap tab">
         <li
           class="tab__item"
@@ -74,24 +74,24 @@
       <section class="mt-5">
         <div class="inline-block mb-2 mr-10">
           <label class="inline-block w-32 mr-5 font-bold">
-            <span>Host</span>
-            <span class="mr-1 text-red-600" title="required">*</span>
+            <span>{{ t('connect.host') }}</span>
+            <span class="mr-1 text-red-600" :title="t('connect.required')">*</span>
           </label>
           <input
             class="w-64 field__input"
-            placeholder="The host of connection"
+            :placeholder="t('connect.host')"
             required
             v-model="connectionOption.host"
           />
         </div>
         <div class="inline-block mb-2 mr-10">
           <label class="inline-block w-32 mr-5 font-bold">
-            Port
-            <span class="mr-1 text-red-600" title="required">*</span>
+            {{ t('connect.port') }}
+            <span class="mr-1 text-red-600" :title="t('connect.required')">*</span>
           </label>
           <input
             class="w-64 field__input"
-            placeholder="The port of connection"
+            :placeholder="t('connect.port')"
             required
             type="number"
             v-model="connectionOption.port"
@@ -104,31 +104,31 @@
       <section>
         <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType != 'Redis'">
           <label class="inline-block w-32 mr-5 font-bold">
-            Username
-            <span class="mr-1 text-red-600" title="required">*</span>
+            {{ t('connect.username') }}
+            <span class="mr-1 text-red-600" :title="t('connect.required')">*</span>
           </label>
-          <input class="w-64 field__input" placeholder="Username" required v-model="connectionOption.user" />
+          <input class="w-64 field__input" :placeholder="t('connect.username')" required v-model="connectionOption.user" />
         </div>
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block w-32 mr-5 font-bold">Password</label>
-          <input class="w-64 field__input" placeholder="Password" type="password" v-model="connectionOption.password" />
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.password') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.password')" type="password" v-model="connectionOption.password" />
         </div>
       </section>
 
       <section v-if="connectionOption.dbType != 'FTP' && connectionOption.dbType != 'MongoDB'">
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block w-32 mr-5 font-bold">Databases</label>
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.databases') }}</label>
           <input
             class="w-64 field__input"
-            placeholder="Special connection database"
+            :placeholder="t('connect.specialConnectionDatabase')"
             v-model="connectionOption.database"
           />
         </div>
         <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType != 'Redis'">
-          <label class="inline-block w-32 mr-5 font-bold">Include Databases</label>
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.includeDatabases') }}</label>
           <input
             class="w-64 field__input"
-            placeholder="Example: mysql,information_schema"
+            :placeholder="t('connect.includeDatabasesPlaceholder')"
             v-model="connectionOption.includeDatabases"
           />
         </div>
@@ -138,14 +138,14 @@
 
       <section>
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block w-32 mr-5 font-bold">Connection Timeout</label>
-          <input class="w-64 field__input" placeholder="5000" v-model="connectionOption.connectTimeout" />
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.connectionTimeout') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.connectionTimeoutPlaceholder')" v-model="connectionOption.connectTimeout" />
         </div>
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block w-32 mr-5 font-bold">Request Timeout</label>
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.requestTimeout') }}</label>
           <input
             class="w-64 field__input"
-            placeholder="10000"
+            :placeholder="t('connect.requestTimeoutPlaceholder')"
             type="number"
             v-model="connectionOption.requestTimeout"
           />
@@ -154,8 +154,8 @@
 
       <section class="flex items-center mb-2" v-if="connectionOption.dbType == 'MySQL'">
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block w-32 mr-5 font-bold">Timezone</label>
-          <input class="w-64 field__input" placeholder="+HH:MM" v-model="connectionOption.timezone" />
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.timezone') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.timezonePlaceholder')" v-model="connectionOption.timezone" />
         </div>
       </section>
     </template>
@@ -165,7 +165,7 @@
         class="inline-block mb-2 mr-10"
         v-if="connectionOption.dbType != 'SSH' && connectionOption.dbType != 'SQLite'"
       >
-        <label class="mr-2 font-bold">SSH Tunnel</label>
+        <label class="mr-2 font-bold">{{ t('connect.sshTunnel') }}</label>
         <el-switch v-model="connectionOption.usingSSH"></el-switch>
       </div>
       <div
@@ -177,24 +177,24 @@
           connectionOption.dbType == 'Redis'
         "
       >
-        <label class="inline-block mr-5 font-bold w-18">Use SSL</label>
+        <label class="inline-block mr-5 font-bold w-18">{{ t('connect.useSSL') }}</label>
         <el-switch v-model="connectionOption.useSSL"></el-switch>
       </div>
       <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
-        <label class="inline-block mr-5 font-bold w-18">SRV Record</label>
+        <label class="inline-block mr-5 font-bold w-18">{{ t('connect.srvRecord') }}</label>
         <el-switch v-model="connectionOption.srv"></el-switch>
       </div>
       <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
-        <label class="inline-block mr-5 font-bold w-18">Use Connection String</label>
+        <label class="inline-block mr-5 font-bold w-18">{{ t('connect.useConnectionString') }}</label>
         <el-switch v-model="connectionOption.useConnectionString"></el-switch>
       </div>
     </section>
     <section class="flex items-center" v-if="connectionOption.useConnectionString">
       <div class="flex w-full mb-2 mr-10">
-        <label class="inline-block w-32 mr-5 font-bold">Connection String</label>
+        <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.connectionString') }}</label>
         <input
           class="w-4/5 field__input"
-          placeholder="e.g mongodb+srv://username:password@server-url/admin"
+          :placeholder="t('connect.connectionStringPlaceholder')"
           v-model="connectionOption.connectionUrl"
         />
       </div>
@@ -210,8 +210,8 @@
     <SSH :connectionOption="connectionOption" v-if="connectionOption.usingSSH && connectionOption.dbType != 'SSH'" />
 
     <div class="mt-2">
-      <button class="inline mr-4 button button--primary w-28" type="submit" v-loading="connect.loading">Connect</button>
-      <button class="inline button button--primary w-28" @click="close">Close</button>
+      <button class="inline mr-4 button button--primary w-28" type="submit" v-loading="connect.loading">{{ t('connect.testConnection') }}</button>
+      <button class="inline button button--primary w-28" @click="close">{{ t('common.close') }}</button>
     </div>
   </form>
 </template>

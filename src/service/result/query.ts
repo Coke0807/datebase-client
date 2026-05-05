@@ -86,9 +86,9 @@ export class QueryPage {
                 }).on('changePageSize', (pageSize) => {
                     Global.updateConfig(ConfigKey.DEFAULT_LIMIT, pageSize)
                 }).on('openGithub', () => {
-                    env.openExternal(Uri.parse('https://github.com/cweijan/vscode-database-client'));
+                    env.openExternal(Uri.parse('https://github.com/Coke0807/datebase-client'));
                 }).on('openCoffee', () => {
-                    env.openExternal(Uri.parse('https://www.buymeacoffee.com/cweijan'));
+                    env.openExternal(Uri.parse('https://www.buymeacoffee.com/coke0807'));
                 }).on('dataModify', () => {
                     if (handler.panel.title.indexOf("*") == -1) handler.panel.title = `${handler.panel.title}*`
                 }).on("saveModify", (sql) => {

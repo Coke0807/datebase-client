@@ -2,73 +2,73 @@
   <div>
     <InfoPanel/>
     <div class="design-toolbar">
-      <el-button @click="column.visible=true" type="primary" title="Insert" icon="el-icon-circle-plus-outline" size="mini" circle> </el-button>
+      <el-button @click="column.visible=true" type="primary" :title="t('common.add')" icon="el-icon-circle-plus-outline" size="mini" circle> </el-button>
     </div>
     <ux-grid :data="designData.editColumnList" stripe style="width: 100%" :cell-style="{height: '25px'}" :height="remainHeight()">
-      <ux-table-column align="center" field="name" title="Name" show-overflow-tooltip="true"></ux-table-column>
-      <ux-table-column align="center" field="type" title="Type" show-overflow-tooltip="true"></ux-table-column>
-      <ux-table-column align="center" field="comment" title="Comment" show-overflow-tooltip="true"></ux-table-column>
-      <ux-table-column align="center" field="maxLength" width="80" title="Length" show-overflow-tooltip="true"></ux-table-column>
-      <ux-table-column align="center" field="defaultValue" width="120" title="Default" show-overflow-tooltip="true"></ux-table-column>
-      <ux-table-column align="center" title="Primary Key" width="100" show-overflow-tooltip="true">
+      <ux-table-column align="center" field="name" :title="t('design.columnName')" show-overflow-tooltip="true"></ux-table-column>
+      <ux-table-column align="center" field="type" :title="t('design.type')" show-overflow-tooltip="true"></ux-table-column>
+      <ux-table-column align="center" field="comment" :title="t('design.comment')" show-overflow-tooltip="true"></ux-table-column>
+      <ux-table-column align="center" field="maxLength" width="80" :title="t('design.length')" show-overflow-tooltip="true"></ux-table-column>
+      <ux-table-column align="center" field="defaultValue" width="120" :title="t('design.default')" show-overflow-tooltip="true"></ux-table-column>
+      <ux-table-column align="center" :title="t('design.primaryKey')" width="100" show-overflow-tooltip="true">
         <template v-slot="{ row }">
           <el-checkbox disabled :checked="row.isPrimary"></el-checkbox>
         </template>
       </ux-table-column>
-      <ux-table-column align="center" title="Unique" width="80" show-overflow-tooltip="true">
+      <ux-table-column align="center" :title="t('design.unique')" width="80" show-overflow-tooltip="true">
         <template v-slot="{ row }">
           <el-checkbox disabled :checked="row.isUnique"></el-checkbox>
         </template>
       </ux-table-column>
-      <ux-table-column align="center" title="Not Null" width="80" show-overflow-tooltip="true">
+      <ux-table-column align="center" :title="t('design.notNull')" width="80" show-overflow-tooltip="true">
         <template v-slot="{ row }">
           <el-checkbox disabled :checked="row.nullable=='NO'"></el-checkbox>
         </template>
       </ux-table-column>
-      <ux-table-column align="center" title="Auto Incrment" width="140" show-overflow-tooltip="true">
+      <ux-table-column align="center" :title="t('design.autoIncrement')" width="140" show-overflow-tooltip="true">
         <template v-slot="{ row }">
           <el-checkbox disabled :checked="row.isAutoIncrement"></el-checkbox>
         </template>
       </ux-table-column>
-      <ux-table-column title="Operation" width="120">
+      <ux-table-column :title="t('common.edit')" width="120">
         <template v-slot="{ row }">
-          <el-button @click="openEdit(row)" title="edit" size="mini" icon="el-icon-edit" circle> </el-button>
-          <el-button @click="deleteConfirm(row)" title="delete" type="danger" size="mini" icon="el-icon-delete" circle> </el-button>
+          <el-button @click="openEdit(row)" :title="t('common.edit')" size="mini" icon="el-icon-edit" circle> </el-button>
+          <el-button @click="deleteConfirm(row)" :title="t('common.delete')" type="danger" size="mini" icon="el-icon-delete" circle> </el-button>
         </template>
       </ux-table-column>
     </ux-grid>
-    <el-dialog :title="'Update Column'" :visible.sync="column.editVisible" top="3vh" size="mini">
+    <el-dialog :title="t('design.updateColumn')" :visible.sync="column.editVisible" top="3vh" size="mini">
       <el-form :inline='true'>
-        <el-form-item label="Name">
+        <el-form-item :label="t('design.columnName')">
           <el-input v-model="editColumn.name"></el-input>
         </el-form-item>
-        <el-form-item label="Type">
+        <el-form-item :label="t('design.type')">
           <el-input v-model="editColumn.type"></el-input>
         </el-form-item>
-        <el-form-item label="Comment">
+        <el-form-item :label="t('design.comment')">
           <el-input v-model="editColumn.comment"></el-input>
         </el-form-item>
-        <el-form-item label="Not Null">
+        <el-form-item :label="t('design.notNull')">
           <el-checkbox v-model="editColumn.isNotNull"></el-checkbox>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" :loading="column.editloading" @click="updateColumn">Update</el-button>
-        <el-button @click="column.editVisible=false">Cancel</el-button>
+        <el-button type="primary" :loading="column.editloading" @click="updateColumn">{{ t('common.save') }}</el-button>
+        <el-button @click="column.editVisible=false">{{ t('common.cancel') }}</el-button>
       </span>
     </el-dialog>
-    <el-dialog :title="'Add Column'" :visible.sync="column.visible" top="3vh" size="mini">
+    <el-dialog :title="t('design.addColumn')" :visible.sync="column.visible" top="3vh" size="mini">
       <el-form :inline='true'>
-        <el-form-item label="Name">
+        <el-form-item :label="t('design.columnName')">
           <el-input v-model="column.name"></el-input>
         </el-form-item>
-        <el-form-item label="Type">
+        <el-form-item :label="t('design.type')">
           <el-input v-model="column.type"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" :loading="column.loading" @click="createcolumn">Create</el-button>
-        <el-button @click="column.visible=false">Cancel</el-button>
+        <el-button type="primary" :loading="column.loading" @click="createcolumn">{{ t('common.add') }}</el-button>
+        <el-button @click="column.visible=false">{{ t('common.cancel') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -151,9 +151,9 @@ export default {
       this.column.editLoading = false;
     },
     deleteConfirm(row) {
-      this.$confirm("Are you sure you want to delete this column?", "Warning", {
-        confirmButtonText: "OK",
-        cancelButtonText: "Cancel",
+      this.$confirm(this.t('common.confirmDeleteColumn'), this.t('common.warning'), {
+        confirmButtonText: this.t('common.ok'),
+        cancelButtonText: this.t('common.cancel'),
         type: "warning",
       }).then(() => {
         this.execute(

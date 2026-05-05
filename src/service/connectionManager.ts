@@ -177,7 +177,7 @@ export class ConnectionManager {
     public static getByActiveFile(): Node {
         if (vscode.window.activeTextEditor) {
             const fileName = vscode.window.activeTextEditor.document.fileName;
-            if (fileName.includes('cweijan')) {
+            if (fileName.includes('coke0807')) {
                 const queryName = path.basename(path.resolve(fileName, '..'))
                 const [host, port, database, schema] = queryName
                     .replace(/^.*@@/, '') // new connection id

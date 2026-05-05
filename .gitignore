@@ -1,8 +1,70 @@
-out
-node_modules
-.idea/
-.vscode-test/
+# 依赖目录
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 构建输出
+out/
+dist/
+build/
 *.vsix
+
+# IDE 配置
+.idea/
+.vscode/
+!.vscode/extensions.json
+.vscode-test/
+
+# 锁文件
 package-lock.json
-.prettierrc
 yarn.lock
+pnpm-lock.yaml
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 日志文件
+logs/
+*.log
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 数据库文件
+*.sqlite
+*.db
+
+# 编译缓存
+.cache/
+.parcel-cache/
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 预处理器配置
+.prettierrc
+.prettierignore
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 临时构建文件
+*.tsbuildinfo
+*.js.map
+*.d.ts
+
+# 系统文件
+Desktop.ini

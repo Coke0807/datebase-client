@@ -6,7 +6,7 @@
 
 ## 安装
 
-从 [Visual Studio Code 扩展商店](https://marketplace.visualstudio.com/items?itemName=cweijan.vscode-mysql-client2) 或 [Open VSX](https://open-vsx.org/extension/cweijan/vscode-mysql-client2) 安装
+从 [Visual Studio Code 扩展商店](https://marketplace.visualstudio.com/items?itemName=coke0807.vscode-database-client) 或 [Open VSX](https://open-vsx.org/extension/coke0807/vscode-database-client) 安装
 
 ## 遥测报告
 

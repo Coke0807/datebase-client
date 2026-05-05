@@ -3,19 +3,19 @@
     <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block font-bold mr-9 w-28">
-          SSH Host
+          {{ t('connect.sshHost') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
-        <input class="w-64 field__input" placeholder="SSH Host" required v-model="connectionOption.ssh.host" />
+        <input class="w-64 field__input" :placeholder="t('connect.sshHost')" required v-model="connectionOption.ssh.host" />
       </div>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block font-bold mr-9 w-28">
-          SSH Port
+          {{ t('connect.sshPort') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
         <input
           class="w-64 field__input"
-          placeholder="SSH Port"
+          :placeholder="t('connect.sshPort')"
           required
           type="number"
           v-model="connectionOption.ssh.port"
@@ -26,15 +26,15 @@
     <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block font-bold mr-9 w-28">
-          SSH Username
+          {{ t('connect.sshUsername') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
-        <input class="w-64 field__input" placeholder="SSH Username" required v-model="connectionOption.ssh.username" />
+        <input class="w-64 field__input" :placeholder="t('connect.sshUsername')" required v-model="connectionOption.ssh.username" />
       </div>
 
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block font-bold mr-9 w-28">SSH Cipher</label>
-        <el-select v-model="connectionOption.ssh.algorithms.cipher[0]" placeholder="Default">
+        <label class="inline-block font-bold mr-9 w-28">{{ t('connect.sshCipher') }}</label>
+        <el-select v-model="connectionOption.ssh.algorithms.cipher[0]" :placeholder="t('connect.default')">
           <el-option value="aes128-cbc">aes128-cbc</el-option>
           <el-option value="aes192-cbc">aes192-cbc</el-option>
           <el-option value="aes256-cbc">aes256-cbc</el-option>
@@ -48,27 +48,27 @@
 
     <section v-if="connectionOption.dbType == 'SSH'">
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block w-32 mr-5 font-bold">Show Hidden File</label>
+        <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.showHiddenFile') }}</label>
         <el-switch v-model="connectionOption.showHidden"></el-switch>
       </div>
     </section>
 
     <section class="mb-2">
-      <label class="inline-block font-bold mr-9 w-28">Type</label>
-      <el-radio v-model="connectionOption.ssh.type" label="password">Password</el-radio>
-      <el-radio v-model="connectionOption.ssh.type" label="privateKey">Private Key</el-radio>
-      <el-radio v-model="connectionOption.ssh.type" label="native">Native SSH</el-radio>
+      <label class="inline-block font-bold mr-9 w-28">{{ t('connect.type') }}</label>
+      <el-radio v-model="connectionOption.ssh.type" label="password">{{ t('connect.password') }}</el-radio>
+      <el-radio v-model="connectionOption.ssh.type" label="privateKey">{{ t('connect.privateKey') }}</el-radio>
+      <el-radio v-model="connectionOption.ssh.type" label="native">{{ t('connect.nativeSSH') }}</el-radio>
     </section>
 
     <div v-if="connectionOption.ssh.type == 'password'" class="mb-2">
       <section>
         <label class="inline-block font-bold mr-9 w-28">
-          Password
+          {{ t('connect.password') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
         <input
           class="w-64 field__input"
-          placeholder="Password"
+          :placeholder="t('connect.password')"
           required
           type="password"
           v-model="connectionOption.ssh.password"
@@ -78,19 +78,19 @@
     <div v-else class="mb-2">
       <section>
         <div class="inline-block mb-2 mr-8">
-          <label class="inline-block font-bold mr-9 w-28">Private Key Path</label>
+          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.privateKeyPath') }}</label>
           <input
             class="w-50 field__input"
-            placeholder="Private Key Path"
+            :placeholder="t('connect.privateKeyPath')"
             v-model="connectionOption.ssh.privateKeyPath"
           />
-          <button @click="() => $emit('choose')" type="button" class="w-12 ml-1">Choose</button>
+          <button @click="() => $emit('choose')" type="button" class="w-12 ml-1">{{ t('connect.choose') }}</button>
         </div>
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block font-bold mr-9 w-28">Passphrase</label>
+          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.passphrase') }}</label>
           <input
             class="w-64 field__input"
-            placeholder="Passphrase"
+            :placeholder="t('connect.passphrase')"
             type="password"
             v-model="connectionOption.ssh.passphrase"
           />
@@ -98,10 +98,10 @@
       </section>
       <section v-if="connectionOption.ssh.type == 'native'">
         <div class="inline-block mr-10">
-          <label class="inline-block font-bold mr-9 w-28">Waiting Time</label>
+          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.waitingTime') }}</label>
           <input
             class="w-64 field__input"
-            placeholder="Waiting time for ssh command."
+            :placeholder="t('connect.waitingTimeDesc')"
             v-model="connectionOption.ssh.watingTime"
           />
         </div>

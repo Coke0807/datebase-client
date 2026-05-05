@@ -2,23 +2,23 @@
   <div>
     <blockquote class="panel" id="error" v-if="error">
       <p class="panel__text">
-        Connection error! <span id="errorMessage" v-text="errorMessage"></span><br />
+        {{ t('forward.connectionError') }} <span id="errorMessage" v-text="errorMessage"></span><br />
       </p>
     </blockquote>
     <el-table :data="forwardList" style="width: 100%">
-      <el-table-column prop="name" label="name">
+      <el-table-column prop="name" :label="t('forward.name')">
       </el-table-column>
-      <el-table-column prop="localHost" label="Local Host">
+      <el-table-column prop="localHost" :label="t('forward.localHost')">
       </el-table-column>
-      <el-table-column prop="localPort" label="Local Port">
+      <el-table-column prop="localPort" :label="t('forward.localPort')">
       </el-table-column>
-      <el-table-column prop="remoteHost" label="Remote Host">
+      <el-table-column prop="remoteHost" :label="t('forward.remoteHost')">
       </el-table-column>
-      <el-table-column prop="remotePort" label="Remote Port">
+      <el-table-column prop="remotePort" :label="t('forward.remotePort')">
       </el-table-column>
-      <el-table-column prop="state" label="State">
+      <el-table-column prop="state" :label="t('forward.state')">
         <template slot-scope="scope">
-          {{scope.row.state==true?"running":"stop"}}
+          {{scope.row.state==true? t('forward.running') : t('forward.stopped')}}
         </template>
       </el-table-column>
       <el-table-column fixed="right" width="200">
@@ -28,17 +28,17 @@
           <el-button type="primary" icon="el-icon-refresh" size="small" circle @click="load"> </el-button>
         </template>
         <template slot-scope="scope">
-          <el-button v-if="!scope.row.state" @click="start(scope.row.id);" type="success" size="small" title="Start"
+          <el-button v-if="!scope.row.state" @click="start(scope.row.id);" type="success" size="small" :title="t('forward.start')"
             icon="el-icon-video-play" circle>
           </el-button>
-          <el-button v-if="scope.row.state" @click="stop(scope.row.id);" type="danger" size="small" title="Stop"
+          <el-button v-if="scope.row.state" @click="stop(scope.row.id);" type="danger" size="small" :title="t('forward.stop')"
             icon="el-icon-switch-button" circle>
           </el-button>
-          <el-button @click="openEdit(scope.row);" type="primary" size="small" title="Edit" icon="el-icon-edit" circle>
+          <el-button @click="openEdit(scope.row);" type="primary" size="small" :title="t('forward.edit')" icon="el-icon-edit" circle>
           </el-button>
-          <el-button @click="info(scope.row);" type="info" size="small" title="Show command" icon="el-icon-info" circle>
+          <el-button @click="info(scope.row);" type="info" size="small" :title="t('forward.showCommand')" icon="el-icon-info" circle>
           </el-button>
-          <el-button @click="deleteConfirm(scope.row.id)" title="delete" type="danger" size="small"
+          <el-button @click="deleteConfirm(scope.row.id)" :title="t('forward.delete')" type="danger" size="small"
             icon="el-icon-delete" circle>
           </el-button>
         </template>
@@ -46,26 +46,26 @@
     </el-table>
     <el-dialog ref="editDialog" :title="panel.title" :visible.sync="panel.visible" width="90%" top="3vh" size="small">
       <el-form ref="infoForm" :model="panel.edit" label-width="120px">
-        <el-form-item size="mini" label="name">
+        <el-form-item size="mini" :label="t('forward.name')">
           <el-input v-model="panel.edit.name"></el-input>
         </el-form-item>
-        <el-form-item size="mini" label="localHost">
+        <el-form-item size="mini" :label="t('forward.localHost')">
           <el-input v-model="panel.edit.localHost"></el-input>
         </el-form-item>
-        <el-form-item size="mini" label="localPort">
+        <el-form-item size="mini" :label="t('forward.localPort')">
           <el-input v-model="panel.edit.localPort"></el-input>
         </el-form-item>
-        <el-form-item size="mini" label="remoteHost">
+        <el-form-item size="mini" :label="t('forward.remoteHost')">
           <el-input v-model="panel.edit.remoteHost"></el-input>
         </el-form-item>
-        <el-form-item size="mini" label="remotePort">
+        <el-form-item size="mini" :label="t('forward.remotePort')">
           <el-input v-model="panel.edit.remotePort"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="panel.visible = false">Cancel</el-button>
+        <el-button @click="panel.visible = false">{{ t('forward.cancel') }}</el-button>
         <el-button type="primary" :loading="panel.loading" @click="confirmUpdate">
-          {{panel.edit.id!=null?"Update":"Create"}}
+          {{panel.edit.id!=null? t('forward.update') : t('forward.create')}}
         </el-button>
       </span>
     </el-dialog>
@@ -84,7 +84,7 @@
         error: false,
         errorMessage: "",
         panel: {
-          title: "create foward",
+          title: t('forward.create'),
           visible: false,
           loading: false,
           edit: {}
@@ -140,11 +140,11 @@
       },
       deleteConfirm(id) {
         this.$confirm(
-          "Are you sure you want to delete this forward?",
-          "Warning",
+          this.t('forward.confirmDeleteForward'),
+          this.t('common.warning'),
           {
-            confirmButtonText: "OK",
-            cancelButtonText: "Cancel",
+            confirmButtonText: this.t('common.ok'),
+            cancelButtonText: this.t('common.cancel'),
             type: "warning"
           }
         )
@@ -152,7 +152,7 @@
             this.remove(id);
           })
           .catch(() => {
-            this.$message({ type: "info", message: "Delete canceled" });
+            this.$message({ type: "info", message: this.t('forward.deleteCanceled') });
           });
       }
     }

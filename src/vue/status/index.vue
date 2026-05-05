@@ -1,35 +1,35 @@
 <template>
   <div class='status-container'>
     <el-tabs v-model="activePanel" @tab-click="changePannel">
-      <el-tab-pane label="dashBoard" name="dashBoard" v-if="info.dbType=='MySQL'">
+      <el-tab-pane :label="t('status.dashBoard')" name="dashBoard" v-if="info.dbType=='MySQL'">
         <el-row style="height:45vh">
           <el-col :span="24">
-            Queries:
+            {{ t('status.queries') }}:
             <div id="queries"></div>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            Traffic:
+            {{ t('status.traffic') }}:
             <div id="traffic"></div>
           </el-col>
           <el-col :span="12">
-            Server Sessions:
+            {{ t('status.serverSessions') }}:
             <div id="sessions"></div>
           </el-col>
         </el-row>
       </el-tab-pane>
-      <el-tab-pane label="processList" name="processList">
+      <el-tab-pane :label="t('status.processList')" name="processList">
         <ux-grid :data="process.rows" size='small' :cell-style="{height: '35px'}" style="width: 100%" :height="remainHeight()">
           <ux-table-column :field="field.name" :title="field.name" v-for="(field,index) in process.fields" :key="index" align="center" show-overflow-tooltip="true" />
         </ux-grid>
       </el-tab-pane>
-      <el-tab-pane label="variableList" name="variableList" v-if="info.dbType!='SqlServer'">
+      <el-tab-pane :label="t('status.variableList')" name="variableList" v-if="info.dbType!='SqlServer'">
         <ux-grid :data="variableList.rows" size='small' :cell-style="{height: '35px'}" style="width: 100%" :height="remainHeight()">
           <ux-table-column :field="field.name" :title="field.name" v-for="(field,index) in variableList.fields" :key="index" align="center" show-overflow-tooltip="true" />
         </ux-grid>
       </el-tab-pane>
-      <el-tab-pane label="statusList" name="statusList" v-if="info.dbType!='SqlServer'">
+      <el-tab-pane :label="t('status.statusList')" name="statusList" v-if="info.dbType!='SqlServer'">
         <ux-grid :data="statusList.rows" size='small' :cell-style="{height: '35px'}" style="width: 100%" :height="remainHeight()">
           <ux-table-column :field="field.name" :title="field.name" v-for="(field,index) in statusList.fields" :key="index" align="center" show-overflow-tooltip="true" />
         </ux-grid>

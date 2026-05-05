@@ -6,10 +6,10 @@
         <div style="float: right;">
           <el-tag type="info">
             <i class="el-icon-refresh"></i>
-            Auto Refresh
+            {{ t('redis.redisStatus.autoRefresh') }}
           </el-tag>
 
-          <el-tooltip class="item" effect="dark" :content="'Auto Refresh Switch, Refresh Every 2 Seconds'" placement="bottom">
+          <el-tooltip class="item" effect="dark" :content="t('redis.redisStatus.autoRefreshTip')" placement="bottom">
             <el-switch v-model="autoRefresh" @change="refreshInit">
             </el-switch>
           </el-tooltip>
@@ -24,26 +24,26 @@
         <el-card class="box-card">
           <div slot="header" class="clearfix">
             <i class="fa fa-server"></i>
-            <span>Server</span>
+            <span>{{ t('redis.redisStatus.server') }}</span>
           </div>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
-              Redis Version:
+              {{ t('redis.redisStatus.redisVersion') }}:
               <span class="server-status-text">{{this.connectionStatus.redis_version}}</span>
             </el-tag>
           </p>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
-              OS:
+              {{ t('redis.redisStatus.os') }}:
               <span class="server-status-text" :title="connectionStatus.os">{{this.connectionStatus.os}}</span>
             </el-tag>
           </p>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
-              Process ID:
+              {{ t('redis.redisStatus.processId') }}:
               <span class="server-status-text">{{this.connectionStatus.process_id}}</span>
             </el-tag>
           </p>
