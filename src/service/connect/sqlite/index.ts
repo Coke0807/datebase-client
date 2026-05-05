@@ -17,7 +17,7 @@ class SQLite {
     }
 
     query(query: string): Promise<ResultNew | ResultNew[]> {
-        if (!this.sqliteCommand) Promise.resolve({ error: "Unable to execute query: provide a valid sqlite3 executable in the setting sqlite.sqlite3." });
+        if (!this.sqliteCommand) return Promise.reject(new Error("Unable to execute query: provide a valid sqlite3 executable in the setting sqlite.sqlite3."));
         return new Promise((res, rej) => {
 
 

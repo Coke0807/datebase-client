@@ -5,19 +5,19 @@
       <el-form :inline="true">
         <!-- key name -->
         <el-form-item>
-          <el-input ref="keyNameInput" v-model="edit.name" @keyup.enter.native="rename" :placeholder="t('redis.keyView.setToRenameKey')">
-            <span slot="prepend" class="key-detail-type">{{ key.type }}</span>
-            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="t('redis.keyView.clickToRename')" @click="rename">
-            </i>
+          <el-input ref="keyNameInput" v-model="edit.name" @keyup.enter="rename" :placeholder="t('redis.keyView.setToRenameKey')">
+            <template #prepend><span class="key-detail-type">{{ key.type }}</span></template>
+            <template #suffix><i class="el-icon-check el-input__icon cursor-pointer" :title="t('redis.keyView.clickToRename')" @click="rename">
+            </i></template>
           </el-input>
         </el-form-item>
 
         <!-- key ttl -->
         <el-form-item>
-          <el-input v-model="edit.ttl" @keyup.enter.native="ttlKey" type='number'>
-            <span slot="prepend">{{ t('redis.keyView.ttl') }}</span>
-            <i class="el-icon-check el-input__icon cursor-pointer" slot="suffix" :title="t('redis.keyView.clickToChangeTtl')" @click="ttlKey">
-            </i>
+          <el-input v-model="edit.ttl" @keyup.enter="ttlKey" type='number'>
+            <template #prepend><span>{{ t('redis.keyView.ttl') }}</span></template>
+            <template #suffix><i class="el-icon-check el-input__icon cursor-pointer" :title="t('redis.keyView.clickToChangeTtl')" @click="ttlKey">
+            </i></template>
           </el-input>
         </el-form-item>
 
@@ -26,8 +26,8 @@
           <el-button type="danger" @click="deleteKey" icon="el-icon-delete"></el-button>
           <el-button type="success" @click="refresh" icon="el-icon-refresh"></el-button>
           <template v-if="key.type=='string'">
-            <el-select v-model="selectedView" class='format-selector' :style='selectStyle' size='mini'>
-              <span slot="prefix" class="fa fa-sitemap"></span>
+            <el-select v-model="selectedView" class='format-selector' :style='selectStyle' size='small'>
+              <template #prefix><span class="fa fa-sitemap"></span></template>
               <el-option v-for="item in viewers" :key="item.value" :label="item.text" :value="item.value">
               </el-option>
             </el-select>
@@ -69,7 +69,7 @@
             </el-form-item>
           </el-form>
           <!-- edit & add dialog -->
-          <el-dialog :title="dialogTitle" :visible.sync="editDialogVisiable">
+          <el-dialog :title="dialogTitle" v-model="editDialogVisiable">
             <el-form>
               <el-form-item :label="t('redis.keyView.key')" v-if="key.type=='hash'">
                 <el-input v-model="addKey"></el-input>
@@ -78,10 +78,12 @@
                 <el-input v-model="addData"></el-input>
               </el-form-item>
             </el-form>
-            <div slot="footer" class="dialog-footer">
+            <template #footer>
+            <div class="dialog-footer">
               <el-button @click="editDialogVisiable = false">{{ t('redis.keyView.cancel') }}</el-button>
               <el-button type="primary" @click="confirmAdd">{{ t('redis.keyView.confirm') }}</el-button>
             </div>
+            </template>
           </el-dialog>
         </div>
         <!-- content table -->

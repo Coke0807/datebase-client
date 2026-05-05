@@ -20,7 +20,7 @@ export class PostgreSqlConnection extends IConnection {
         } as ClientConfig;
         if (node.useSSL) {
             config.ssl = {
-                rejectUnauthorized: false,
+                rejectUnauthorized: node.caPath ? true : false,
                 ca: (node.caPath) ? fs.readFileSync(node.caPath) : null,
                 cert: (node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
                 key: (node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,
@@ -76,8 +76,8 @@ export class PostgreSqlConnection extends IConnection {
         this.client.connect(err => {
             callback(err)
             if (!err) {
-                this.client.on("error", this.end)
-                this.client.on("end", this.end)
+                this.client.on("error", () => this.end())
+                this.client.on("end", () => this.end())
             }
         })
     }

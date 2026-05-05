@@ -22,10 +22,12 @@
       <!-- server -->
       <el-col :span="8">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <i class="fa fa-server"></i>
-            <span>{{ t('redis.redisStatus.server') }}</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <i class="fa fa-server"></i>
+              <span>{{ t('redis.redisStatus.server') }}</span>
+            </div>
+          </template>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
@@ -53,10 +55,12 @@
       <!-- memory row -->
       <el-col :span="8">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <i class="fa fa-microchip"></i>
-            <span> Memory</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <i class="fa fa-microchip"></i>
+              <span> Memory</span>
+            </div>
+          </template>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
@@ -84,10 +88,12 @@
       <!-- stats row -->
       <el-col :span="8">
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <i class="fa fa-thermometer-three-quarters"></i>
-            <span>Stats</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <i class="fa fa-thermometer-three-quarters"></i>
+              <span>Stats</span>
+            </div>
+          </template>
 
           <p class="server-status-tag-p">
             <el-tag class='server-status-container' type="info" size="big">
@@ -117,10 +123,12 @@
     <el-row class="status-card">
       <el-col>
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <i class="fa fa-bar-chart"></i>
-            <span>Key Statistics</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <i class="fa fa-bar-chart"></i>
+              <span>Key Statistics</span>
+            </div>
+          </template>
 
           <el-table :data="DBKeys" stripe>
             <el-table-column fixed prop="db" label="DB">
@@ -140,10 +148,12 @@
     <el-row class="status-card">
       <el-col>
         <el-card class="box-card">
-          <div slot="header" class="clearfix">
-            <i class="fa fa-info-circle"></i>
-            <span> All Redis Info</span>
-          </div>
+          <template #header>
+            <div class="clearfix">
+              <i class="fa fa-info-circle"></i>
+              <span> All Redis Info</span>
+            </div>
+          </template>
 
           <el-table :data="AllRedisInfo" stripe>
             <el-table-column fixed prop="key" label="Key">

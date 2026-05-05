@@ -28,12 +28,12 @@
         </el-form-item>
       </el-form>
     </div>
-      <el-button stlye="margin-left:250px;" class="m-2" @click="startCompare" :title="t('structDiff.diff')" type="danger" size="mini" v-loading="loading.compare">{{ t('structDiff.diff') }}
+      <el-button stlye="margin-left:250px;" class="m-2" @click="startCompare" :title="t('structDiff.diff')" type="danger" size="small" v-loading="loading.compare">{{ t('structDiff.diff') }}
       </el-button>
     <div >
       <template v-if="compareResult.sqlList">
         <el-card>
-          <el-button @click="confrimSync" v-loading="loading.sync" :title="t('structDiff.sync')" type="success" size="mini">{{ t('structDiff.sync') }}
+          <el-button @click="confrimSync" v-loading="loading.sync" :title="t('structDiff.sync')" type="success" size="small">{{ t('structDiff.sync') }}
           </el-button>
           <vxe-table :data="compareResult.sqlList" :height="remainHeight" ref="dataTable" stripe style="width: 100%" @checkbox-change="selectionChange">
             <vxe-column type="checkbox" width="40" fixed="left"> </vxe-column>

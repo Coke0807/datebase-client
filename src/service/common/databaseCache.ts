@@ -8,8 +8,14 @@ export class DatabaseCache {
 
     private static cache = { database: {} };
     private static childCache = {};
+    private static childCacheTimestamps: { [key: string]: number } = {};
     private static globalCollpaseState: { key?: TreeItemCollapsibleState };
     private static workspaceCollpaseState: { key?: TreeItemCollapsibleState };
+
+    /** T-06: Maximum number of child cache entries before LRU eviction */
+    private static readonly MAX_CHILD_CACHE_SIZE = 500;
+    /** T-06: TTL for child cache entries in milliseconds (5 minutes) */
+    private static readonly CHILD_CACHE_TTL = 5 * 60 * 1000;
 
     /**
      * get element current collapseState or default collapseState
@@ -69,15 +75,37 @@ export class DatabaseCache {
 
     public static clearCache() {
         this.childCache = {}
+        this.childCacheTimestamps = {}
         this.cache.database = {}
     }
 
 
     public static setChildCache(uid: string, tableNodeList: Node[]) {
+        // T-06: Evict oldest entries if cache exceeds max size
+        const keys = Object.keys(this.childCache);
+        if (keys.length >= DatabaseCache.MAX_CHILD_CACHE_SIZE) {
+            // Sort by timestamp and remove oldest 20%
+            const sorted = keys.sort((a, b) =>
+                (this.childCacheTimestamps[a] || 0) - (this.childCacheTimestamps[b] || 0)
+            );
+            const evictCount = Math.floor(DatabaseCache.MAX_CHILD_CACHE_SIZE * 0.2);
+            for (let i = 0; i < evictCount && i < sorted.length; i++) {
+                delete this.childCache[sorted[i]];
+                delete this.childCacheTimestamps[sorted[i]];
+            }
+        }
         this.childCache[uid] = tableNodeList;
+        this.childCacheTimestamps[uid] = Date.now();
     }
 
     public static getChildCache<T extends Node>(uid: string): T[] {
+        // T-06: Check TTL before returning cached data
+        const timestamp = this.childCacheTimestamps[uid];
+        if (timestamp && (Date.now() - timestamp > DatabaseCache.CHILD_CACHE_TTL)) {
+            delete this.childCache[uid];
+            delete this.childCacheTimestamps[uid];
+            return null;
+        }
         return this.childCache[uid];
     }
 
@@ -88,6 +116,14 @@ export class DatabaseCache {
     public static clearDatabaseCache(connectionid: string) {
         if (connectionid) {
             delete this.cache.database[connectionid];
+            // T-06: Also clean childCache entries belonging to this connection
+            const prefix = connectionid + '_';
+            for (const key of Object.keys(this.childCache)) {
+                if (key.startsWith(prefix)) {
+                    delete this.childCache[key];
+                    delete this.childCacheTimestamps[key];
+                }
+            }
         }
     }
 

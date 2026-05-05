@@ -4,7 +4,8 @@ const postMessage = (message) => { if (vscode) { vscode.postMessage(message) } }
 export const getVscodeEvent = () => {
     let events = {}
     let init = false;
-    function receive({ data }) {
+    function receive(message) {
+        let data = message.data;
         if (!data)
             return;
         if (events[data.type]) {
@@ -28,7 +29,8 @@ export const getVscodeEvent = () => {
         },
         destroy() {
             window.removeEventListener('message', receive)
-            this.init = false;
+            init = false;
+            events = {}
         }
     }
 }

@@ -24,7 +24,7 @@ export class MysqlConnection extends IConnection {
         } as mysql.ConnectionConfig;
         if (node.useSSL) {
             config.ssl = {
-                rejectUnauthorized: false,
+                rejectUnauthorized: node.caPath ? true : false,
                 ca: (node.caPath) ? fs.readFileSync(node.caPath) : null,
                 cert: (node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
                 key: (node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,

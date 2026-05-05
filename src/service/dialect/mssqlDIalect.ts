@@ -12,6 +12,7 @@ export class MssqlDIalect extends SqlDialect {
         return `DROP INDEX ${table}.${indexName}`
     }
     showIndex(database: string, table: string): string {
+        const tbl = this.validateIdentifier(table);
         return `SELECT
         index_name = ind.name,
         column_name = col.name,
@@ -26,7 +27,7 @@ export class MssqlDIalect extends SqlDialect {
         and ic.column_id = col.column_id
         INNER JOIN sys.tables t ON ind.object_id = t.object_id
       WHERE
-        t.name = '${table}';`
+        t.name = '${tbl}';`
     }
     variableList(): string {
         throw new Error("Method not implemented.");
@@ -55,9 +56,12 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
     }
     updateColumnSql(updateColumnParam: UpdateColumnParam): string {
         let {columnName,columnType,newColumnName,comment,nullable,table}=updateColumnParam
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(columnName);
+        const newCol = this.validateIdentifier(newColumnName);
         const defaultDefinition = nullable ? "" : " NOT NULL";
-        comment = comment ? ` comment '${comment}'` : "";
-        return `ALTER TABLE\n\t${table} CHANGE ${columnName} ${newColumnName} ${columnType}${defaultDefinition}${comment};`;
+        const safeComment = comment ? ` comment '${this.escapeValue(comment)}'` : "";
+        return `ALTER TABLE\n\t${tbl} CHANGE ${col} ${newCol} ${columnType}${defaultDefinition}${safeComment};`;
     }
     showUsers(): string {
         return `SELECT name [user] from sys.database_principals where type='S'`
@@ -67,7 +71,8 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
         return `sp_rename '${table}', '${newTableName}'`;
     }
     truncateDatabase(database: string): string {
-        return `SELECT Concat('TRUNCATE TABLE [',table_schema,'].[',TABLE_NAME, '];') trun FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'  AND TABLE_SCHEMA='${database}'`
+        const db = this.validateIdentifier(database);
+        return `SELECT Concat('TRUNCATE TABLE [',table_schema,'].[',TABLE_NAME, '];') trun FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'  AND TABLE_SCHEMA='${db}'`
     }
     createDatabase(database: string): string {
         return `create database ${database}`;
@@ -76,41 +81,55 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
         return ``
     }
     showViewSource(database: string, table: string): string {
-        return `SELECT definition 'Create View' FROM sys.sql_modules WHERE object_id = OBJECT_ID('${database}.${table}');`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT definition 'Create View' FROM sys.sql_modules WHERE object_id = OBJECT_ID('${db}.${tbl}');`
     }
     showProcedureSource(database: string, name: string): string {
-        return `SELECT definition 'Create Procedure','${database}.${name}' "Procedure" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${database}.${name}');`
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SELECT definition 'Create Procedure','${db}.${n}' "Procedure" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${db}.${n}');`
     }
     showFunctionSource(database: string, name: string): string {
-        return `SELECT definition 'Create Function','${database}.${name}' "Function" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${database}.${name}');`
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SELECT definition 'Create Function','${db}.${n}' "Function" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${db}.${n}');`
     }
     showTriggerSource(database: string, name: string): string {
-        return `SELECT definition 'SQL Original Statement','${database}.${name}' "Trigger" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${database}.${name}');`
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SELECT definition 'SQL Original Statement','${db}.${n}' "Trigger" FROM sys.sql_modules WHERE object_id = OBJECT_ID('${db}.${n}');`
     }
     /**
      * remove extra、COLUMN_COMMENT(comment)、COLUMN_KEY(key)
      * mssql table column has primary and unique in same column, so it occur duplicate column.
      */
     showColumns(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT c.COLUMN_NAME "name", DATA_TYPE "simpleType", DATA_TYPE "type", IS_NULLABLE nullable, CHARACTER_MAXIMUM_LENGTH "maxLength", COLUMN_DEFAULT "defaultValue", '' "comment", tc.constraint_type "key" FROM
         INFORMATION_SCHEMA.COLUMNS c
         left join  INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu
         on c.COLUMN_NAME=ccu.column_name and c.table_name=ccu.table_name and ccu.table_catalog=c.TABLE_CATALOG and ccu.TABLE_SCHEMA=c.TABLE_SCHEMA
         left join  INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
         on tc.constraint_name=ccu.constraint_name
-        and tc.table_catalog=c.TABLE_CATALOG and tc.TABLE_SCHEMA=c.TABLE_SCHEMA and tc.table_name=c.table_name WHERE c.TABLE_SCHEMA = '${database}' AND c.table_name = '${table}' ORDER BY ORDINAL_POSITION`;
+        and tc.table_catalog=c.TABLE_CATALOG and tc.TABLE_SCHEMA=c.TABLE_SCHEMA and tc.table_name=c.table_name WHERE c.TABLE_SCHEMA = '${db}' AND c.table_name = '${tbl}' ORDER BY ORDINAL_POSITION`;
     }
     showTriggers(database: string): string {
-        return `SELECT t.name TRIGGER_NAME FROM SYS.OBJECTS t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE TYPE = 'TR' and s.name='${database}'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT t.name TRIGGER_NAME FROM SYS.OBJECTS t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id WHERE TYPE = 'TR' and s.name='${db}'`;
     }
     showProcedures(database: string): string {
-        return `SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = '${database}' and ROUTINE_TYPE='PROCEDURE'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = '${db}' and ROUTINE_TYPE='PROCEDURE'`;
     }
     showFunctions(database: string): string {
-        return `SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = '${database}' and ROUTINE_TYPE='FUNCTION'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_SCHEMA = '${db}' and ROUTINE_TYPE='FUNCTION'`;
     }
     showViews(database: string): string {
-        return `SELECT name FROM sys.all_views t where SCHEMA_NAME(t.schema_id)='${database}' order by name`;
+        const db = this.validateIdentifier(database);
+        return `SELECT name FROM sys.all_views t where SCHEMA_NAME(t.schema_id)='${db}' order by name`;
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
         return `SELECT TOP ${pageSize} * FROM ${database}.${table};`;
@@ -119,12 +138,13 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
         return `SELECT count(*) count FROM ${database}.${table};`;
     }
     showTables(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT TABLE_NAME 'name'
       FROM
         INFORMATION_SCHEMA.TABLES t
       WHERE
         TABLE_TYPE = 'BASE TABLE'
-        AND TABLE_SCHEMA = '${database}' order by TABLE_NAME`
+        AND TABLE_SCHEMA = '${db}' order by TABLE_NAME`
     //     return `SELECT
     //     TABLE_NAME 'name',ds.row_count rows
     //   FROM

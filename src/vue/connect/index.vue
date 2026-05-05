@@ -342,7 +342,7 @@ export default {
     tryConnect() {
       this.connect.loading = true;
       vscodeEvent.emit("connecting", {
-        connectionOption: this.connectionOption,
+        connectionOption: JSON.parse(JSON.stringify(this.connectionOption)),
       });
     },
     choose(event) {

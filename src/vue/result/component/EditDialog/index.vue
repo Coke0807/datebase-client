@@ -1,7 +1,7 @@
 <template>
-  <el-dialog ref="editDialog" :title="editorTilte" :visible.sync="visible" width="60%" top="3vh" size="mini" :closeOnClickModal="false">
+  <el-dialog ref="editDialog" :title="editorTilte" v-model="visible" width="60%" top="3vh" :closeOnClickModal="false">
     <el-form ref="infoForm" :model="editModel" :inline="true">
-      <el-form-item :prop="column.name" :key="column.name" v-for="column in columnList" size="mini">
+      <el-form-item :prop="column.name" :key="column.name" v-for="column in columnList">
         <template>
           <span>
             {{ column.name }} : {{ column.type }} &nbsp;
@@ -13,13 +13,15 @@
         </template>
       </el-form-item>
     </el-form>
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="visible = false">Cancel</el-button>
-      <el-button v-if="model=='update'" type="primary" :loading="loading" @click="confirmUpdate(editModel)">
-        Update</el-button>
-      <el-button v-if="model=='insert'||model=='copy'" type="primary" :loading="loading" @click="confirmInsert(editModel)">
-        Insert</el-button>
-    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="visible = false">Cancel</el-button>
+        <el-button v-if="model=='update'" type="primary" :loading="loading" @click="confirmUpdate(editModel)">
+          Update</el-button>
+        <el-button v-if="model=='insert'||model=='copy'" type="primary" :loading="loading" @click="confirmInsert(editModel)">
+          Insert</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 

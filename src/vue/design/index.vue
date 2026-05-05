@@ -1,6 +1,6 @@
 <template>
   <div class="mt-2">
-    <el-button @click="init" type="success" :title="t('design.refresh')"  size="mini" >{{ t('design.refresh') }} </el-button>
+    <el-button @click="init" type="success" :title="t('design.refresh')"  size="small" >{{ t('design.refresh') }} </el-button>
     <el-tag>{{ t('design.table') }}:</el-tag>
     {{table}}
     <ul class="tab">

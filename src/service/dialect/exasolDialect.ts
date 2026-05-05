@@ -19,34 +19,41 @@ export class ExasolDialect extends SqlDialect {
     }
 
     showTables(database: string): string {
-        return `SELECT TABLE_NAME FROM SYS.EXA_ALL_TABLES WHERE TABLE_SCHEMA = '${database}' ORDER BY TABLE_NAME;`;
+        const db = this.validateIdentifier(database);
+        return `SELECT TABLE_NAME FROM SYS.EXA_ALL_TABLES WHERE TABLE_SCHEMA = '${db}' ORDER BY TABLE_NAME;`;
     }
 
     showViews(database: string): string {
-        return `SELECT VIEW_NAME FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = '${database}' ORDER BY VIEW_NAME;`;
+        const db = this.validateIdentifier(database);
+        return `SELECT VIEW_NAME FROM SYS.EXA_ALL_VIEWS WHERE VIEW_SCHEMA = '${db}' ORDER BY VIEW_NAME;`;
     }
 
     showColumns(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT 
             COLUMN_NAME AS "name",
             COLUMN_TYPE AS "type",
             COLUMN_TYPE AS "simpleType"
         FROM SYS.EXA_ALL_COLUMNS 
-        WHERE COLUMN_SCHEMA = '${database}' 
-        AND COLUMN_TABLE = '${table}' 
+        WHERE COLUMN_SCHEMA = '${db}' 
+        AND COLUMN_TABLE = '${tbl}' 
         ORDER BY COLUMN_ORDINAL_POSITION;`;
     }
 
     showTriggers(database: string): string {
-        return `SELECT TRIGGER_NAME FROM SYS.EXA_ALL_TRIGGERS WHERE TRIGGER_SCHEMA = '${database}' ORDER BY TRIGGER_NAME;`;
+        const db = this.validateIdentifier(database);
+        return `SELECT TRIGGER_NAME FROM SYS.EXA_ALL_TRIGGERS WHERE TRIGGER_SCHEMA = '${db}' ORDER BY TRIGGER_NAME;`;
     }
 
     showProcedures(database: string): string {
-        return `SELECT PROCEDURE_NAME FROM SYS.EXA_ALL_PROCEDURES WHERE PROCEDURE_SCHEMA = '${database}' ORDER BY PROCEDURE_NAME;`;
+        const db = this.validateIdentifier(database);
+        return `SELECT PROCEDURE_NAME FROM SYS.EXA_ALL_PROCEDURES WHERE PROCEDURE_SCHEMA = '${db}' ORDER BY PROCEDURE_NAME;`;
     }
 
     showFunctions(database: string): string {
-        return `SELECT FUNCTION_NAME FROM SYS.EXA_ALL_FUNCTIONS WHERE FUNCTION_SCHEMA = '${database}' ORDER BY FUNCTION_NAME;`;
+        const db = this.validateIdentifier(database);
+        return `SELECT FUNCTION_NAME FROM SYS.EXA_ALL_FUNCTIONS WHERE FUNCTION_SCHEMA = '${db}' ORDER BY FUNCTION_NAME;`;
     }
 
     tableTemplate(): string {
@@ -98,9 +105,10 @@ END;`;
     }
 
     truncateDatabase(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT 'TRUNCATE TABLE ' || TABLE_SCHEMA || '.' || TABLE_NAME || ';' 
         FROM SYS.EXA_ALL_TABLES 
-        WHERE TABLE_SCHEMA = '${database}';`;
+        WHERE TABLE_SCHEMA = '${db}';`;
     }
 
     createUser(): string {

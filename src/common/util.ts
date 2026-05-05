@@ -39,7 +39,7 @@ export class Util {
                 return origin.trim()
             }
             if (originType == "object") {
-                for (const key in origin) {
+                for (const key of Object.keys(origin)) {
                     origin[key] = this.trim(origin[key])
                 }
             }

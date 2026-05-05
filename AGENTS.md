@@ -9,6 +9,8 @@ npm run dev      # 开发构建（watch 模式）
 npm run build    # 生产构建
 ```
 
+**VS Code 最低版本**：`^1.80.0`
+
 ## 架构概览
 
 ```
@@ -27,7 +29,7 @@ src/
 ├── provider/             # VS Code API 实现
 │   ├── treeDataProvider.ts
 │   └── complete/         # SQL 自动补全
-└── vue/                  # WebView 前端（Vue 2）
+└── vue/                  # WebView 前端（Vue 3）
 ```
 
 ## 核心约定
@@ -53,6 +55,13 @@ export class TableNode extends Node {
 ```
 
 **⚠️ 重要**：Node 对象存在循环引用（parent 属性），不能直接 `JSON.stringify`，使用 `NodeUtil.removeParent()` 处理。
+
+**Node 的三层缓存体系**：
+| 缓存层 | 存储位置 | 用途 |
+|------|--------|------|
+| 自身缓存 | `Node.nodeCache` | 快速查找节点（按 connectId 索引）|
+| 子节点缓存 | `DatabaseCache.childCache` | LazyLoad，避免重复查询 |
+| 状态缓存 | `DatabaseCache.elementState` | 展开/折叠状态持久化 |
 
 ### 2. 命令命名约定
 
@@ -88,26 +97,62 @@ this.contextValue = ModelType.TABLE;
 通过 `ServiceManager` 获取服务实例：
 
 ```typescript
-const connectionManager = ServiceManager.getConnectionManager();
-const sqlDialect = ServiceManager.getDialect(dialectType);
+const dialect = ServiceManager.getDialect(this.dbType);
+const dump = ServiceManager.getDumpService(node.dbType);
+const page = ServiceManager.getPageService(node.dbType);
+```
+
+### 5. SQL 方言系统
+
+所有数据库方言继承 `SqlDialect` 基类：
+
+```typescript
+// src/service/dialect/sqlDialect.ts
+export abstract class SqlDialect {
+  // 安全验证（防 SQL 注入）
+  protected validateIdentifier(name: string): string
+  protected escapeValue(value: string): string
+  
+  // 核心抽象方法
+  abstract showTables(database): string
+  abstract showColumns(database, table): string
+  abstract buildPageSql(database, table, pageSize): string
+  // ...
+}
+```
+
+**方言实现**：MySQL、PostgreSQL、SQLite、SQL Server、MongoDB、Elasticsearch 等。
+
+### 6. WebView 通信
+
+**后端 → 前端**：
+```typescript
+handler.emit("DATA", { data: result, fields, costTime });
+```
+
+**前端 → 后端**：
+```javascript
+vscode.emit("executeSQL", sql);
 ```
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
-| 扩展后端 | TypeScript 3.8 + VS Code API 1.51 |
-| WebView 前端 | Vue 2.6 + Element UI + Tailwind CSS |
-| 构建工具 | Webpack 4（双入口：extension + webview） |
-| 数据库驱动 | mysql2, pg, tedious, ioredis, mongodb |
+| 扩展后端 | TypeScript 5.9 + VS Code API 1.80+ |
+| WebView 前端 | Vue 3.5 + Element Plus + VxeTable + Tailwind CSS |
+| 构建工具 | Webpack 5（双入口：extension + webview） |
+| 数据库驱动 | mysql2@3.x, pg, tedious, ioredis, mongodb |
 
 ## 常见陷阱
 
 ### 1. 依赖版本问题
 
-- **ssh2@0.5.4**：2017 年版本，API 与最新版不兼容
-- **Vue 2**：已停止维护，不建议大范围重构
-- **axios@0.21.1**：存在 SSRF 漏洞，谨慎使用
+| 依赖 | 问题 | 建议 |
+|------|------|------|
+| **ssh2@0.5.4** | 2017 年版本，API 不兼容最新版 | 🔴 需分阶段重构 |
+| **ts-loader@7.x** | 严重滞后（最新 9.x） | 🟠 建议升级 |
+| **@types/node@12.x** | 严重滞后（最新 25.x） | 🟠 建议升级 |
 
 ### 2. SQLite 依赖
 
@@ -116,12 +161,18 @@ Linux/macOS 需要系统安装 `sqlite3` 命令行工具。
 ### 3. Webpack 外部依赖
 
 以下模块被标记为 external，不会打包：
-- `vscode` - VS Code API
+- `vscode` - VS Code API（由宿主提供）
 - `mockjs`, `mongodb-client-encryption` - 按需加载
 
 ### 4. Node polyfill
 
-`fs`, `net`, `tls`, `child_process`, `dns` 在 Webpack 中设为 `empty`，WebView 中不可用。
+**Extension（后端）**：直接使用 Node.js 模块
+
+**WebView（前端）**：注入 polyfill（process、buffer、stream-browserify）
+
+### 5. TypeScript 配置
+
+项目未启用严格模式（`strict: false`），允许隐式 any。修改时注意类型安全。
 
 ## 国际化
 
@@ -133,14 +184,17 @@ Linux/macOS 需要系统安装 `sqlite3` 命令行工具。
 
 | 文件 | 用途 |
 |------|------|
-| `src/extension.ts` | 扩展入口 |
-| `src/model/interface/node.ts` | Node 基类 |
-| `src/service/serviceManager.ts` | 服务管理器 |
+| `src/extension.ts` | 扩展入口，命令注册 |
+| `src/model/interface/node.ts` | Node 基类，树节点核心 |
+| `src/service/serviceManager.ts` | 服务管理器，工厂方法 |
 | `src/service/dialect/sqlDialect.ts` | SQL 方言基类 |
-| `src/model/database/connectionNode.ts` | 连接节点实现示例 |
+| `src/service/connectionManager.ts` | 连接池管理 |
+| `src/provider/treeDataProvider.ts` | 树视图实现 |
+| `src/common/viewManager.ts` | WebView 通信管理 |
 | `webpack.config.js` | 双入口构建配置 |
 
 ## 相关文档
 
 - [README.md](./README.md) - 项目介绍和功能说明
 - [CHANGELOG.md](./CHANGELOG.md) - 版本更新日志
+- [docs/](./docs/) - 迁移计划和评审报告

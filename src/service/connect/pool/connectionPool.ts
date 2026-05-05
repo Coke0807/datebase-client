@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { IConnection } from "../connection";
 import { IpoolConnection, pcStatus } from "./poolConnection";
+import { Console } from "@/common/Console";
 
 export abstract class ConnectionPool<T> extends IConnection {
     private connections: IpoolConnection<T>[] = [];
@@ -40,11 +41,17 @@ export abstract class ConnectionPool<T> extends IConnection {
             this.createConnection(poolConnection)
         }
     }
-    private createConnection(poolConnection: IpoolConnection<T>): void {
+    private createConnection(poolConnection: IpoolConnection<T>, retryCount = 0): void {
         try {
             this.newConnection((err, con) => {
                 if (err) {
-                    this.createConnection(poolConnection)
+                    // Retry with exponential backoff, max 5 retries
+                    if (retryCount < 5) {
+                        const delay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                        setTimeout(() => this.createConnection(poolConnection, retryCount + 1), delay);
+                    } else {
+                        Console.log(`Connection pool: failed to create connection after ${retryCount} retries`);
+                    }
                     return;
                 }
                 poolConnection.actual = con
@@ -65,7 +72,7 @@ export abstract class ConnectionPool<T> extends IConnection {
                 }
             })
         } catch (error) {
-            this.createConnection(poolConnection)
+            Console.log(`Connection pool: exception creating connection: ${error}`);
         }
     }
 

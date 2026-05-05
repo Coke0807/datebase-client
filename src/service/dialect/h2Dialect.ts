@@ -26,12 +26,14 @@ export class H2Dialect extends SqlDialect {
     }
 
     showIndex(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT 
             INDEX_NAME as name,
             COLUMN_NAME as column_name,
             NON_UNIQUE as non_unique
         FROM INFORMATION_SCHEMA.INDEXES 
-        WHERE TABLE_SCHEMA = '${database}' AND TABLE_NAME = '${table}'
+        WHERE TABLE_SCHEMA = '${db}' AND TABLE_NAME = '${tbl}'
         ORDER BY INDEX_NAME, ORDINAL_POSITION;`;
     }
 
@@ -44,20 +46,24 @@ export class H2Dialect extends SqlDialect {
     }
 
     showTables(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT TABLE_NAME as name 
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE TABLE_SCHEMA = '${database}' AND TABLE_TYPE = 'TABLE'
+        WHERE TABLE_SCHEMA = '${db}' AND TABLE_TYPE = 'TABLE'
         ORDER BY TABLE_NAME;`;
     }
 
     showViews(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT TABLE_NAME as name 
         FROM INFORMATION_SCHEMA.VIEWS 
-        WHERE TABLE_SCHEMA = '${database}'
+        WHERE TABLE_SCHEMA = '${db}'
         ORDER BY TABLE_NAME;`;
     }
 
     showColumns(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT 
             COLUMN_NAME as name,
             DATA_TYPE as type,
@@ -65,28 +71,31 @@ export class H2Dialect extends SqlDialect {
             COLUMN_DEFAULT as defaultValue,
             REMARKS as comment
         FROM INFORMATION_SCHEMA.COLUMNS 
-        WHERE TABLE_SCHEMA = '${database}' AND TABLE_NAME = '${table}'
+        WHERE TABLE_SCHEMA = '${db}' AND TABLE_NAME = '${tbl}'
         ORDER BY ORDINAL_POSITION;`;
     }
 
     showTriggers(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT TRIGGER_NAME as name 
         FROM INFORMATION_SCHEMA.TRIGGERS 
-        WHERE TRIGGER_SCHEMA = '${database}'
+        WHERE TRIGGER_SCHEMA = '${db}'
         ORDER BY TRIGGER_NAME;`;
     }
 
     showProcedures(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT SPECIFIC_NAME as name 
         FROM INFORMATION_SCHEMA.ROUTINES 
-        WHERE ROUTINE_SCHEMA = '${database}' AND ROUTINE_TYPE = 'PROCEDURE'
+        WHERE ROUTINE_SCHEMA = '${db}' AND ROUTINE_TYPE = 'PROCEDURE'
         ORDER BY SPECIFIC_NAME;`;
     }
 
     showFunctions(database: string): string {
+        const db = this.validateIdentifier(database);
         return `SELECT SPECIFIC_NAME as name 
         FROM INFORMATION_SCHEMA.ROUTINES 
-        WHERE ROUTINE_SCHEMA = '${database}' AND ROUTINE_TYPE = 'FUNCTION'
+        WHERE ROUTINE_SCHEMA = '${db}' AND ROUTINE_TYPE = 'FUNCTION'
         ORDER BY SPECIFIC_NAME;`;
     }
 
@@ -111,11 +120,12 @@ export class H2Dialect extends SqlDialect {
     }
 
     truncateDatabase(database: string): string {
+        const db = this.validateIdentifier(database);
         return `-- H2 does not support TRUNCATE DATABASE directly
 -- Use the following to get truncate statements:
 SELECT 'TRUNCATE TABLE ' || TABLE_SCHEMA || '.' || TABLE_NAME || ';' 
 FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_SCHEMA = '${database}' AND TABLE_TYPE = 'TABLE';`;
+WHERE TABLE_SCHEMA = '${db}' AND TABLE_TYPE = 'TABLE';`;
     }
 
     updateTable(update: UpdateTableParam): string {
@@ -123,12 +133,14 @@ WHERE TABLE_SCHEMA = '${database}' AND TABLE_TYPE = 'TABLE';`;
     }
 
     updateColumn(table: string, column: string, type: string, comment: string, nullable: string): string {
-        let sql = `ALTER TABLE ${table} ALTER COLUMN ${column} ${type}`;
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(column);
+        let sql = `ALTER TABLE ${tbl} ALTER COLUMN ${col} ${type}`;
         if (nullable === 'NO') {
             sql += ' NOT NULL';
         }
         if (comment) {
-            sql += ` COMMENT '${comment}'`;
+            sql += ` COMMENT '${this.escapeValue(comment)}'`;
         }
         return sql + ';';
     }
@@ -138,33 +150,43 @@ WHERE TABLE_SCHEMA = '${database}' AND TABLE_TYPE = 'TABLE';`;
     }
 
     showTableSource(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT SQL as "Create Table" 
         FROM INFORMATION_SCHEMA.TABLES 
-        WHERE TABLE_SCHEMA = '${database}' AND TABLE_NAME = '${table}';`;
+        WHERE TABLE_SCHEMA = '${db}' AND TABLE_NAME = '${tbl}';`;
     }
 
     showViewSource(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
         return `SELECT VIEW_DEFINITION as "Create View" 
         FROM INFORMATION_SCHEMA.VIEWS 
-        WHERE TABLE_SCHEMA = '${database}' AND TABLE_NAME = '${table}';`;
+        WHERE TABLE_SCHEMA = '${db}' AND TABLE_NAME = '${tbl}';`;
     }
 
     showProcedureSource(database: string, name: string): string {
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
         return `SELECT ROUTINE_DEFINITION as "Create Procedure" 
         FROM INFORMATION_SCHEMA.ROUTINES 
-        WHERE ROUTINE_SCHEMA = '${database}' AND SPECIFIC_NAME = '${name}';`;
+        WHERE ROUTINE_SCHEMA = '${db}' AND SPECIFIC_NAME = '${n}';`;
     }
 
     showFunctionSource(database: string, name: string): string {
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
         return `SELECT ROUTINE_DEFINITION as "Create Function" 
         FROM INFORMATION_SCHEMA.ROUTINES 
-        WHERE ROUTINE_SCHEMA = '${database}' AND SPECIFIC_NAME = '${name}';`;
+        WHERE ROUTINE_SCHEMA = '${db}' AND SPECIFIC_NAME = '${n}';`;
     }
 
     showTriggerSource(database: string, name: string): string {
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
         return `SELECT SQL as "Create Trigger" 
         FROM INFORMATION_SCHEMA.TRIGGERS 
-        WHERE TRIGGER_SCHEMA = '${database}' AND TRIGGER_NAME = '${name}';`;
+        WHERE TRIGGER_SCHEMA = '${db}' AND TRIGGER_NAME = '${n}';`;
     }
 
     tableTemplate(): string {

@@ -23,7 +23,7 @@ export class QueryUnit {
             connection.query(sql, (err: Error, rows, fields, total) => {
                 if (err) {
                     if (showError) {
-                        Console.log(`Execute sql fail : ${sql}`);
+                        Console.log(`Execute sql fail : ${QueryUnit.sanitizeSql(sql)}`);
                         Console.log(err);
                     }
                     reject(err);
@@ -32,6 +32,19 @@ export class QueryUnit {
                 }
             });
         });
+    }
+
+    /**
+     * C-06: Sanitize SQL for logging — masks passwords and sensitive values.
+     */
+    private static sanitizeSql(sql: string): string {
+        if (!sql) return sql;
+        return sql
+            .replace(/(password\s*=\s*')[^']*(')/gi, "$1***$2")
+            .replace(/(IDENTIFIED\s+BY\s+')[^']*(')/gi, "$1***$2")
+            .replace(/(PASSWORD\s+')[^']*(')/gi, "$1***$2")
+            .replace(/(SECRET\s+')[^']*(')/gi, "$1***$2")
+            .replace(/(TOKEN\s+')[^']*(')/gi, "$1***$2");
     }
 
 

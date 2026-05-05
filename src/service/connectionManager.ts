@@ -77,65 +77,67 @@ export class ConnectionManager {
             throw new Error("Connection is dead!")
         }
         return new Promise(async (resolve, reject) => {
-
-            NodeUtil.of(connectionNode)
-            if (!getRequest.retryCount) getRequest.retryCount = 1;
-            const key = getRequest.sessionId || connectionNode.getConnectId();
-            const connection = this.alivedConnection[key];
-            if (connection) {
-                if (connection.connection.isAlive()) {
-                    if (connection.schema != connectionNode.schema) {
-                        const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
-                        try {
-                            if (sql) {
-                                await QueryUnit.queryPromise(connection.connection, sql, false)
+            try {
+                NodeUtil.of(connectionNode)
+                if (!getRequest.retryCount) getRequest.retryCount = 1;
+                const key = getRequest.sessionId || connectionNode.getConnectId();
+                const connection = this.alivedConnection[key];
+                if (connection) {
+                    if (connection.connection.isAlive()) {
+                        if (connection.schema != connectionNode.schema) {
+                            const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
+                            try {
+                                if (sql) {
+                                    await QueryUnit.queryPromise(connection.connection, sql, false)
+                                }
+                                connection.schema = connectionNode.schema
+                                resolve(connection.connection);
+                                return;
+                            } catch (err) {
+                                ConnectionManager.end(key, connection);
                             }
-                            connection.schema = connectionNode.schema
+                        } else {
                             resolve(connection.connection);
                             return;
-                        } catch (err) {
-                            ConnectionManager.end(key, connection);
                         }
-                    } else {
-                        resolve(connection.connection);
+                    }
+                }
+
+                const ssh = connectionNode.ssh;
+                let connectOption = connectionNode;
+                if (connectOption.usingSSH) {
+                    connectOption = await this.tunnelService.createTunnel(connectOption, (err) => {
+                        reject(err?.message || err?.errno);
+                        if (err.errno == 'EADDRINUSE') { return; }
+                        this.alivedConnection[key] = null
+                    })
+                    if (!connectOption) {
+                        reject("create ssh tunnel fail!");
                         return;
                     }
                 }
-            }
-
-            const ssh = connectionNode.ssh;
-            let connectOption = connectionNode;
-            if (connectOption.usingSSH) {
-                connectOption = await this.tunnelService.createTunnel(connectOption, (err) => {
-                    reject(err?.message || err?.errno);
-                    if (err.errno == 'EADDRINUSE') { return; }
-                    this.alivedConnection[key] = null
-                })
-                if (!connectOption) {
-                    reject("create ssh tunnel fail!");
-                    return;
-                }
-            }
-            const newConnection = this.create(connectOption);
-            this.alivedConnection[key] = { connection: newConnection, ssh };
-            newConnection.connect(async (err: Error) => {
-                if (err) {
-                    this.end(key, this.alivedConnection[key])
-                    reject(err)
-                } else {
-                    try {
-                        const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
-                        if (connectionNode.schema && sql) {
-                            await QueryUnit.queryPromise(newConnection, sql, false)
+                const newConnection = this.create(connectOption);
+                this.alivedConnection[key] = { connection: newConnection, ssh };
+                newConnection.connect(async (err: Error) => {
+                    if (err) {
+                        this.end(key, this.alivedConnection[key])
+                        reject(err)
+                    } else {
+                        try {
+                            const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
+                            if (connectionNode.schema && sql) {
+                                await QueryUnit.queryPromise(newConnection, sql, false)
+                            }
+                        } catch (error) {
+                            console.log(error)
                         }
-                    } catch (error) {
-                        console.log(err)
+
+                        resolve(newConnection);
                     }
-
-                    resolve(newConnection);
-                }
-            });
-
+                });
+            } catch (err) {
+                reject(err);
+            }
         });
 
     }

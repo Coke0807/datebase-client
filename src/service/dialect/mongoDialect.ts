@@ -3,7 +3,7 @@ import { UpdateColumnParam } from "./param/updateColumnParam";
 import { UpdateTableParam } from "./param/updateTableParam";
 import { SqlDialect } from "./sqlDialect";
 
-export class MongoDialect implements SqlDialect{
+export class MongoDialect extends SqlDialect{
     dropIndex(table: string, indexName: string): string {
         throw new Error("Method not implemented.");
     }

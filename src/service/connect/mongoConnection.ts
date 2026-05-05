@@ -7,6 +7,27 @@ export class MongoConnection extends IConnection {
     private conneted: boolean;
     private client: MongoClient;
     private option: MongoClientOptions;
+
+    /** C-01: Whitelisted MongoDB driver methods — blocks arbitrary code execution via eval() */
+    private static readonly ALLOWED_METHODS = new Set([
+        'db', 'collection', 'find', 'findOne', 'insertOne', 'insertMany',
+        'updateOne', 'updateMany', 'deleteOne', 'deleteMany',
+        'aggregate', 'countDocuments', 'distinct', 'drop', 'createIndex',
+        'listCollections', 'stats', 'renameCollection', 'findOneAndUpdate',
+        'findOneAndDelete', 'findOneAndReplace', 'bulkWrite',
+        'toArray', 'limit', 'skip', 'sort', 'project', 'count',
+        'next', 'forEach', 'map', 'dropDatabase', 'dropCollection',
+        'createCollection', 'indexes', 'indexExists', 'indexInformation',
+    ]);
+
+    /** Patterns that must never appear in a MongoDB query expression */
+    private static readonly DANGEROUS_PATTERNS = [
+        /\bprocess\b/, /\brequire\b/, /\bglobalThis\b/,
+        /\beval\b/, /\bFunction\b/, /\b__proto__\b/,
+        /\bchild_process\b/, /\bnew\s+Function/,
+        /\bnew\s+RegExp/, /\bsetImmediate\b/,
+    ];
+
     constructor(private node: Node) {
         super()
         this.option = {
@@ -15,6 +36,40 @@ export class MongoConnection extends IConnection {
             sslCert: (node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
             sslKey: (node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,
         } as MongoClientOptions;
+    }
+
+    /**
+     * C-01: Safe MongoDB query execution — validates method chain against whitelist
+     * instead of using raw eval(). Uses new Function() which has no local scope access.
+     */
+    private async safeExecute(sql: string): Promise<any> {
+        // 1. Block dangerous patterns
+        for (const pattern of MongoConnection.DANGEROUS_PATTERNS) {
+            if (pattern.test(sql)) {
+                throw new Error(`MongoDB query contains forbidden pattern: ${pattern.source}`);
+            }
+        }
+
+        // 2. Validate all method names in the chain are whitelisted
+        const methodPattern = /\.([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g;
+        let match: RegExpExecArray;
+        while ((match = methodPattern.exec(sql)) !== null) {
+            if (!MongoConnection.ALLOWED_METHODS.has(match[1])) {
+                throw new Error(`MongoDB method '${match[1]}' is not allowed. Only whitelisted driver methods can be executed.`);
+            }
+        }
+
+        // 3. Ensure expression is a simple method chain (no statements)
+        // Only block semicolons (statement separators), not = inside object literals
+        if (/;/.test(sql.replace(/['"][^'"]*['"]/g, ''))) {
+            throw new Error('MongoDB query must be a single method chain expression');
+        }
+
+        // 4. Execute via new Function — no access to local scope, only 'client' param
+        const normalizedSql = sql.startsWith('.') ? sql : '.' + sql;
+        const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+        const fn = new AsyncFunction('client', `"use strict"; return client${normalizedSql};`);
+        return await fn(this.client);
     }
 
     connect(callback: (err: Error) => void): void {
@@ -69,7 +124,7 @@ export class MongoConnection extends IConnection {
             })
         } else {
             try {
-                const result = await eval('this.client.' + sql)
+                const result = await this.safeExecute(sql)
                 if (result == null) {
                     callback(null)
                 } else if (Number.isInteger(result)) {

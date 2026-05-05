@@ -12,7 +12,9 @@ export class PostgreSqlDialect extends SqlDialect {
         return `DROP INDEX ${indexName}`
     }
     showIndex(database: string, table: string): string {
-        return `SELECT indexname index_name, indexdef FROM pg_indexes WHERE schemaname = '${database}' and tablename='${table}'`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT indexname index_name, indexdef FROM pg_indexes WHERE schemaname = '${db}' and tablename='${tbl}'`
     }
     variableList(): string {
         return 'SHOW ALL'
@@ -96,14 +98,17 @@ ALTER TABLE ${table} ALTER RENAME COLUMN ${column} TO [newColumnName];`;
     }
     updateColumnSql(updateColumnParam: UpdateColumnParam): string {
         let { columnName, columnType, newColumnName, comment, nullable, table } = updateColumnParam
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(columnName);
+        const newCol = this.validateIdentifier(newColumnName);
         const defaultDefinition = nullable ? "DROP NOT NULL" : "SET NOT NULL";
-        let sql = `ALTER TABLE ${table} ALTER COLUMN ${columnName} TYPE ${columnType};
-ALTER TABLE ${table} ALTER COLUMN ${columnName} ${defaultDefinition};`;
+        let sql = `ALTER TABLE ${tbl} ALTER COLUMN ${col} TYPE ${columnType};
+ALTER TABLE ${tbl} ALTER COLUMN ${col} ${defaultDefinition};`;
         if (comment) {
-            sql = sql + `COMMENT ON COLUMN ${table}.${columnName} is '${comment}';`
+            sql = sql + `COMMENT ON COLUMN ${tbl}.${col} is '${this.escapeValue(comment)}';`
         }
         if (columnName != newColumnName) {
-            sql = sql + `ALTER TABLE ${table} RENAME COLUMN ${columnName} TO ${newColumnName};`
+            sql = sql + `ALTER TABLE ${tbl} RENAME COLUMN ${col} TO ${newCol};`
         }
         return sql;
     }
@@ -118,17 +123,20 @@ ALTER TABLE ${table} ALTER COLUMN ${columnName} ${defaultDefinition};`;
     }
     updateTable(update: UpdateTableParam): string {
         const { table, newTableName, comment, newComment } = update
+        const tbl = this.validateIdentifier(table);
         let sql = "";
         if (newComment && newComment != comment) {
-            sql = `COMMENT ON TABLE ${table} IS '${newComment}';`;
+            sql = `COMMENT ON TABLE ${tbl} IS '${this.escapeValue(newComment)}';`;
         }
         if (newTableName && table != newTableName) {
-            sql += `ALTER TABLE ${table} RENAME TO ${newTableName};`
+            const newTbl = this.validateIdentifier(newTableName);
+            sql += `ALTER TABLE ${tbl} RENAME TO ${newTbl};`
         }
         return sql;
     }
     truncateDatabase(database: string): string {
-        return `SELECT Concat('TRUNCATE TABLE "',TABLE_NAME, '";') trun FROM INFORMATION_SCHEMA.TABLES WHERE  table_schema ='${database}' AND table_type='BASE TABLE';`
+        const db = this.validateIdentifier(database);
+        return `SELECT Concat('TRUNCATE TABLE "',TABLE_NAME, '";') trun FROM INFORMATION_SCHEMA.TABLES WHERE  table_schema ='${db}' AND table_type='BASE TABLE';`
     }
     createDatabase(database: string): string {
         return `create database "${database}"`;
@@ -138,19 +146,29 @@ ALTER TABLE ${table} ALTER COLUMN ${columnName} ${defaultDefinition};`;
         // return `SHOW CREATE TABLE "${database}"."${table}";`
     }
     showViewSource(database: string, table: string): string {
-        return `SELECT CONCAT('CREATE VIEW ',table_name,'\nAS\n(',regexp_replace(view_definition,';$',''),')') "Create View",table_name,view_definition from information_schema.views where table_schema='${database}' and table_name='${table}';`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT CONCAT('CREATE VIEW ',table_name,'\nAS\n(',regexp_replace(view_definition,';$',''),')') "Create View",table_name,view_definition from information_schema.views where table_schema='${db}' and table_name='${tbl}';`
     }
     showProcedureSource(database: string, name: string): string {
-        return `select pg_get_functiondef('${database}.${name}' :: regproc) "Create Procedure",'${name}' "Procedure";`;
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `select pg_get_functiondef('${db}.${n}' :: regproc) "Create Procedure",'${n}' "Procedure";`;
     }
     showFunctionSource(database: string, name: string): string {
-        return `select pg_get_functiondef('${database}.${name}' :: regproc) "Create Function",'${name}' "Function";`;
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `select pg_get_functiondef('${db}.${n}' :: regproc) "Create Function",'${n}' "Function";`;
     }
     showTriggerSource(database: string, name: string): string {
-        return `select pg_get_triggerdef(oid) "SQL Original Statement",'${database}.${name}' "Trigger" from pg_trigger where tgname = '${name}';`;
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `select pg_get_triggerdef(oid) "SQL Original Statement",'${db}.${n}' "Trigger" from pg_trigger where tgname = '${n}';`;
     }
     showColumns(database: string, table: string): string {
+        const db = this.validateIdentifier(database);
         const view = table.split('.')[1];
+        const tbl = this.validateIdentifier(view ? view : table);
         return `SELECT c.COLUMN_NAME "name", DATA_TYPE "simpleType", DATA_TYPE "type", IS_NULLABLE nullable, CHARACTER_MAXIMUM_LENGTH "maxLength", COLUMN_DEFAULT "defaultValue", '' "comment", tc.constraint_type "key" FROM
         information_schema.columns c
         left join  information_schema.constraint_column_usage ccu
@@ -158,19 +176,23 @@ ALTER TABLE ${table} ALTER COLUMN ${columnName} ${defaultDefinition};`;
         and c.table_schema=ccu.table_schema
         left join  information_schema.table_constraints tc
         on tc.constraint_name=ccu.constraint_name and tc.table_schema=ccu.table_schema
-        and tc.table_catalog=c.TABLE_CATALOG and tc.table_name=c.table_name WHERE c.TABLE_SCHEMA = '${database}' AND c.table_name = '${view ? view : table}' ORDER BY ORDINAL_POSITION;`;
+        and tc.table_catalog=c.TABLE_CATALOG and tc.table_name=c.table_name WHERE c.TABLE_SCHEMA = '${db}' AND c.table_name = '${tbl}' ORDER BY ORDINAL_POSITION;`;
     }
     showTriggers(database: string): string {
-        return `SELECT TRIGGER_NAME "TRIGGER_NAME" FROM information_schema.TRIGGERS WHERE trigger_schema = '${database}'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT TRIGGER_NAME "TRIGGER_NAME" FROM information_schema.TRIGGERS WHERE trigger_schema = '${db}'`;
     }
     showProcedures(database: string): string {
-        return `SELECT ROUTINE_NAME "ROUTINE_NAME" FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${database}' and ROUTINE_TYPE='PROCEDURE'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME "ROUTINE_NAME" FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${db}' and ROUTINE_TYPE='PROCEDURE'`;
     }
     showFunctions(database: string): string {
-        return `SELECT ROUTINE_NAME "ROUTINE_NAME" FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${database}' and ROUTINE_TYPE='FUNCTION'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME "ROUTINE_NAME" FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${db}' and ROUTINE_TYPE='FUNCTION'`;
     }
     showViews(database: string): string {
-        return `select table_name "name" from information_schema.tables where table_schema='${database}' and table_type='VIEW' order by "name";`
+        const db = this.validateIdentifier(database);
+        return `select table_name "name" from information_schema.tables where table_schema='${db}' and table_type='VIEW' order by "name";`
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
         return `SELECT * FROM ${table} LIMIT ${pageSize};`;
@@ -179,12 +201,13 @@ ALTER TABLE ${table} ALTER COLUMN ${columnName} ${defaultDefinition};`;
         return `SELECT count(*) FROM ${table};`;
     }
     showTables(database: string): string {
+        const db = this.validateIdentifier(database);
         return `  SELECT t.table_name "name", pg_catalog.obj_description(pgc.oid, 'pg_class') "comment"
         FROM information_schema.tables t
         JOIN pg_catalog.pg_class pgc ON t.table_name = pgc.relname 
         JOIN pg_catalog.pg_namespace pgn ON pgn.oid=pgc.relnamespace and pgn.nspname=t.table_schema
         WHERE t.table_type='BASE TABLE'
-        AND t.table_schema='${database}' order by t.table_name;`
+        AND t.table_schema='${db}' order by t.table_name;`
     }
     showDatabases(){
         return `SELECT datname "Database" FROM pg_database WHERE datistemplate = false;`

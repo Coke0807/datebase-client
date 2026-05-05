@@ -6,7 +6,8 @@ export class SqliTeDialect extends SqlDialect{
         throw new Error("Method not implemented.");
     }
     showIndex(database: string, table: string):string{
-        return `SELECT name index_name FROM sqlite_master WHERE type='index' and tbl_name='${table}' `;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT name index_name FROM sqlite_master WHERE type='index' and tbl_name='${tbl}' `;
     }
     dropIndex(table: string, indexName: string): string {
         return `DROP INDEX ${indexName};`
@@ -57,10 +58,12 @@ export class SqliTeDialect extends SqlDialect{
         throw new Error("Method not implemented.");
     }
     showTableSource(database: string, table: string): string {
-        return `SELECT sql "Create Table" FROM sqlite_master where name='${table}' and type='table';`
+        const tbl = this.validateIdentifier(table);
+        return `SELECT sql "Create Table" FROM sqlite_master where name='${tbl}' and type='table';`
     }
     showViewSource(database: string, table: string): string {
-        return `SELECT sql "Create View" FROM sqlite_master where name='${table}' and type='view';`
+        const tbl = this.validateIdentifier(table);
+        return `SELECT sql "Create View" FROM sqlite_master where name='${tbl}' and type='view';`
     }
     showProcedureSource(database: string, name: string): string {
         throw new Error("Method not implemented.");

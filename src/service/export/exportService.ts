@@ -103,7 +103,7 @@ export class ExportService {
             let values = "";
             for (const key in row) {
                 columns += `${key},`
-                values += `${row[key] != null ? `'${row[key]}'` : 'null'},`
+                values += `${row[key] != null ? `'${String(row[key]).replace(/'/g, "''")}'` : 'null'},`
             }
             sql += `insert into ${exportContext.table}(${columns.replace(/.$/, '')}) values(${values.replace(/.$/, '')});\n`
         }
@@ -133,11 +133,27 @@ export class ExportService {
         let csvContent = "";
         for (const row of rows) {
             for (const key in row) {
-                csvContent += `${row[key] != null ? row[key] : ''},`
+                csvContent += `${this.escapeCsv(row[key])},`
             }
             csvContent = csvContent.replace(/.$/, "") + "\n"
         }
         fs.writeFileSync(filePath, csvContent, { encoding: "utf8" });
+    }
+
+    /**
+     * C-08: Escape CSV values to prevent injection and formula execution.
+     */
+    private escapeCsv(value: any): string {
+        if (value == null) return '';
+        const str = String(value);
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        // Prevent CSV formula injection
+        if (/^[=+\-@\t\r]/.test(str)) {
+            return `'${str}`;
+        }
+        return str;
     }
 
 

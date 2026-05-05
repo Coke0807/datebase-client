@@ -11,7 +11,9 @@ export class MysqlDialect extends SqlDialect {
         return `ALTER TABLE ${table} DROP INDEX ${indexName}`
     }
     showIndex(database: string, table: string): string {
-        return `SELECT column_name,index_name,non_unique,index_type FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='${database}' and table_name='${table}';`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT column_name,index_name,non_unique,index_type FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema='${db}' and table_name='${tbl}';`
     }
     variableList(): string {
         return 'show global VARIABLES'
@@ -32,15 +34,20 @@ export class MysqlDialect extends SqlDialect {
         return `CREATE USER 'username'@'%' IDENTIFIED BY 'password';`;
     }
     updateColumn(table: string, column: string, type: string, comment: string, nullable: string): string {
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(column);
         const defaultDefinition = nullable == "YES" ? "" : " NOT NULL";
-        comment = comment ? ` comment '${comment}'` : "";
-        return `ALTER TABLE\n\t${table} CHANGE ${column} ${column} ${type}${defaultDefinition}${comment};`;
+        const safeComment = comment ? ` comment '${this.escapeValue(comment)}'` : "";
+        return `ALTER TABLE\n\t${tbl} CHANGE ${col} ${col} ${type}${defaultDefinition}${safeComment};`;
     }
     updateColumnSql(updateColumnParam: UpdateColumnParam): string {
         let {columnName,columnType,newColumnName,comment,nullable,table}=updateColumnParam
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(columnName);
+        const newCol = this.validateIdentifier(newColumnName);
         const defaultDefinition = nullable ? "" : " NOT NULL";
-        comment = comment ? ` comment '${comment}'` : "";
-        return `ALTER TABLE\n\t${table} CHANGE ${columnName} ${newColumnName} ${columnType}${defaultDefinition}${comment};`;
+        const safeComment = comment ? ` comment '${this.escapeValue(comment)}'` : "";
+        return `ALTER TABLE\n\t${tbl} CHANGE ${col} ${newCol} ${columnType}${defaultDefinition}${safeComment};`;
     }
     showUsers(): string {
         return `SELECT concat(user,'@',host) user FROM mysql.user;`;
@@ -54,50 +61,69 @@ export class MysqlDialect extends SqlDialect {
     }
     updateTable(update: UpdateTableParam): string {
         const { table, newTableName, comment, newComment } = update
+        const tbl = this.validateIdentifier(table);
         let sql = "";
         if (newComment && newComment != comment) {
-            sql = `ALTER TABLE ${table} COMMENT = '${newComment}';`;
+            sql = `ALTER TABLE ${tbl} COMMENT = '${this.escapeValue(newComment)}';`;
         }
         if (newTableName && table != newTableName) {
-            sql += `ALTER TABLE ${table} RENAME TO ${newTableName};`
+            const newTbl = this.validateIdentifier(newTableName);
+            sql += `ALTER TABLE ${tbl} RENAME TO ${newTbl};`
         }
         return sql;
     }
     truncateDatabase(database: string): string {
-        return `SELECT Concat('TRUNCATE TABLE \`',table_schema,'\`.\`',TABLE_NAME, '\`;') trun FROM INFORMATION_SCHEMA.TABLES where  table_schema ='${database}' and TABLE_TYPE<>'VIEW';`
+        const db = this.validateIdentifier(database);
+        return `SELECT Concat('TRUNCATE TABLE \`',table_schema,'\`.\`',TABLE_NAME, '\`;') trun FROM INFORMATION_SCHEMA.TABLES where  table_schema ='${db}' and TABLE_TYPE<>'VIEW';`
     }
     createDatabase(database: string): string {
         return `create database \`${database}\` default character set = 'utf8mb4' `;
     }
     showTableSource(database: string, table: string): string {
-        return `SHOW CREATE TABLE \`${database}\`.\`${table}\`;`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SHOW CREATE TABLE \`${db}\`.\`${tbl}\`;`
     }
     showViewSource(database: string, table: string): string {
-        return `SHOW CREATE VIEW  \`${database}\`.\`${table}\`;`
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SHOW CREATE VIEW  \`${db}\`.\`${tbl}\`;`
     }
     showProcedureSource(database: string, name: string): string {
-        return `SHOW CREATE PROCEDURE \`${database}\`.\`${name}\`;`
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SHOW CREATE PROCEDURE \`${db}\`.\`${n}\`;`
     }
     showFunctionSource(database: string, name: string): string {
-        return `SHOW CREATE FUNCTION \`${database}\`.\`${name}\`;`;
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SHOW CREATE FUNCTION \`${db}\`.\`${n}\`;`;
     }
     showTriggerSource(database: string, name: string): string {
-        return `SHOW CREATE TRIGGER \`${database}\`.\`${name}\`;`;
+        const db = this.validateIdentifier(database);
+        const n = this.validateIdentifier(name);
+        return `SHOW CREATE TRIGGER \`${db}\`.\`${n}\`;`;
     }
     showColumns(database: string, table: string): string {
-        return `SELECT COLUMN_NAME name,DATA_TYPE simpleType,COLUMN_TYPE type,COLUMN_COMMENT comment,COLUMN_KEY \`key\`,IS_NULLABLE nullable,CHARACTER_MAXIMUM_LENGTH maxLength,COLUMN_DEFAULT defaultValue,EXTRA extra FROM information_schema.columns WHERE table_schema = '${database}' AND table_name = '${table}' ORDER BY ORDINAL_POSITION;`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT COLUMN_NAME name,DATA_TYPE simpleType,COLUMN_TYPE type,COLUMN_COMMENT comment,COLUMN_KEY \`key\`,IS_NULLABLE nullable,CHARACTER_MAXIMUM_LENGTH maxLength,COLUMN_DEFAULT defaultValue,EXTRA extra FROM information_schema.columns WHERE table_schema = '${db}' AND table_name = '${tbl}' ORDER BY ORDINAL_POSITION;`;
     }
     showTriggers(database: string): string {
-        return `SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = '${database}'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT TRIGGER_NAME FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = '${db}'`;
     }
     showProcedures(database: string): string {
-        return `SELECT ROUTINE_NAME FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${database}' and ROUTINE_TYPE='PROCEDURE'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${db}' and ROUTINE_TYPE='PROCEDURE'`;
     }
     showFunctions(database: string): string {
-        return `SELECT ROUTINE_NAME FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${database}' and ROUTINE_TYPE='FUNCTION'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT ROUTINE_NAME FROM information_schema.routines WHERE ROUTINE_SCHEMA = '${db}' and ROUTINE_TYPE='FUNCTION'`;
     }
     showViews(database: string): string {
-        return `SELECT TABLE_NAME name FROM information_schema.VIEWS  WHERE TABLE_SCHEMA = '${database}'`;
+        const db = this.validateIdentifier(database);
+        return `SELECT TABLE_NAME name FROM information_schema.VIEWS  WHERE TABLE_SCHEMA = '${db}'`;
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
         return `SELECT * FROM ${table} LIMIT ${pageSize};`;
@@ -106,7 +132,8 @@ export class MysqlDialect extends SqlDialect {
         return `SELECT count(*) FROM ${table};`;
     }
     showTables(database: string): string {
-        return `SELECT table_comment \`comment\`,TABLE_NAME as \`name\`,TABLE_ROWS \`rows\`,auto_increment,\`row_format\`,data_length,index_length FROM information_schema.TABLES  WHERE TABLE_SCHEMA = '${database}' and TABLE_TYPE<>'VIEW' order by table_name;`
+        const db = this.validateIdentifier(database);
+        return `SELECT table_comment \`comment\`,TABLE_NAME as \`name\`,TABLE_ROWS \`rows\`,auto_increment,\`row_format\`,data_length,index_length FROM information_schema.TABLES  WHERE TABLE_SCHEMA = '${db}' and TABLE_TYPE<>'VIEW' order by table_name;`
     }
     showSchemas(): string {
         return "show databases"

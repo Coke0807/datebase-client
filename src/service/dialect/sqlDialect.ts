@@ -3,6 +3,35 @@ import { UpdateColumnParam } from "./param/updateColumnParam";
 import { UpdateTableParam } from "./param/updateTableParam";
 
 export abstract class SqlDialect {
+    /**
+     * C-02: Validate SQL identifier (table name, database name, column name, etc.)
+     * to prevent SQL injection via template string interpolation.
+     * Only allows alphanumeric, underscore, hyphen, dot, and backtick-wrapped identifiers.
+     */
+    protected validateIdentifier(name: string): string {
+        if (name == null || name === '') return name;
+        // Allow backtick/bracket-quoted identifiers as-is (already safe)
+        if ((name.startsWith('`') && name.endsWith('`')) ||
+            (name.startsWith('"') && name.endsWith('"')) ||
+            (name.startsWith('[') && name.endsWith(']'))) {
+            return name;
+        }
+        // Block obviously dangerous characters that enable SQL injection
+        if (/[;'"\-\-\/\*\x00\x1a\n\r]/.test(name)) {
+            throw new Error(`Invalid SQL identifier: ${name}`);
+        }
+        return name;
+    }
+
+    /**
+     * C-02: Escape a string value for safe inclusion in SQL.
+     * Used for comment strings and other value parameters.
+     */
+    protected escapeValue(value: string): string {
+        if (value == null) return 'null';
+        return String(value).replace(/'/g, "''");
+    }
+
     dropIndex(table: string, indexName: string): string {
         throw new Error("Method not implemented.");
     }

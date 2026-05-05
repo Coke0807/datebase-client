@@ -81,8 +81,8 @@
                     this.emit('resize', { cols: terminal.cols, rows: terminal.rows })
                 }
 
-                window.addEventListener('resize', resizeScreen, false)
-                window.addEventListener("keyup", async event => {
+                this._resizeHandler = resizeScreen;
+                this._keyupHandler = async event => {
                     if (event.code == "KeyV" && event.ctrlKey && !event.altKey && !event.shiftKey) {
                         this.emit('data', await navigator.clipboard.readText())
                     } else if (event.code == "KeyF" && event.ctrlKey && !event.altKey && !event.shiftKey) {
@@ -90,10 +90,14 @@
                     } else if (event.code == "Escape") {
                         searchAddonBar.hidden();
                     }
-                })
-                window.onfocus = () => {
+                };
+                this._focusHandler = () => {
                     terminal.focus()
-                }
+                };
+
+                window.addEventListener('resize', this._resizeHandler, false)
+                window.addEventListener("keyup", this._keyupHandler)
+                window.onfocus = this._focusHandler
 
                 container.oncontextmenu = async (event) => {
                     event.stopPropagation()
@@ -138,6 +142,16 @@
 
                 this.emit('initTerminal', { cols: terminal.cols, rows: terminal.rows })
             }).init();
+        },
+        beforeUnmount() {
+            // R-03: Clean up event listeners to prevent memory leaks
+            if (this._resizeHandler) {
+                window.removeEventListener('resize', this._resizeHandler);
+            }
+            if (this._keyupHandler) {
+                window.removeEventListener('keyup', this._keyupHandler);
+            }
+            window.onfocus = null;
         },
         methods: {}
     };

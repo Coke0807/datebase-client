@@ -1,5 +1,5 @@
 <template>
-  <el-dialog :title="t('result.exportOption')" :visible="visible" width="30%" top="3vh" size="mini" @close="$emit('update:visible',false)">
+  <el-dialog :title="t('result.exportOption')" :model-value="visible" width="30%" top="3vh" @close="$emit('update:visible',false)">
     <el-form :model="exportOption">
       <el-form-item :label="t('result.exportFileType')">
         <el-select v-model="exportOption.type">
@@ -13,10 +13,12 @@
         <el-switch v-model="exportOption.withOutLimit"></el-switch>
       </el-form-item>
     </el-form>
-    <span slot="footer" class="dialog-footer">
-      <el-button type="primary" :loading="loading" @click="loading=true;$emit('exportHandle',exportOption);">{{ t('result.export') }}</el-button>
-      <el-button @click="$emit('update:visible',false)">{{ t('connect.cancel') }}</el-button>
-    </span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" :loading="loading" @click="loading=true;$emit('exportHandle',exportOption);">{{ t('result.export') }}</el-button>
+        <el-button @click="$emit('update:visible',false)">{{ t('connect.cancel') }}</el-button>
+      </span>
+    </template>
   </el-dialog>
 </template>
 

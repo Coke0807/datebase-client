@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="design-toolbar">
-      <el-button @click="index.visible=true" type="primary" :title="t('common.add')" icon="el-icon-circle-plus-outline" size="mini" circle> </el-button>
+      <el-button @click="index.visible=true" type="primary" :title="t('common.add')" icon="el-icon-circle-plus-outline" size="small" circle> </el-button>
     </div>
     <ux-grid :data="designData.editIndex" stripe style="width: 100%" :cell-style="{height: '35px'}">
       <ux-table-column align="center" field="index_name" :title="t('design.indexName')" show-overflow-tooltip="true"></ux-table-column>
@@ -10,11 +10,11 @@
       <ux-table-column align="center" field="index_type" :title="t('design.indexType')" show-overflow-tooltip="true"></ux-table-column>
       <ux-table-column :title="t('common.edit')" width="120">
         <template v-slot="{ row }">
-          <el-button @click="deleteConfirm(row)" :title="t('common.delete')" type="danger" size="mini" icon="el-icon-delete" circle> </el-button>
+          <el-button @click="deleteConfirm(row)" :title="t('common.delete')" type="danger" size="small" icon="el-icon-delete" circle> </el-button>
         </template>
       </ux-table-column>
     </ux-grid>
-    <el-dialog :title="t('design.addIndex')" :visible.sync="index.visible" top="3vh" size="mini">
+    <el-dialog :title="t('design.addIndex')" v-model="index.visible" top="3vh">
       <el-form :inline='true'>
         <el-form-item :label="t('design.column')">
           <el-select v-model="index.column">
@@ -29,10 +29,12 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" :loading="index.loading" @click="createIndex">{{ t('common.add') }}</el-button>
-        <el-button @click="index.visible=false">{{ t('common.cancel') }}</el-button>
-      </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" :loading="index.loading" @click="createIndex">{{ t('common.add') }}</el-button>
+          <el-button @click="index.visible=false">{{ t('common.cancel') }}</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>

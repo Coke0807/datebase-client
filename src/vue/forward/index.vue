@@ -44,30 +44,32 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog ref="editDialog" :title="panel.title" :visible.sync="panel.visible" width="90%" top="3vh" size="small">
+    <el-dialog ref="editDialog" :title="panel.title" v-model="panel.visible" width="90%" top="3vh">
       <el-form ref="infoForm" :model="panel.edit" label-width="120px">
-        <el-form-item size="mini" :label="t('forward.name')">
+        <el-form-item size="small" :label="t('forward.name')">
           <el-input v-model="panel.edit.name"></el-input>
         </el-form-item>
-        <el-form-item size="mini" :label="t('forward.localHost')">
+        <el-form-item size="small" :label="t('forward.localHost')">
           <el-input v-model="panel.edit.localHost"></el-input>
         </el-form-item>
-        <el-form-item size="mini" :label="t('forward.localPort')">
+        <el-form-item size="small" :label="t('forward.localPort')">
           <el-input v-model="panel.edit.localPort"></el-input>
         </el-form-item>
-        <el-form-item size="mini" :label="t('forward.remoteHost')">
+        <el-form-item size="small" :label="t('forward.remoteHost')">
           <el-input v-model="panel.edit.remoteHost"></el-input>
         </el-form-item>
-        <el-form-item size="mini" :label="t('forward.remotePort')">
+        <el-form-item size="small" :label="t('forward.remotePort')">
           <el-input v-model="panel.edit.remotePort"></el-input>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="panel.visible = false">{{ t('forward.cancel') }}</el-button>
-        <el-button type="primary" :loading="panel.loading" @click="confirmUpdate">
-          {{panel.edit.id!=null? t('forward.update') : t('forward.create')}}
-        </el-button>
-      </span>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="panel.visible = false">{{ t('forward.cancel') }}</el-button>
+          <el-button type="primary" :loading="panel.loading" @click="confirmUpdate">
+            {{panel.edit.id!=null? t('forward.update') : t('forward.create')}}
+          </el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>

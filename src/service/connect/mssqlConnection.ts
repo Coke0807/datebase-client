@@ -105,14 +105,20 @@ export class MSSqlConnnection extends ConnectionPool<Connection>{
     }
     connect(callback: (err: Error) => void): void {
         try {
-            const con = new Connection(this.config)
-            con.on("connect", err => {
-                callback(err)
+            let callbackFired = false;
+            const safeCallback = (err: Error) => {
+                if (callbackFired) return;
+                callbackFired = true;
+                callback(err);
                 if (!err) {
                     this.fill()
                 }
+            }
+            const con = new Connection(this.config)
+            con.on("connect", err => {
+                safeCallback(err)
             }).on("error", err => {
-                callback(err)
+                safeCallback(err)
             })
         } catch (error) {
             callback(error)

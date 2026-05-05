@@ -2,7 +2,7 @@
   <div id="app">
     <div class="hint">
       <div style="width:95%;">
-        <el-input type="textarea" :autosize="{ minRows:2, maxRows:5}" v-model="toolbar.sql" class="sql-pannel" @keypress.native="panelInput" />
+        <el-input type="textarea" :autosize="{ minRows:2, maxRows:5}" v-model="toolbar.sql" class="sql-pannel" @keypress="panelInput" />
       </div>
       <Toolbar :page="page" :showFullBtn="showFullBtn" :search.sync="table.search" :costTime="result.costTime" @changePage="changePage" @sendToVscode="sendToVscode" @export="exportOption.visible = true" @insert="$refs.editor.openInsert()" @deleteConfirm="deleteConfirm" @run="info.message = false;execute(toolbar.sql);" />
       <div v-if="info.message ">
@@ -28,7 +28,7 @@
       </vxe-column>
     </vxe-table>
     <EditDialog ref="editor" :dbType="result.dbType" :result="result" :database="result.database" :table="result.table" :primaryKey="result.primaryKey" :primaryKeyList="result.primaryKeyList" :columnList="result.columnList" @execute="execute" />
-    <ExportDialog :visible.sync="exportOption.visible" @exportHandle="confirmExport" />
+    <ExportDialog v-model:visible="exportOption.visible" @exportHandle="confirmExport" />
   </div>
 </template>
 
@@ -105,10 +105,11 @@ export default {
   mounted() {
     this.remainHeight = window.innerHeight - 90;
     this.showFullBtn = window.outerWidth / window.innerWidth >= 2;
-    window.addEventListener("resize", () => {
+    this._resizeHandler = () => {
       this.remainHeight = window.innerHeight - 90;
       this.showFullBtn = window.outerWidth / window.innerWidth >= 2;
-    });
+    };
+    window.addEventListener("resize", this._resizeHandler);
     const handlerData = (data, sameTable) => {
       this.result = data;
       this.toolbar.sql = data.sql;
@@ -164,7 +165,7 @@ export default {
         e.preventDefault();
       }
     };
-    window.addEventListener("message", ({ data }) => {
+    this._messageHandler = ({ data }) => {
       if (!data) return;
       const response = data.content;
       console.log(data);
@@ -219,13 +220,31 @@ export default {
           this.refresh();
           break;
       }
-    });
+    };
+    window.addEventListener("message", this._messageHandler);
     vscodeEvent.emit("init");
-    window.addEventListener("keyup", (event) => {
+    this._copyKeyupHandler = (event) => {
       if (event.key == "c" && event.ctrlKey) {
         document.execCommand("copy");
       }
-    });
+    };
+    window.addEventListener("keyup", this._copyKeyupHandler);
+  },
+  beforeUnmount() {
+    // R-03: Clean up event listeners to prevent memory leaks
+    if (this._resizeHandler) {
+      window.removeEventListener("resize", this._resizeHandler);
+    }
+    if (this._messageHandler) {
+      window.removeEventListener("message", this._messageHandler);
+    }
+    if (this._copyKeyupHandler) {
+      window.removeEventListener("keyup", this._copyKeyupHandler);
+    }
+    window.onkeypress = null;
+    if (vscodeEvent) {
+      vscodeEvent.destroy();
+    }
   },
   methods: {
     panelInput(event){

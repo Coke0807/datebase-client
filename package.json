@@ -1031,7 +1031,7 @@
 		"@types/redis": "^2.8.18",
 		"@types/ssh2": "^0.5.43",
 		"@types/tedious": "^4.0.3",
-		"@types/vscode": "^1.118.0",
+		"@types/vscode": "^1.80.0",
 		"@types/webpack-sources": "^3.2.3",
 		"babel-loader": "^8.1.0",
 		"buffer": "^6.0.3",
