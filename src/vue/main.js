@@ -3,6 +3,8 @@ import App from './App.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import VxeTable from 'vxe-table'
+import 'vxe-table/lib/style.css'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import i18nMixin from './mixin/i18n';
 
@@ -44,5 +46,6 @@ const app = createApp(App)
 app.mixin(i18nMixin)
 
 app.use(ElementPlus, { locale: zhCn })
+app.use(VxeTable)
 app.use(router)
 app.mount('#app')

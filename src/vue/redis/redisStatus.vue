@@ -179,7 +179,7 @@ export default {
     })
     vscodeEvent.emit("route-" + this.$route.name)
   },
-  destroyed() {
+  unmounted() {
     clearInterval(this.refreshTimer)
     vscodeEvent.destroy()
   },

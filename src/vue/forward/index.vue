@@ -17,17 +17,17 @@
       <el-table-column prop="remotePort" :label="t('forward.remotePort')">
       </el-table-column>
       <el-table-column prop="state" :label="t('forward.state')">
-        <template slot-scope="scope">
+        <template #default="scope">
           {{scope.row.state==true? t('forward.running') : t('forward.stopped')}}
         </template>
       </el-table-column>
       <el-table-column fixed="right" width="200">
-        <template slot="header" slot-scope="scope">
+        <template #header="scope">
           <el-button type="info" icon="el-icon-circle-plus-outline" size="small" circle @click="createRequest">
           </el-button>
           <el-button type="primary" icon="el-icon-refresh" size="small" circle @click="load"> </el-button>
         </template>
-        <template slot-scope="scope">
+        <template #default="scope">
           <el-button v-if="!scope.row.state" @click="start(scope.row.id);" type="success" size="small" :title="t('forward.start')"
             icon="el-icon-video-play" circle>
           </el-button>

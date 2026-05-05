@@ -35,11 +35,11 @@
         <el-card>
           <el-button @click="confrimSync" v-loading="loading.sync" :title="t('structDiff.sync')" type="success" size="mini">{{ t('structDiff.sync') }}
           </el-button>
-          <ux-grid :data="compareResult.sqlList" :height="remainHeight" ref="dataTable" stripe style="width: 100%" @selection-change="selectionChange">
-            <ux-table-column type="checkbox" width="40" fixed="left"> </ux-table-column>
-            <ux-table-column align="center" width="60" field="type" :title="t('structDiff.diff')" show-overflow-tooltip="true"></ux-table-column>
-            <ux-table-column align="center" field="sql" title="SQL" show-overflow-tooltip="true"></ux-table-column>
-          </ux-grid>
+          <vxe-table :data="compareResult.sqlList" :height="remainHeight" ref="dataTable" stripe style="width: 100%" @checkbox-change="selectionChange">
+            <vxe-column type="checkbox" width="40" fixed="left"> </vxe-column>
+            <vxe-column align="center" width="60" field="type" :title="t('structDiff.diff')" show-overflow="true"></vxe-column>
+            <vxe-column align="center" field="sql" title="SQL" show-overflow="true"></vxe-column>
+          </vxe-table>
         </el-card>
       </template>
     </div>

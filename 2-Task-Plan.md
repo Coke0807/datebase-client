@@ -262,16 +262,16 @@
 
 ### 3.2 Vue 3 安装与配置
 
-- [ ] 3.2.1 执行 `npm install vue@^3.4.0 element-plus @element-plus/icons-vue` 安装 Vue 3 和 Element Plus
-- [ ] 3.2.2 执行 `npm uninstall vue element-ui vue-loader@15` 卸载 Vue 2
-- [ ] 3.2.3 执行 `npm install vue-loader@^16.0.0 --save-dev` 安装 Vue 3 的 loader
-- [ ] 3.2.4 更新 `webpack.config.js`：适配 Vue 3 的 vue-loader 配置
+- [x] 3.2.1 执行 `npm install vue@^3.4.0 element-plus @element-plus/icons-vue` 安装 Vue 3 和 Element Plus
+- [x] 3.2.2 执行 `npm uninstall vue element-ui vue-loader@15` 卸载 Vue 2
+- [x] 3.2.3 执行 `npm install vue-loader@^17.0.0 --save-dev` 安装 Vue 3 的 loader
+- [x] 3.2.4 更新 `webpack.config.js`：适配 Vue 3 的 vue-loader 配置
 
 ### 3.3 入口文件迁移
 
-- [ ] 3.3.1 更新 `src/vue/main.js`：使用 `createApp()` 替代 `new Vue()`
-- [ ] 3.3.2 更新 `src/vue/main.js`：使用 `app.use(ElementPlus)` 替代 `Vue.use(ElementUI)`
-- [ ] 3.3.3 更新 `src/vue/main.js`：使用 `app.mount('#app')` 替代 `new Vue({ el: '#app' })`
+- [x] 3.3.1 更新 `src/vue/main.js`：使用 `createApp()` 替代 `new Vue()`
+- [x] 3.3.2 更新 `src/vue/main.js`：使用 `app.use(ElementPlus)` 替代 `Vue.use(ElementUI)`
+- [x] 3.3.3 更新 `src/vue/main.js`：使用 `app.mount('#app')` 替代 `new Vue({ el: '#app' })`
 
 ### 3.4 组件迁移
 
@@ -321,8 +321,8 @@
 | 阶段 0 | 18 | 18 | 100% | ✅ 完成 |
 | 阶段 1 | 24 | 24 | 100% | ✅ 完成 |
 | 阶段 2 | 32 | 32 | 100% | ✅ 完成 |
-| 阶段 3 | 4 | 28 | 14% | 🔄 进行中 |
-| **总计** | **78** | **102** | **77%** | 🔄 进行中 |
+| 阶段 3 | 10 | 28 | 36% | 🔄 进行中 |
+| **总计** | **84** | **102** | **82%** | 🔄 进行中 |
 
 ---
 

@@ -90,17 +90,17 @@
             <el-table-column type="index" :label="t('redis.keyView.id')" sortable width="60" align="center">
             </el-table-column>
             <el-table-column v-if="key.type=='hash'" resizable sortable :label="t('redis.keyView.key')" align="center">
-              <template slot-scope="scope">
+              <template #default="scope">
                 {{scope.row.key}}
               </template>
             </el-table-column>
             <el-table-column resizable sortable show-overflow-tooltip :label="t('redis.keyView.value')" align="center">
-              <template slot-scope="scope">
+              <template #default="scope">
                 {{key.type=='hash'?scope.row.value:scope.row}}
               </template>
             </el-table-column>
             <el-table-column label="Operation" width="150" align="center">
-              <template slot-scope="scope">
+              <template #default="scope">
                 <el-button type="text" @click="showEditDialog(scope.row)" icon="el-icon-edit" circle  v-if="key.type=='hash'">
                 </el-button>
                 <el-button type="text" @click="deleteLine(scope.row)" icon="el-icon-delete" circle>
@@ -127,7 +127,7 @@ const prettyBytes = require("pretty-bytes");
 let vscodeEvent;
 
 export default {
-  destroyed() {
+  unmounted() {
     vscodeEvent.destroy();
   },
   mounted() {

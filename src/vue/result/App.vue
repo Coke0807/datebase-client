@@ -11,16 +11,22 @@
       </div>
     </div>
     <!-- trigger when click -->
-    <ux-grid ref="dataTable" :data="filterData" v-loading='table.loading' size='small' :cell-style="{height: '35px'}" @sort-change="sort" :height="remainHeight" width="100vh" stripe :checkboxConfig="{ checkMethod: selectable}">
-      <ux-table-column type="checkbox" width="40" fixed="left"></ux-table-column>
-      <ux-table-column type="index" width="40" :seq-method="({row,rowIndex})=>(rowIndex||!row.isFilter)?rowIndex:undefined">
-        <Controller slot="header" :result="result" :toolbar="toolbar" />
-      </ux-table-column>
-      <ux-table-column v-for="(field,index) in (result.fields||[]).filter(field=>toolbar.showColumns.includes(field.name.toLowerCase()))" :key="index" :resizable="true" :field="field.name" :title="field.name" :sortable="true" :width="computeWidth(field,0)" edit-render>
-        <Header slot="header" slot-scope="scope" :result="result" :scope="scope" :index="index" />
-        <Row slot-scope="scope" :scope="scope" :result="result" :filterObj="toolbar.filter" :editList.sync="update.editList" @execute="execute" @sendToVscode="sendToVscode" @openEditor="openEditor" />
-      </ux-table-column>
-    </ux-grid>
+    <vxe-table ref="dataTable" :data="filterData" v-loading='table.loading' size='small' :cell-style="{height: '35px'}" @sort-change="sort" :height="remainHeight" stripe :checkbox-config="{ checkMethod: selectable }">
+      <vxe-column type="checkbox" width="40" fixed="left"></vxe-column>
+      <vxe-column type="seq" width="40" :seq-method="({row,rowIndex})=>(rowIndex||!row.isFilter)?rowIndex:undefined">
+        <template #header>
+          <Controller :result="result" :toolbar="toolbar" />
+        </template>
+      </vxe-column>
+      <vxe-column v-for="(field,index) in (result.fields||[]).filter(field=>toolbar.showColumns.includes(field.name.toLowerCase()))" :key="index" :resizable="true" :field="field.name" :title="field.name" :sortable="true" :width="computeWidth(field,0)">
+        <template #header="scope">
+          <Header :result="result" :scope="scope" :index="index" />
+        </template>
+        <template #default="scope">
+          <Row :scope="scope" :result="result" :filterObj="toolbar.filter" :editList.sync="update.editList" @execute="execute" @sendToVscode="sendToVscode" @openEditor="openEditor" />
+        </template>
+      </vxe-column>
+    </vxe-table>
     <EditDialog ref="editor" :dbType="result.dbType" :result="result" :database="result.database" :table="result.table" :primaryKey="result.primaryKey" :primaryKeyList="result.primaryKeyList" :columnList="result.columnList" @execute="execute" />
     <ExportDialog :visible.sync="exportOption.visible" @exportHandle="confirmExport" />
   </div>
