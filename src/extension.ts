@@ -40,8 +40,12 @@ import { SSHConnectionNode } from "./model/ssh/sshConnectionNode";
 import { FTPFileNode } from "./model/ftp/ftpFileNode";
 import { HistoryNode } from "./provider/history/historyNode";
 import { ConnectService } from "./service/connect/connectService";
+import { SecretService } from "./common/secretService";
 
 export function activate(context: vscode.ExtensionContext) {
+
+    // Initialize SecretStorage service for secure password storage
+    SecretService.init(context);
 
     const serviceManager = new ServiceManager(context)
 

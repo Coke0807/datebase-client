@@ -16,6 +16,7 @@ import { DatabaseCache } from "../../service/common/databaseCache";
 import { NodeUtil } from "../nodeUtil";
 import { CopyAble } from "./copyAble";
 import { SSHConfig } from "./sshConfig";
+import { SecretService } from "@/common/secretService";
 
 export interface SwitchOpt {
     isGlobal?: boolean;
@@ -175,15 +176,28 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
 
             switch (command.command) {
                 case CommandKey.add:
-                    connections[key] = NodeUtil.removeParent(this);
-                    break;
                 case CommandKey.update:
-                    connections[key] = NodeUtil.removeParent(this);
-                    ConnectionManager.removeConnection(key)
+                    // Store password securely in SecretStorage
+                    if (this.password) {
+                        await SecretService.instance.storePassword(key, this.password);
+                        // Remove password from Memento storage (keep it in memory for current session)
+                        const nodeCopy = NodeUtil.removeParent(this);
+                        delete nodeCopy.password; // Don't store password in Memento
+                        connections[key] = nodeCopy;
+                    } else {
+                        connections[key] = NodeUtil.removeParent(this);
+                    }
+                    
+                    if (command.command === CommandKey.update) {
+                        ConnectionManager.removeConnection(key)
+                    }
                     break;
                 case CommandKey.delete:
                     ConnectionManager.removeConnection(key)
                     delete connections[key]
+                    // Delete password from SecretStorage
+                    await SecretService.instance.deletePassword(key);
+                    break;
                 default:
                     break;
             }

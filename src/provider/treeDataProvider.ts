@@ -13,6 +13,7 @@ import { UserGroup } from "../model/database/userGroup";
 import { CommandKey, Node } from "../model/interface/node";
 import { DatabaseCache } from "../service/common/databaseCache";
 import { ConnectionManager } from "../service/connectionManager";
+import { SecretService } from "@/common/secretService";
 
 export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
 
@@ -125,9 +126,28 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
         let globalConnections = GlobalState.get<{ [key: string]: Node }>(connetKey, {});
         let workspaceConnections = WorkState.get<{ [key: string]: Node }>(connetKey, {});
 
-        return Object.keys(workspaceConnections).map(key => this.getNode(workspaceConnections[key], key, false, connetKey)).concat(
-            Object.keys(globalConnections).map(key => this.getNode(globalConnections[key], key, true, connetKey))
-        )
+        // Load passwords from SecretStorage for all connections
+        const globalNodes = await Promise.all(
+            Object.keys(globalConnections).map(async key => {
+                const node = this.getNode(globalConnections[key], key, true, connetKey);
+                // Retrieve password from SecretStorage with backward compatibility
+                const legacyPassword = globalConnections[key].password;
+                node.password = await SecretService.instance.getPassword(key, legacyPassword);
+                return node;
+            })
+        );
+
+        const workspaceNodes = await Promise.all(
+            Object.keys(workspaceConnections).map(async key => {
+                const node = this.getNode(workspaceConnections[key], key, false, connetKey);
+                // Retrieve password from SecretStorage with backward compatibility
+                const legacyPassword = workspaceConnections[key].password;
+                node.password = await SecretService.instance.getPassword(key, legacyPassword);
+                return node;
+            })
+        );
+
+        return workspaceNodes.concat(globalNodes);
     }
 
     private getNode(connectInfo: Node, key: string, global: boolean, connectionKey: string) {
