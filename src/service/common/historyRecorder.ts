@@ -39,7 +39,7 @@ export class HistoryRecorder {
             + this.pad(date.getHours(), 2) + ":" + this.pad(date.getMinutes(), 2) + ":" + this.pad(date.getSeconds(), 2);
     }
 
-    public pad(n: any, width: number, z?: any): number {
+    public pad(n: any, width: number, z?: any): string {
         z = z || '0';
         n = n + '';
         return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
