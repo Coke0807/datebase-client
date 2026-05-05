@@ -10,7 +10,7 @@ export class MongoConnection extends IConnection {
     constructor(private node: Node) {
         super()
         this.option = {
-            connectTimeoutMS: this.node.connectTimeout || 5000, waitQueueTimeoutMS: this.node.requestTimeout,
+            connectTimeoutMS: this.node.connectTimeout ?? 5000, waitQueueTimeoutMS: this.node.requestTimeout,
             ssl: this.node.useSSL, sslValidate: false,
             sslCert: (node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
             sslKey: (node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,
@@ -19,9 +19,7 @@ export class MongoConnection extends IConnection {
 
     connect(callback: (err: Error) => void): void {
         let url=this.node.connectionUrl;
-        if (url) {
-          this.option = { useNewUrlParser: true}
-        } else {
+        if (!url) {
           url = `mongodb://${this.node.host}:${this.node.port}`;
           if (this.node.user || this.node.password) {
             const escapedUser = encodeURIComponent(this.node.user)
@@ -29,13 +27,15 @@ export class MongoConnection extends IConnection {
             url = `mongodb://${escapedUser}:${escapedPassword}@${this.node.host}:${this.node.port}`;
           }
         }
-        MongoClient.connect(url, this.option, (err, client) => {
-          if (!err) {
+        MongoClient.connect(url, this.option)
+          .then((client) => {
             this.client = client;
             this.conneted = true;
-          }
-          callback(err)
-        })
+            callback(null);
+          })
+          .catch((err) => {
+            callback(err);
+          });
       }
 
     run(callback: (client: MongoClient) => void) {
@@ -53,7 +53,7 @@ export class MongoConnection extends IConnection {
     end(): void {
     }
     isAlive(): boolean {
-        return this.conneted && this.client && this.client.isConnected();
+        return this.conneted && this.client !== null;
     }
 
     query(sql: string, callback?: queryCallback): void;

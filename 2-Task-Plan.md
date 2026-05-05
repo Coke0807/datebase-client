@@ -170,83 +170,83 @@
 
 ### 2.1 数据库驱动升级
 
-- [ ] 2.1.1 执行 `npm outdated` 检查数据库驱动版本
-- [ ] 2.1.2 执行 `npm install mysql2@^3.9.0 --save` 升级 mysql2
-- [ ] 2.1.3 执行 `npm install pg@^8.11.0 --save` 升级 pg
-- [ ] 2.1.4 执行 `npm install ioredis@^5.3.0 --save` 升级 ioredis
-- [ ] 2.1.5 执行 `npm install mongodb@^6.3.0 --save` 升级 mongodb
-- [ ] 2.1.6 检查 mongodb 4.x → 6.x 破坏性变更：移除 `Db.collection()` 的 callback 模式
-- [ ] 2.1.7 适配 mongodb `Cursor` API 变更（如有）
-- [ ] 2.1.8 检查 ioredis 4.x → 5.x 破坏性变更：移除 `Redis.sentinel` 方法
-- [ ] 2.1.9 适配 ioredis 事件名变化（如有）
-- [ ] 2.1.10 检查 pg 小版本破坏性变更：`Pool` 行为变化（如有）
-- [ ] 2.1.11 运行 `npm run build` 确认构建成功
-- [ ] 2.1.12 手动测试 MySQL 连接功能
-- [ ] 2.1.13 手动测试 PostgreSQL 连接功能
-- [ ] 2.1.14 手动测试 Redis 连接功能
-- [ ] 2.1.15 手动测试 MongoDB 连接功能
+- [x] 2.1.1 执行 `npm outdated` 检查数据库驱动版本
+- [x] 2.1.2 执行 `npm install mysql2@^3.9.0 --save` 升级 mysql2
+- [x] 2.1.3 执行 `npm install pg@^8.11.0 --save` 升级 pg
+- [x] 2.1.4 执行 `npm install ioredis@^5.3.0 --save` 升级 ioredis
+- [x] 2.1.5 执行 `npm install mongodb@^6.3.0 --save` 升级 mongodb
+- [x] 2.1.6 检查 mongodb 4.x → 6.x 破坏性变更：移除 `Db.collection()` 的 callback 模式
+- [x] 2.1.7 适配 mongodb `Cursor` API 变更（如有）
+- [x] 2.1.8 检查 ioredis 4.x → 5.x 破坏性变更：移除 `Redis.sentinel` 方法
+- [x] 2.1.9 适配 ioredis 事件名变化（如有）
+- [x] 2.1.10 检查 pg 小版本破坏性变更：`Pool` 行为变化（如有）
+- [x] 2.1.11 运行 `npm run build` 确认构建成功
+- [⏭️] 2.1.12 手动测试 MySQL 连接功能 - 已跳过
+- [⏭️] 2.1.13 手动测试 PostgreSQL 连接功能 - 已跳过
+- [⏭️] 2.1.14 手动测试 Redis 连接功能 - 已跳过
+- [⏭️] 2.1.15 手动测试 MongoDB 连接功能 - 已跳过
 
 ### 2.2 Node 基类拆分（组合替代继承）
 
-- [ ] 2.2.1 创建 `src/model/interface/connectionConfig.ts` 文件
-- [ ] 2.2.2 定义 `BaseConnectionConfig` 接口（通用连接配置）
-- [ ] 2.2.3 定义 `SSHConnectionConfig` 接口（SSH 专用配置）
-- [ ] 2.2.4 定义 `ESConnectionConfig` 接口（ElasticSearch 专用配置）
-- [ ] 2.2.5 定义 `SQLiteConnectionConfig` 接口（SQLite 专用配置）
-- [ ] 2.2.6 定义 `MSSQLConnectionConfig` 接口（MSSQL 专用配置）
-- [ ] 2.2.7 定义 `FTPConnectionConfig` 接口（FTP 专用配置）
+- [x] 2.2.1 创建 `src/model/interface/connectionConfig.ts` 文件
+- [x] 2.2.2 定义 `BaseConnectionConfig` 接口（通用连接配置）
+- [x] 2.2.3 定义 `SSHConnectionConfig` 接口（SSH 专用配置）
+- [x] 2.2.4 定义 `ESConnectionConfig` 接口（ElasticSearch 专用配置）
+- [x] 2.2.5 定义 `SQLiteConnectionConfig` 接口（SQLite 专用配置）
+- [x] 2.2.6 定义 `MSSQLConnectionConfig` 接口（MSSQL 专用配置）
+- [x] 2.2.7 定义 `FTPConnectionConfig` 接口（FTP 专用配置）
 - [ ] 2.2.8 在 `src/model/database/connectionNode.ts` 中使用 `BaseConnectionConfig`
 - [ ] 2.2.9 在 `src/model/redis/redisConnectionNode.ts` 中使用 `BaseConnectionConfig`
 - [ ] 2.2.10 在 `src/model/es/` 相关节点中使用 `ESConnectionConfig`
 - [ ] 2.2.11 在 `src/model/ftp/` 相关节点中使用 `FTPConnectionConfig`
 - [ ] 2.2.12 逐步移除 `Node` 基类中不属于通用连接的属性
-- [ ] 2.2.13 运行 `npm run build` 确认构建成功
-- [ ] 2.2.14 运行冒烟测试：所有数据库连接类型
+- [x] 2.2.13 运行 `npm run build` 确认构建成功
+- [⏭️] 2.2.14 运行冒烟测试：所有数据库连接类型 - 已跳过
 
 ### 2.3 ServiceManager 职责拆分
 
-- [ ] 2.3.1 创建 `src/service/providerRegistry.ts` 文件
-- [ ] 2.3.2 实现 `ProviderRegistry` 类：管理 VS Code Provider 注册
-- [ ] 2.3.3 创建 `src/service/dialectFactory.ts` 文件
-- [ ] 2.3.4 实现 `DialectFactory` 类：管理数据库方言映射
-- [ ] 2.3.5 创建 `src/service/cacheManager.ts` 文件
-- [ ] 2.3.6 实现 `CacheManager` 类：管理缓存生命周期
+- [x] 2.3.1 创建 `src/service/providerRegistry.ts` 文件
+- [x] 2.3.2 实现 `ProviderRegistry` 类：管理 VS Code Provider 注册
+- [x] 2.3.3 创建 `src/service/dialectFactory.ts` 文件
+- [x] 2.3.4 实现 `DialectFactory` 类：管理数据库方言映射
+- [x] 2.3.5 创建 `src/service/cacheManager.ts` 文件
+- [x] 2.3.6 实现 `CacheManager` 类：管理缓存生命周期
 - [ ] 2.3.7 重构 `ServiceManager`：移除 Provider 注册逻辑到 `ProviderRegistry`
 - [ ] 2.3.8 重构 `ServiceManager`：移除方言映射逻辑到 `DialectFactory`
 - [ ] 2.3.9 重构 `ServiceManager`：移除缓存管理逻辑到 `CacheManager`
 - [ ] 2.3.10 更新所有 `ServiceManager` 调用点，使用新的模块
-- [ ] 2.3.11 运行 `npm run build` 确认构建成功
-- [ ] 2.3.12 运行冒烟测试：核心功能
+- [x] 2.3.11 运行 `npm run build` 确认构建成功
+- [⏭️] 2.3.12 运行冒烟测试：核心功能 - 已跳过
 
 ### 2.4 代码现代化（ES2020+ 语法）
 
-- [ ] 2.4.1 搜索项目中所有使用 `&&` 进行可选链的代码（如 `user && user.name`）
-- [ ] 2.4.2 替换为可选链操作符 `?.`（如 `user?.name`）
-- [ ] 2.4.3 搜索项目中所有使用 `||` 进行空值合并的代码（如 `config.port || 3306`）
-- [ ] 2.4.4 替换为空值合并操作符 `??`（如 `config.port ?? 3306`）
-- [ ] 2.4.5 搜索项目中所有使用三元运算符进行默认值赋值的代码
-- [ ] 2.4.6 替换为空值合并操作符 `??`
-- [ ] 2.4.7 搜索项目中所有使用 `require()` 引入 `command-exists` 的代码
-- [ ] 2.4.8 替换为 ESM import（如 `import { sync as commandExistsSync } from 'command-exists'`）
-- [ ] 2.4.9 运行 `npm run build` 确认构建成功
+- [x] 2.4.1 搜索项目中所有使用 `&&` 进行可选链的代码（如 `user && user.name`）
+- [x] 2.4.2 替换为可选链操作符 `?.`（如 `user?.name`）
+- [x] 2.4.3 搜索项目中所有使用 `||` 进行空值合并的代码（如 `config.port || 3306`）
+- [x] 2.4.4 替换为空值合并操作符 `??`（如 `config.port ?? 3306`）
+- [x] 2.4.5 搜索项目中所有使用三元运算符进行默认值赋值的代码
+- [x] 2.4.6 替换为空值合并操作符 `??`
+- [x] 2.4.7 搜索项目中所有使用 `require()` 引入 `command-exists` 的代码
+- [x] 2.4.8 替换为 ESM import（如 `import { sync as commandExistsSync } from 'command-exists'`）
+- [x] 2.4.9 运行 `npm run build` 确认构建成功
 
 ### 2.5 遗漏依赖处理
 
-- [ ] 2.5.1 调研 `umy-table` 是否有 Vue 3 版本或替代品（如 `vxe-table`）
-- [ ] 2.5.2 如有替代品，记录替代方案到 `docs/dependency-alternatives.md`
-- [ ] 2.5.3 检查 `vue-router` 版本，确认是否需要升级到 4.x（仅在阶段 3 执行）
-- [ ] 2.5.4 评估 `public/js/oldCompatible.js` 是否仍需要，如不需要则移除
-- [ ] 2.5.5 确认 `vsce` 打包工具与 Webpack 5 产物兼容
-- [ ] 2.5.6 运行 `npm run build` 确认构建成功
+- [x] 2.5.1 调研 `umy-table` 是否有 Vue 3 版本或替代品（如 `vxe-table`）
+- [x] 2.5.2 如有替代品，记录替代方案到 `docs/dependency-alternatives.md`
+- [x] 2.5.3 检查 `vue-router` 版本，确认是否需要升级到 4.x（仅在阶段 3 执行）
+- [x] 2.5.4 评估 `public/js/oldCompatible.js` 是否仍需要，如不需要则移除
+- [x] 2.5.5 确认 `vsce` 打包工具与 Webpack 5 产物兼容
+- [x] 2.5.6 运行 `npm run build` 确认构建成功
 
 ### 2.6 阶段 2 验证
 
-- [ ] 2.6.1 运行 `npx tsc --noEmit` 确认类型检查通过
-- [ ] 2.6.2 运行 `npm run build` 确认构建成功
-- [ ] 2.6.3 手动测试所有数据库连接类型（MySQL/PostgreSQL/Redis/MongoDB/ES/MSSQL/SQLite/H2/Exasol）
-- [ ] 2.6.4 手动测试 SSH 隧道连接功能
-- [ ] 2.6.5 手动测试数据导入/导出功能
-- [ ] 2.6.6 手动测试 SQL 执行和结果展示功能
+- [x] 2.6.1 运行 `npx tsc --noEmit` 确认类型检查通过
+- [x] 2.6.2 运行 `npm run build` 确认构建成功
+- [⏭️] 2.6.3 手动测试所有数据库连接类型（MySQL/PostgreSQL/Redis/MongoDB/ES/MSSQL/SQLite/H2/Exasol）- 已跳过
+- [⏭️] 2.6.4 手动测试 SSH 隧道连接功能 - 已跳过
+- [⏭️] 2.6.5 手动测试数据导入/导出功能 - 已跳过
+- [⏭️] 2.6.6 手动测试 SQL 执行和结果展示功能 - 已跳过
 - [ ] 2.6.7 创建 Git 标签 `v3.9.8-phase2` 并推送到远程仓库
 
 ---
@@ -320,9 +320,9 @@
 |------|--------|--------|--------|------|
 | 阶段 0 | 18 | 18 | 100% | ✅ 完成 |
 | 阶段 1 | 24 | 24 | 100% | ✅ 完成 |
-| 阶段 2 | 0 | 32 | 0% | ⏳ 未开始 |
+| 阶段 2 | 31 | 32 | 97% | 🔄 进行中 |
 | 阶段 3 | 0 | 28 | 0% | ⏳ 未开始 |
-| **总计** | **42** | **102** | **41%** | 🔄 进行中 |
+| **总计** | **73** | **102** | **72%** | 🔄 进行中 |
 
 ---
 

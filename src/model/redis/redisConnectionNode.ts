@@ -6,9 +6,10 @@ import { CommandKey, Node } from "@/model/interface/node";
 import { NodeUtil } from "@/model/nodeUtil";
 import * as path from "path";
 import * as vscode from "vscode";
+import Redis from "ioredis";
 import { RedisFolderNode } from "./folderNode";
 import RedisBaseNode from "./redisBaseNode";
-var commandExistsSync = require('command-exists').sync;
+import { sync as commandExistsSync } from 'command-exists';
 
 export class RedisConnectionNode extends RedisBaseNode {
 
@@ -60,7 +61,7 @@ export class RedisConnectionNode extends RedisBaseNode {
                     }
                     const splitCommand: string[] = content.replace(/ +/g, " ").split(' ')
                     const command = splitCommand.shift()
-                    const reply = await client.send_command(command, splitCommand)
+                    const reply = await client.sendCommand(new Redis.Command(command, splitCommand))
                     handler.emit("result", reply)
                 }).on("exit", () => {
                     handler.panel.dispose()

@@ -34,7 +34,7 @@ export class EsConnection extends IConnection {
             headers: {
                 'Content-Type': 'application/json',
             },
-            timeout: this.opt.connectTimeout || 2000,
+            timeout: this.opt.connectTimeout ?? 2000,
             responseType: 'json',
             data: body
         };

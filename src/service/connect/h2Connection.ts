@@ -31,7 +31,7 @@ export class H2Connection extends IConnection {
         super();
         this.node = node;
         this.node.host = node.host || '127.0.0.1';
-        this.node.port = node.port || 9092;
+        this.node.port = node.port ?? 9092;
         this.node.user = node.user || 'sa';
         this.node.password = node.password || '';
     }

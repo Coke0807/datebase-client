@@ -1,21 +1,21 @@
 import { Node } from "@/model/interface/node";
 import { IConnection, queryCallback } from "./connection";
 import * as fs from "fs";
-import IoRedis from "ioredis";
+import Redis, { RedisOptions } from "ioredis";
 
 export class RedisConnection extends IConnection {
     private conneted: boolean;
-    private client: IoRedis.Redis;
+    private client: Redis;
     constructor(node: Node) {
         super()
-        let config = {
+        let config: RedisOptions = {
             port: node.port,
             host: node.host,
             password: node.password,
-            connectTimeout: node.connectTimeout || 5000,
+            connectTimeout: node.connectTimeout ?? 5000,
             db: node.database as any as number,
             family: 4,
-        }as IoRedis.RedisOptions;
+        };
         if(node.useSSL){
             config.tls={
                 rejectUnauthorized: false,
@@ -25,7 +25,7 @@ export class RedisConnection extends IConnection {
                 minVersion: 'TLSv1'
             }
         }
-        this.client = new IoRedis(config);
+        this.client = new Redis(config);
 
 
     }
@@ -34,9 +34,9 @@ export class RedisConnection extends IConnection {
     query(sql: any, values?: any, callback?: any) {
         const param: string[] = sql.replace(/ +/g, " ").split(' ')
         const command = param.shift()
-        this.client.send_command(command, param, callback)
+        this.client.sendCommand(new Redis.Command(command, param, { replyEncoding: 'utf-8' }), callback)
     }
-    run(callback: (client: IoRedis.Redis) => void) {
+    run(callback: (client: Redis) => void) {
 
         callback(this.client)
     }

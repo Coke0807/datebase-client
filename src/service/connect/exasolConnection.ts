@@ -27,7 +27,7 @@ export class ExasolConnection extends IConnection {
         super();
         this.node = node;
         this.node.host = node.host || '127.0.0.1';
-        this.node.port = node.port || 8563;
+        this.node.port = node.port ?? 8563;
         this.node.user = node.user || 'sys';
         this.node.password = node.password || '';
         this.connected = false;

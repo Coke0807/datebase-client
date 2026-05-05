@@ -2,16 +2,24 @@ const path = require('path');
 const { VueLoaderPlugin } = require('vue-loader')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const webpack = require('webpack');
 const isProd = process.argv.indexOf('--mode=production') >= 0;
-var webpack = require('webpack');
 
 module.exports = [
     {
         target: "node",
+        // Webpack 5: 移除 node polyfill，使用 resolve.fallback 替代
         node: {
-            fs: 'empty', net: 'empty', tls: 'empty',
-            child_process: 'empty', dns: 'empty',
-            global: true, __dirname: true
+            global: true,
+            __dirname: false,
+            __filename: false,
+        },
+        resolve: {
+            extensions: ['.ts', '.js'],
+            alias: {
+                '@': path.resolve(__dirname, './src')
+            }
+            // Webpack 5: Node.js 扩展不需要 fallback，直接使用 Node.js 内置模块
         },
         entry: ['./src/extension.ts'],
         output: {
@@ -25,17 +33,25 @@ module.exports = [
             mockjs: 'mockjs vscode',
             'mongodb-client-encryption':'mongodb-client-encryption'
         },
-        resolve: {
-            extensions: ['.ts', '.js'],
-            alias: {
-                '@': path.resolve(__dirname, './src')
+        plugins: [
+            // Webpack 5: IgnorePlugin 新语法
+            new webpack.IgnorePlugin({
+                resourceRegExp: /^(pg-native|cardinal|encoding|aws4|pg-cloudflare)$/
+            })
+        ],
+        module: { 
+            rules: [
+                { test: /\.ts$/, exclude: /(node_modules|bin)/, use: ['ts-loader'] }
+            ] 
+        },
+        optimization: { minimize: isProd },
+        // Webpack 5: 持久化缓存
+        cache: {
+            type: 'filesystem',
+            buildDependencies: {
+                config: [__filename]
             }
         },
-        plugins: [
-            new webpack.IgnorePlugin(/^(pg-native|cardinal|encoding|aws4|pg-cloudflare)$/)
-        ],
-        module: { rules: [{ test: /\.ts$/, exclude: /(node_modules|bin)/, use: ['ts-loader'] }] },
-        optimization: { minimize: isProd },
         watch: !isProd,
         mode: isProd ? 'production' : 'development',
         devtool: isProd ? false : 'source-map',
@@ -53,19 +69,68 @@ module.exports = [
                 patterns: [{ from: 'public', to: './webview' }]
             }),
         ],
+        resolve: {
+            extensions: ['.vue', '.js'],
+            alias: { 
+                'vue$': 'vue/dist/vue.esm.js', 
+                '@': path.resolve('src'),
+            },
+            // Webpack 5: WebView 浏览器环境需要的 polyfill
+            fallback: {
+                "process": require.resolve("process/browser"),
+                "buffer": require.resolve("buffer/"),
+                "stream": require.resolve("stream-browserify"),
+                "util": require.resolve("util/"),
+            }
+        },
+        plugins: [
+            new VueLoaderPlugin(),
+            // Webpack 5: 提供 process 和 Buffer 全局变量
+            new webpack.ProvidePlugin({
+                process: 'process/browser',
+                Buffer: ['buffer', 'Buffer'],
+            }),
+            new HtmlWebpackPlugin({ 
+                inject: true, 
+                template: './public/index.html', 
+                chunks: ['app'], 
+                filename: 'webview/app.html' 
+            }),
+            new HtmlWebpackPlugin({ 
+                inject: true, 
+                templateContent: `<head><script src="js/oldCompatible.js"></script></head><body> <div id="app"></div> </body>`, 
+                chunks: ['query'], 
+                filename: 'webview/result.html' 
+            }),
+            new CopyWebpackPlugin({
+                patterns: [{ from: 'public', to: './webview' }]
+            }),
+        ],
         output: {
             path: path.resolve(__dirname, 'out'),
             filename: 'webview/js/[name].js'
         },
-        resolve: {
-            extensions: ['.vue', '.js'],
-            alias: { 'vue$': 'vue/dist/vue.esm.js', '@': path.resolve('src'), }
-        },
         module: {
             rules: [
-                { test: /\.vue$/, loader: 'vue-loader', options: { loaders: { css: ["vue-style-loader", "css-loader"] } } },
+                // Webpack 5: vue-loader 配置更新
+                { 
+                    test: /\.vue$/, 
+                    loader: 'vue-loader'
+                },
                 { test: /(\.css|\.cssx)$/, use: ["vue-style-loader", "css-loader", { loader: "postcss-loader" }] },
-                { test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/, loader: 'url-loader', options: { limit: 80000 } }
+                // Webpack 5: 使用 Asset Modules 替代 url-loader
+                { 
+                    test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+                    type: 'asset',
+                    parser: {
+                        dataUrlCondition: {
+                            maxSize: 80000 // 80KB
+                        }
+                    },
+                    generator: {
+                        filename: 'webview/fonts/[name].[hash:8][ext]'
+                    }
+                }
             ]
         },
         optimization: {
@@ -75,6 +140,13 @@ module.exports = [
                     antv: { name: "antv", test: /[\\/]@antv[\\/]/, chunks: "all", priority: 10 },
                     vendor: { name: "vendor", test: /[\\/]node_modules[\\/]/, chunks: "all", priority: -1 }
                 }
+            }
+        },
+        // Webpack 5: 持久化缓存
+        cache: {
+            type: 'filesystem',
+            buildDependencies: {
+                config: [__filename]
             }
         },
         watch: !isProd,
