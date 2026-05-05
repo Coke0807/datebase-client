@@ -1,22 +1,14 @@
-import Vue from 'vue'
-import App from './App'
-import ElementUI from 'element-ui';
-import locale from 'element-ui/lib/locale/lang/zh-CN'
-Vue.use(ElementUI, { locale });
+import { createApp } from 'vue'
+import App from './App.vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import Contextmenu from "./component/Contextmenu"
-Vue.use(Contextmenu);
-import UmyTable from 'umy-table'
-import 'umy-table/lib/theme-chalk/index.css';
 import '@/../public/theme/auto.css'
-import '@/../public/theme/umyui.css'
 import './view.css'
 import './icon/iconfont.css'
-Vue.use(UmyTable);
 
-Vue.config.productionTip = false
-
-new Vue({
-  el: '#app',
-  components: { App },
-  template: '<App/>'
-})
+const app = createApp(App)
+app.use(ElementPlus, { locale: zhCn })
+app.use(Contextmenu)
+app.mount('#app')

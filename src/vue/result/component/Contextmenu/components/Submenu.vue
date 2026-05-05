@@ -16,7 +16,7 @@
                 'menu_item', 'menu_item__disabled',
                 item.divided?'menu_item__divided':null
               ]"
-              :key="index"
+              :key="'disabled-' + index"
               v-if="item.disabled"
             >
               <div class="menu_item_icon" v-if="hasIcon">
@@ -32,7 +32,7 @@
                 activeSubmenu.index===index? 'menu_item_expand':null,
                 item.divided?'menu_item__divided':null
               ]"
-              :key="index"
+              :key="'children-' + index"
               @mouseenter="($event)=>enterItem($event,item,index)"
               v-else-if="item.children"
             >
@@ -48,7 +48,7 @@
                 'menu_item', 'menu_item__available',
                 item.divided?'menu_item__divided':null
               ]"
-              :key="index"
+              :key="'clickable-' + index"
               @mouseenter="($event)=>enterItem($event,item,index)"
               @click="itemClick(item)"
               v-else
@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import Vue from "vue";
+import { createApp, h, ref, reactive, onMounted, nextTick, getCurrentInstance } from "vue";
 import {
   SUBMENU_X_OFFSET,
   SUBMENU_Y_OFFSET,
@@ -75,154 +75,185 @@ import {
   SUBMENU_OPEN_TREND_RIGHT,
   COMPONENT_NAME
 } from "../constant";
+
 export default {
   name: COMPONENT_NAME,
-  data() {
-    return {
-      commonClass: {
-        menu: null,
-        menuItem: null,
-        clickableMenuItem: null,
-        unclickableMenuItem: null
-      },
-      activeSubmenu: {
-        index: null,
-        instance: null
-      },
-      items: [],
-      position: {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0
-      },
-      style: {
-        left: 0,
-        top: 0,
-        zIndex: 2,
-        minWidth: 150
-      },
-      customClass: null,
-      visible: false,
-      hasIcon: false,
-      openTrend: SUBMENU_OPEN_TREND_RIGHT
-    };
-  },
-  mounted() {
-    this.visible = true;
-    for (let item of this.items) {
-      if (item.icon) {
-        this.hasIcon = true;
-        break;
-      }
+  props: {
+    commonClass: {
+      type: Object,
+      default: () => ({})
+    },
+    items: {
+      type: Array,
+      default: () => []
+    },
+    position: {
+      type: Object,
+      default: () => ({ x: 0, y: 0, width: 0, height: 0 })
+    },
+    style: {
+      type: Object,
+      default: () => ({ left: 0, top: 0, zIndex: 2, minWidth: 150 })
+    },
+    customClass: {
+      type: String,
+      default: null
+    },
+    openTrend: {
+      type: Number,
+      default: SUBMENU_OPEN_TREND_RIGHT
+    },
+    onClose: {
+      type: Function,
+      default: null
     }
-    this.$nextTick(() => {
-      const windowWidth = document.documentElement.clientWidth;
-      const windowHeight = document.documentElement.clientHeight;
-      const menu = this.$refs.menu;
-      const menuWidth = menu.offsetWidth;
-      const menuHeight = menu.offsetHeight;
-
-      (this.openTrend === SUBMENU_OPEN_TREND_LEFT
-        ? this.leftOpen
-        : this.rightOpen)(windowWidth, windowHeight, menuWidth);
-
-      this.style.top = this.position.y;
-      if (this.position.y + menuHeight > windowHeight) {
-        if (this.position.height === 0) {
-          this.style.top = this.position.y - menuHeight;
-        } else {
-          this.style.top = windowHeight - menuHeight;
-        }
-      }
-    });
   },
-  methods: {
-    leftOpen(windowWidth, windowHeight, menuWidth) {
-      this.style.left = this.position.x - menuWidth;
-      this.openTrend = SUBMENU_OPEN_TREND_LEFT;
-      if (this.style.left < 0) {
-        this.openTrend = SUBMENU_OPEN_TREND_RIGHT;
-        if (this.position.width === 0) {
-          this.style.left = 0;
-        } else {
-          this.style.left = this.position.x + this.position.width;
+  setup(props, { expose }) {
+    const menu = ref(null);
+    const visible = ref(false);
+    const hasIcon = ref(false);
+    const currentOpenTrend = ref(props.openTrend);
+    const activeSubmenu = ref(null);
+    const activeSubmenuContainer = ref(null);
+    const styleState = reactive({ ...props.style });
+
+    onMounted(() => {
+      visible.value = true;
+      for (let item of props.items) {
+        if (item.icon) {
+          hasIcon.value = true;
+          break;
         }
       }
-    },
-    rightOpen(windowWidth, windowHeight, menuWidth) {
-      this.style.left = this.position.x + this.position.width;
-      this.openTrend = SUBMENU_OPEN_TREND_RIGHT;
-      if (this.style.left + menuWidth > windowWidth) {
-        this.openTrend = SUBMENU_OPEN_TREND_LEFT;
-        if (this.position.width === 0) {
-          this.style.left = windowWidth - menuWidth;
+      nextTick(() => {
+        const windowWidth = document.documentElement.clientWidth;
+        const windowHeight = document.documentElement.clientHeight;
+        const menuEl = menu.value;
+        const menuWidth = menuEl.offsetWidth;
+        const menuHeight = menuEl.offsetHeight;
+
+        (currentOpenTrend.value === SUBMENU_OPEN_TREND_LEFT
+          ? leftOpen
+          : rightOpen)(windowWidth, windowHeight, menuWidth);
+
+        styleState.top = props.position.y;
+        if (props.position.y + menuHeight > windowHeight) {
+          if (props.position.height === 0) {
+            styleState.top = props.position.y - menuHeight;
+          } else {
+            styleState.top = windowHeight - menuHeight;
+          }
+        }
+      });
+    });
+
+    const leftOpen = (windowWidth, windowHeight, menuWidth) => {
+      styleState.left = props.position.x - menuWidth;
+      currentOpenTrend.value = SUBMENU_OPEN_TREND_LEFT;
+      if (styleState.left < 0) {
+        currentOpenTrend.value = SUBMENU_OPEN_TREND_RIGHT;
+        if (props.position.width === 0) {
+          styleState.left = 0;
         } else {
-          this.style.left = this.position.x - menuWidth;
+          styleState.left = props.position.x + props.position.width;
         }
       }
-    },
-    enterItem(e, item, index) {
-      if (!this.visible) {
-        return;
-      }
-      if (this.activeSubmenu.instance) {
-        if (this.activeSubmenu.index === index) {
-          return;
+    };
+
+    const rightOpen = (windowWidth, windowHeight, menuWidth) => {
+      styleState.left = props.position.x + props.position.width;
+      currentOpenTrend.value = SUBMENU_OPEN_TREND_RIGHT;
+      if (styleState.left + menuWidth > windowWidth) {
+        currentOpenTrend.value = SUBMENU_OPEN_TREND_LEFT;
+        if (props.position.width === 0) {
+          styleState.left = windowWidth - menuWidth;
         } else {
-          this.activeSubmenu.instance.close();
-          this.activeSubmenu.instance = null;
-          this.activeSubmenu.index = null;
+          styleState.left = props.position.x - menuWidth;
         }
       }
-      if (!item.children) {
-        return;
+    };
+
+    const enterItem = (e, item, index) => {
+      if (!visible.value) return;
+      
+      if (activeSubmenu.value) {
+        if (activeSubmenu.value.index === index) return;
+        activeSubmenu.value.close();
+        activeSubmenu.value = null;
       }
+      
+      if (!item.children) return;
+
       const menuItemClientRect = e.target.getBoundingClientRect();
-      const SubmenuConstructor = Vue.component(COMPONENT_NAME);
-      this.activeSubmenu.index = index;
-      this.activeSubmenu.instance = new SubmenuConstructor();
-      this.activeSubmenu.instance.items = item.children;
-      this.activeSubmenu.instance.openTrend = this.openTrend;
-      this.activeSubmenu.instance.commonClass = this.commonClass;
-      this.activeSubmenu.instance.position = {
-        x: menuItemClientRect.x + SUBMENU_X_OFFSET,
-        y: menuItemClientRect.y + SUBMENU_Y_OFFSET,
-        width: menuItemClientRect.width - 2 * SUBMENU_X_OFFSET,
-        height: menuItemClientRect.width
-      };
-      this.activeSubmenu.instance.style.minWidth =
-        typeof item.minWidth === "number" ? item.minWidth : this.style.minWidth;
-      this.activeSubmenu.instance.style.zIndex = this.style.zIndex;
-      this.activeSubmenu.instance.customClass =
-        typeof item.customClass === "string"
-          ? item.customClass
-          : this.customClass;
-      this.activeSubmenu.instance.$mount();
-      document.body.appendChild(this.activeSubmenu.instance.$el);
-    },
-    itemClick(item) {
-      if (!this.visible) {
-        return;
-      }
-      if (
-        item &&
-        !item.disabled &&
-        !item.hidden &&
-        typeof item.onClick === "function"
-      ) {
+      
+      // 创建子菜单容器
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      
+      import('./Submenu.vue').then(({ default: Submenu }) => {
+        const app = createApp({
+          render() {
+            return h(Submenu, {
+              items: item.children,
+              openTrend: currentOpenTrend.value,
+              commonClass: props.commonClass,
+              position: {
+                x: menuItemClientRect.x + SUBMENU_X_OFFSET,
+                y: menuItemClientRect.y + SUBMENU_Y_OFFSET,
+                width: menuItemClientRect.width - 2 * SUBMENU_X_OFFSET,
+                height: menuItemClientRect.width
+              },
+              style: {
+                minWidth: typeof item.minWidth === "number" ? item.minWidth : styleState.minWidth,
+                zIndex: styleState.zIndex
+              },
+              customClass: typeof item.customClass === "string" ? item.customClass : props.customClass,
+              onClose: () => {
+                app.unmount();
+                document.body.removeChild(container);
+                activeSubmenu.value = null;
+              }
+            });
+          }
+        });
+        
+        app.mount(container);
+        activeSubmenu.value = { index, close: () => {
+          app.unmount();
+          document.body.removeChild(container);
+        }};
+        activeSubmenuContainer.value = container;
+      });
+    };
+
+    const itemClick = (item) => {
+      if (!visible.value) return;
+      if (item && !item.disabled && !item.hidden && typeof item.onClick === "function") {
         return item.onClick();
       }
-    },
-    close() {
-      this.visible = false;
-      if (this.activeSubmenu.instance) {
-        this.activeSubmenu.instance.close();
+    };
+
+    const close = () => {
+      visible.value = false;
+      if (activeSubmenu.value) {
+        activeSubmenu.value.close();
       }
-      this.$nextTick(() => {
-        this.$destroy();
-      });
-    }
+      if (props.onClose) {
+        props.onClose();
+      }
+    };
+
+    expose({ close });
+
+    return {
+      menu,
+      visible,
+      hasIcon,
+      styleState,
+      enterItem,
+      itemClick,
+      close
+    };
   }
 };
 </script>

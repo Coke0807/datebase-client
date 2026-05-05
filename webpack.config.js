@@ -72,7 +72,7 @@ module.exports = [
         resolve: {
             extensions: ['.vue', '.js'],
             alias: { 
-                'vue$': 'vue/dist/vue.esm.js', 
+                'vue$': 'vue/dist/vue.esm-bundler.js', 
                 '@': path.resolve('src'),
             },
             // Webpack 5: WebView 浏览器环境需要的 polyfill

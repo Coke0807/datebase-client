@@ -1,54 +1,48 @@
-import Vue from 'vue'
-import App from './App'
-import ElementUI from 'element-ui';
-import locale from 'element-ui/lib/locale/lang/zh-CN'
-import VueRouter from 'vue-router'
-import UmyTable from 'umy-table'
+import { createApp } from 'vue'
+import App from './App.vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import i18nMixin from './mixin/i18n';
 
-import 'umy-table/lib/theme-chalk/index.css';
 import '@/../public/theme/auto.css'
-import '@/../public/theme/umyui.css'
 import "tailwindcss/tailwind.css"
 
-Vue.use(VueRouter)
-Vue.use(ElementUI, { locale });
-Vue.use(UmyTable);
+import connect from "./connect/index.vue";
+import status from "./status/index.vue";
+import design from "./design/index.vue";
+import structDiff from "./structDiff/index.vue";
+import keyView from "./redis/keyView.vue";
+import terminal from "./redis/terminal.vue";
+import redisStatus from "./redis/redisStatus.vue";
+import forward from "./forward/index.vue";
+import sshTerminal from "./xterm/index.vue";
 
-// 全局注册 i18n mixin
-Vue.mixin(i18nMixin);
+const routes = [
+  { path: '/connect', component: connect, name: 'connect' },
+  { path: '/status', component: status, name: 'status' },
+  { path: '/design', component: design, name: 'design' },
+  { path: '/structDiff', component: structDiff, name: 'structDiff' },
+  // redis
+  { path: '/keyView', component: keyView, name: 'keyView' },
+  { path: '/terminal', component: terminal, name: 'terminal' },
+  { path: '/redisStatus', component: redisStatus, name: 'redisStatus' },
+  // ssh
+  { path: '/forward', component: forward, name: 'forward' },
+  { path: '/sshTerminal', component: sshTerminal, name: 'sshTerminal' },
+]
 
-Vue.config.productionTip = false
-
-import connect from "./connect";
-import status from "./status";
-import design from "./design";
-import structDiff from "./structDiff";
-import keyView from "./redis/keyView";
-import terminal from "./redis/terminal";
-import redisStatus from "./redis/redisStatus";
-import forward from "./forward";
-import sshTerminal from "./xterm";
-
-const router = new VueRouter({
-  routes: [
-    { path: '/connect', component: connect, name: 'connect' },
-    { path: '/status', component: status, name: 'status' },
-    { path: '/design', component: design, name: 'design' },
-    { path: '/structDiff', component: structDiff, name: 'structDiff' },
-    // redis
-    { path: '/keyView', component: keyView, name: 'keyView' },
-    { path: '/terminal', component: terminal, name: 'terminal' },
-    { path: '/redisStatus', component: redisStatus, name: 'redisStatus' },
-    // ssh
-    { path: '/forward', component: forward, name: 'forward' },
-    { path: '/sshTerminal', component: sshTerminal, name: 'sshTerminal' },
-  ]
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes
 })
 
-new Vue({
-  el: '#app',
-  components: { App },
-  router,
-  template: '<App/>'
-})
+const app = createApp(App)
+
+// 注册全局 mixin
+app.mixin(i18nMixin)
+
+app.use(ElementPlus, { locale: zhCn })
+app.use(router)
+app.mount('#app')
