@@ -28,6 +28,40 @@ html, body {
 }
 
 /* ============================================
+   Element Plus 2.x CSS 变量覆盖 - 核心主题色
+   在:root级别定义，确保最高优先级
+   ============================================ */
+
+:root {
+    /* 输入框主题变量 */
+    --el-input-bg-color: var(--vscode-input-background) !important;
+    --el-input-text-color: var(--vscode-input-foreground) !important;
+    --el-input-border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-input-placeholder-color: var(--vscode-input-placeholderForeground) !important;
+    --el-input-hover-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    --el-input-focus-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    --el-fill-color-blank: var(--vscode-input-background) !important;
+
+    /* 下拉菜单主题变量 */
+    --el-bg-color-overlay: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    --el-border-color-light: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-text-color-regular: var(--vscode-foreground) !important;
+    --el-fill-color-light: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+
+    /* 组件通用主题变量 */
+    --el-bg-color: var(--vscode-editor-background) !important;
+    --el-text-color-primary: var(--vscode-foreground) !important;
+    --el-text-color-secondary: var(--vscode-descriptionForeground, var(--vscode-foreground)) !important;
+    --el-border-color: var(--vscode-panel-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-border-color-hover: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+
+    /* 按钮主题变量 */
+    --el-button-primary-bg-color: var(--vscode-button-background) !important;
+    --el-button-primary-border-color: var(--vscode-button-background) !important;
+    --el-button-primary-text-color: var(--vscode-button-foreground) !important;
+}
+
+/* ============================================
    全局输入框样式 - 强制覆盖 Element Plus
    ============================================ */
 
@@ -154,6 +188,87 @@ a:hover {
     border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
 }
 
+/* ============================================
+   Element Plus 输入框 - 最高优先级覆盖
+   使用 html body 前缀确保覆盖 Element Plus 默认样式
+   ============================================ */
+
+/* 基础输入框样式 */
+html body .el-input__inner,
+html body .el-input .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+    --el-input-bg-color: var(--vscode-input-background) !important;
+    --el-input-text-color: var(--vscode-input-foreground) !important;
+    --el-input-border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+}
+
+/* 悬停状态 */
+html body .el-input__inner:hover,
+html body .el-input .el-input__inner:hover,
+html body .el-input:hover .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    color: var(--vscode-input-foreground) !important;
+    --el-input-hover-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+/* 聚焦状态 */
+html body .el-input__inner:focus,
+html body .el-input .el-input__inner:focus,
+html body .el-input.is-active .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    color: var(--vscode-input-foreground) !important;
+    --el-input-focus-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder, transparent) !important;
+}
+
+/* 下拉选择器中的输入框 */
+html body .el-select .el-input__inner,
+html body .el-select .el-input.is-focus .el-input__inner,
+html body .el-select .el-input .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+    --el-input-bg-color: var(--vscode-input-background) !important;
+    --el-input-text-color: var(--vscode-input-foreground) !important;
+}
+
+/* placeholder */
+html body .el-input__inner::placeholder,
+html body .el-input__inner::-webkit-input-placeholder,
+html body .el-input__inner::-moz-placeholder,
+html body .el-input__inner:-ms-input-placeholder {
+    color: var(--vscode-input-placeholderForeground) !important;
+    --el-input-placeholder-color: var(--vscode-input-placeholderForeground) !important;
+}
+
+/* 禁用状态 */
+html body .el-input.is-disabled .el-input__inner,
+html body .el-input__inner:disabled {
+    background-color: var(--vscode-disabledForeground, var(--vscode-input-placeholderForeground)) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-disabledForeground, var(--vscode-input-placeholderForeground)) !important;
+    opacity: 0.5 !important;
+}
+
+/* 文本域 */
+html body .el-textarea__inner,
+html body .el-textarea .el-textarea__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+html body .el-textarea__inner:focus,
+html body .el-textarea .el-textarea__inner:focus {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
 /* 按钮样式 - 主按钮 */
 .el-button {
     background-color: var(--vscode-button-background) !important;
@@ -165,6 +280,30 @@ a:hover {
     font-size: var(--vscode-font-size) !important;
     font-weight: 500 !important;
     transition: background-color 0.2s !important;
+}
+
+/* ============================================
+   全局 el-select 下拉面板 - 去除顶部间隙
+   Element Plus 默认在 popper 顶部留有 caret 三角的间距，
+   这里统一移除，使下拉项与输入框直接对齐
+   ============================================ */
+.el-select-dropdown,
+.el-select-dropdown__list,
+.el-popper.is-light,
+.el-popper .el-select-dropdown {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.el-select-dropdown__list .el-scrollbar__view,
+.el-select-dropdown__list {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* popper 与触发器之间的偏移归零 */
+.el-popper[data-popper-placement^="bottom"] {
+    margin-top: 0 !important;
 }
 
 .el-button:hover {
@@ -400,13 +539,14 @@ html body .el-select-dropdown.el-popper,
     border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
     border-radius: 2px !important;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+    padding: 0 !important;
 }
 
 /* 下拉列表 */
 html body .el-select-dropdown__list,
 .el-select-dropdown__list {
     background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
-    padding: 4px 0 !important;
+    padding: 0 !important;
     margin: 0 !important;
 }
 
@@ -16120,4 +16260,117 @@ html body .el-popper.is-dark {
     background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
     border-color: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
     --el-bg-color-overlay: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* ============================================
+   终极保险 - 强制覆盖所有输入框
+   使用属性选择器确保最高优先级
+   ============================================ */
+
+/* 所有 input 元素的基础样式 */
+html body input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+html body .el-input__inner,
+html body .el-input input,
+html body [class*="input"] input,
+html body [class*="Input"] {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* 所有下拉菜单 */
+html body [class*="select-dropdown"],
+html body [class*="SelectDropdown"],
+html body .el-select-dropdown,
+html body .el-popper[class*="select"],
+html body [role="listbox"] {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+}
+
+/* 所有下拉选项 */
+html body [class*="select-dropdown__item"],
+html body [class*="SelectDropdownItem"],
+html body [role="option"] {
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+}
+
+html body [class*="select-dropdown__item"]:hover,
+html body [class*="select-dropdown__item"][class*="hover"],
+html body [role="option"]:hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+}
+
+/* 覆盖 Element Plus 2.x 的 CSS 变量 - 最高级别 */
+html,
+html body,
+#app,
+[class*="el-"],
+[class^="el-"] {
+    --el-input-bg-color: var(--vscode-input-background) !important;
+    --el-input-text-color: var(--vscode-input-foreground) !important;
+    --el-input-border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-input-placeholder-color: var(--vscode-input-placeholderForeground) !important;
+    --el-input-hover-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    --el-input-focus-border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    --el-fill-color-blank: var(--vscode-input-background) !important;
+}
+
+/* ============================================
+   单选框、复选框、开关全局样式
+   ============================================ */
+
+/* Radio 单选框 */
+html body .el-radio,
+html body .el-radio__label {
+    color: var(--vscode-foreground) !important;
+}
+
+html body .el-radio__input.is-checked .el-radio__inner {
+    border-color: var(--vscode-button-background) !important;
+    background-color: var(--vscode-button-background) !important;
+}
+
+html body .el-radio__input.is-checked + .el-radio__label {
+    color: var(--vscode-button-background) !important;
+}
+
+html body .el-radio__inner {
+    border-color: var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+}
+
+/* Checkbox 复选框 */
+html body .el-checkbox,
+html body .el-checkbox__label {
+    color: var(--vscode-foreground) !important;
+}
+
+html body .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: var(--vscode-button-background) !important;
+    border-color: var(--vscode-button-background) !important;
+}
+
+html body .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--vscode-button-background) !important;
+}
+
+html body .el-checkbox__inner {
+    background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+    border-color: var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+}
+
+/* Switch 开关 */
+html body .el-switch__label {
+    color: var(--vscode-foreground) !important;
+}
+
+html body .el-switch__core {
+    border-color: var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+}
+
+html body .el-switch.is-checked .el-switch__core {
+    border-color: var(--vscode-button-background) !important;
+    background-color: var(--vscode-button-background) !important;
 }

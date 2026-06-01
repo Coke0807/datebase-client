@@ -31,10 +31,13 @@ module.exports = [
         externals: {
             vscode: 'commonjs vscode',
             mockjs: 'mockjs vscode',
-            'mongodb-client-encryption':'mongodb-client-encryption'
+            'mongodb-client-encryption':'mongodb-client-encryption',
+            // 原生模块（.node 二进制文件）无法被 webpack 打包，需外部化由运行时 require
+            'cpu-features': 'commonjs cpu-features',
+            '../build/Release/cpufeatures.node': 'commonjs ../build/Release/cpufeatures.node',
+            './crypto/build/Release/sshcrypto.node': 'commonjs ./crypto/build/Release/sshcrypto.node',
         },
         plugins: [
-            // Webpack 5: IgnorePlugin 新语法
             new webpack.IgnorePlugin({
                 resourceRegExp: /^(pg-native|cardinal|encoding|aws4|pg-cloudflare)$/
             })
@@ -61,14 +64,6 @@ module.exports = [
             app: './src/vue/main.js',
             query: './src/vue/result/main.js'
         },
-        plugins: [
-            new VueLoaderPlugin(),
-            new HtmlWebpackPlugin({ inject: true, template: './public/index.html', chunks: ['app'], filename: 'webview/app.html' }),
-            new HtmlWebpackPlugin({ inject: true, templateContent: `<head><script src="js/oldCompatible.js"></script></head><body> <div id="app"></div> </body>`, chunks: ['query'], filename: 'webview/result.html' }),
-            new CopyWebpackPlugin({
-                patterns: [{ from: 'public', to: './webview' }]
-            }),
-        ],
         resolve: {
             extensions: ['.vue', '.js'],
             alias: { 

@@ -1,81 +1,71 @@
 <template>
   <div class="mt-5">
-    <section class="mb-2">
+    <!-- 第一行：连接模式 -->
+    <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.connectionMode') }}</label>
-        <el-select v-model="connectionOption.h2Mode" :placeholder="t('connect.selectMode')" class="w-64 h2-mode-select" :teleported="false" popper-class="h2-mode-select-popper">
+        <el-select
+          v-model="connectionOption.h2Mode"
+          :placeholder="t('connect.selectMode')"
+          class="w-64"
+          :teleported="false"
+          popper-class="h2-mode-select-popper"
+        >
           <el-option :label="t('connect.tcpServer')" value="tcp"></el-option>
           <el-option :label="t('connect.postgresqlProtocol')" value="pg"></el-option>
         </el-select>
       </div>
     </section>
-    
-    <section class="mb-2">
+
+    <!-- 第二行：主机 + 用户名 -->
+    <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.host') }}
           <span class="mr-1 text-red-600">*</span>
         </label>
-        <input class="w-64 field__input" placeholder="127.0.0.1"
-          v-model="connectionOption.host" />
+        <input class="w-64 field__input" placeholder="127.0.0.1" v-model="connectionOption.host" />
       </div>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.username') }}
         </label>
-        <input class="w-64 field__input" placeholder="sa"
-          v-model="connectionOption.user" />
+        <input class="w-64 field__input" placeholder="sa" v-model="connectionOption.user" />
       </div>
+    </section>
+
+    <!-- 第三行：密码 + 端口（根据模式显示不同端口） -->
+    <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.password') }}
         </label>
-        <input class="w-64 field__input" type="password"
-          v-model="connectionOption.password" />
+        <input class="w-64 field__input" type="password" v-model="connectionOption.password" />
       </div>
-    </section>
-    
-    <section class="mb-2" v-if="connectionOption.h2Mode === 'tcp'">
-      <div class="inline-block mb-2 mr-10">
+      <div class="inline-block mb-2 mr-10" v-if="connectionOption.h2Mode === 'tcp'">
         <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.port') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
-        <input
-          class="w-64 field__input"
-          placeholder="9092"
-          type="number"
-          v-model="connectionOption.port"
-        />
+        <input class="w-64 field__input" placeholder="9092" type="number" v-model="connectionOption.port" />
       </div>
-    </section>
-    
-    <section class="mb-2" v-if="connectionOption.h2Mode === 'pg'">
-      <div class="inline-block mb-2 mr-10">
+      <div class="inline-block mb-2 mr-10" v-if="connectionOption.h2Mode === 'pg'">
         <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.port') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
-        <input
-          class="w-64 field__input"
-          placeholder="5435"
-          type="number"
-          v-model="connectionOption.port"
-        />
+        <input class="w-64 field__input" placeholder="5435" type="number" v-model="connectionOption.port" />
       </div>
     </section>
-    
-    <section class="mb-2">
+
+    <!-- 第四行：数据库路径 -->
+    <section>
       <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.databasePath') }}</label>
-        <input
-          class="w-64 field__input"
-          :placeholder="t('connect.databasePathPlaceholder')"
-          v-model="connectionOption.database"
-        />
+        <input class="w-64 field__input" :placeholder="t('connect.databasePathPlaceholder')" v-model="connectionOption.database" />
       </div>
     </section>
-    
+
     <section class="mb-4 p-3 info-panel">
       <h4 class="font-bold mb-2">{{ t('connect.h2SetupInstructions') }}:</h4>
       <div v-if="connectionOption.h2Mode === 'tcp'" class="text-sm">
@@ -116,51 +106,32 @@ export default {
 </script>
 
 <style scoped>
-/* H2 组件样式 - 使用 VS Code 主题变量 */
+/* el-select 与 input 对齐 */
 :deep(.el-select) {
-  width: 256px;
+  height: 28px;
 }
 
-/* 下拉选择器输入框 - 强制覆盖所有状态 */
-:deep(.el-select .el-input .el-input__inner),
-:deep(.el-select .el-input__inner) {
+:deep(.el-input__wrapper) {
   background-color: var(--vscode-input-background) !important;
-  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+:deep(.el-input__inner) {
   color: var(--vscode-input-foreground) !important;
   height: 28px !important;
   line-height: 28px !important;
 }
 
-/* 悬停状态 */
-:deep(.el-select .el-input .el-input__inner:hover),
-:deep(.el-select .el-input__inner:hover) {
-  background-color: var(--vscode-input-background) !important;
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* 聚焦状态 */
-:deep(.el-select .el-input .el-input__inner:focus),
-:deep(.el-select .el-input__inner:focus) {
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  background-color: var(--vscode-input-background) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* is-focus 状态 - 下拉框打开时 */
-:deep(.el-select .el-input.is-focus .el-input__inner) {
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  background-color: var(--vscode-input-background) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* placeholder */
-:deep(.el-select .el-input .el-input__inner::placeholder),
 :deep(.el-select .el-input__inner::placeholder) {
   color: var(--vscode-input-placeholderForeground) !important;
 }
 
-/* 下拉菜单弹出层 */
 :deep(.el-select-dropdown) {
   background-color: var(--vscode-dropdown-background) !important;
   border-color: var(--vscode-dropdown-border) !important;
@@ -170,7 +141,6 @@ export default {
   color: var(--vscode-dropdown-foreground) !important;
 }
 
-:deep(.el-select-dropdown__item.hover),
 :deep(.el-select-dropdown__item:hover) {
   background-color: var(--vscode-list-hoverBackground) !important;
 }
@@ -230,12 +200,6 @@ p {
 <style>
 /* 全局样式 - 强制覆盖 Element Plus 下拉菜单
    这个 style 标签没有 scoped 属性，作用于全局 */
-.h2-mode-select .el-input__inner {
-  background-color: var(--vscode-input-background) !important;
-  border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
 .h2-mode-select-popper.el-select-dropdown,
 .h2-mode-select-popper .el-select-dropdown__list,
 .h2-mode-select-popper .el-scrollbar__view {

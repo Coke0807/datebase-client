@@ -1,40 +1,35 @@
 <template>
   <div class="mt-5">
+    <!-- 第一行：SSH 主机 + SSH 端口 -->
     <section>
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block font-bold mr-9 w-28">
+        <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.sshHost') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
         <input class="w-64 field__input" :placeholder="t('connect.sshHost')" required v-model="connectionOption.ssh.host" />
       </div>
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block font-bold mr-9 w-28">
+        <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.sshPort') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
-        <input
-          class="w-64 field__input"
-          :placeholder="t('connect.sshPort')"
-          required
-          type="number"
-          v-model="connectionOption.ssh.port"
-        />
+        <input class="w-64 field__input" :placeholder="t('connect.sshPort')" required type="number" v-model="connectionOption.ssh.port" />
       </div>
     </section>
 
+    <!-- 第二行：SSH 用户名 + SSH 加密算法 -->
     <section>
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block font-bold mr-9 w-28">
+        <label class="inline-block w-32 mr-5 font-bold">
           {{ t('connect.sshUsername') }}
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
         <input class="w-64 field__input" :placeholder="t('connect.sshUsername')" required v-model="connectionOption.ssh.username" />
       </div>
-
       <div class="inline-block mb-2 mr-10">
-        <label class="inline-block font-bold mr-9 w-28">{{ t('connect.sshCipher') }}</label>
-        <el-select v-model="connectionOption.ssh.algorithms.cipher[0]" :placeholder="t('connect.default')" :teleported="false">
+        <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.sshCipher') }}</label>
+        <el-select class="w-64" v-model="connectionOption.ssh.algorithms.cipher[0]" :placeholder="t('connect.default')" :teleported="false">
           <el-option value="aes128-cbc">aes128-cbc</el-option>
           <el-option value="aes192-cbc">aes192-cbc</el-option>
           <el-option value="aes256-cbc">aes256-cbc</el-option>
@@ -54,7 +49,7 @@
     </section>
 
     <section class="mb-2">
-      <label class="inline-block font-bold mr-9 w-28">{{ t('connect.type') }}</label>
+      <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.type') }}</label>
       <el-radio v-model="connectionOption.ssh.type" label="password">{{ t('connect.password') }}</el-radio>
       <el-radio v-model="connectionOption.ssh.type" label="privateKey">{{ t('connect.privateKey') }}</el-radio>
       <el-radio v-model="connectionOption.ssh.type" label="native">{{ t('connect.nativeSSH') }}</el-radio>
@@ -62,48 +57,31 @@
 
     <div v-if="connectionOption.ssh.type == 'password'" class="mb-2">
       <section>
-        <label class="inline-block font-bold mr-9 w-28">
-          {{ t('connect.password') }}
-          <span class="mr-1 text-red-600" title="required">*</span>
-        </label>
-        <input
-          class="w-64 field__input"
-          :placeholder="t('connect.password')"
-          required
-          type="password"
-          v-model="connectionOption.ssh.password"
-        />
+        <div class="inline-block mb-2 mr-10">
+          <label class="inline-block w-32 mr-5 font-bold">
+            {{ t('connect.password') }}
+            <span class="mr-1 text-red-600" title="required">*</span>
+          </label>
+          <input class="w-64 field__input" :placeholder="t('connect.password')" required type="password" v-model="connectionOption.ssh.password" />
+        </div>
       </section>
     </div>
     <div v-else class="mb-2">
       <section>
-        <div class="inline-block mb-2 mr-8">
-          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.privateKeyPath') }}</label>
-          <input
-            class="w-50 field__input"
-            :placeholder="t('connect.privateKeyPath')"
-            v-model="connectionOption.ssh.privateKeyPath"
-          />
+        <div class="inline-block mb-2 mr-10">
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.privateKeyPath') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.privateKeyPath')" v-model="connectionOption.ssh.privateKeyPath" />
           <button @click="() => $emit('choose')" type="button" class="w-12 ml-1">{{ t('connect.choose') }}</button>
         </div>
         <div class="inline-block mb-2 mr-10">
-          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.passphrase') }}</label>
-          <input
-            class="w-64 field__input"
-            :placeholder="t('connect.passphrase')"
-            type="password"
-            v-model="connectionOption.ssh.passphrase"
-          />
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.passphrase') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.passphrase')" type="password" v-model="connectionOption.ssh.passphrase" />
         </div>
       </section>
-      <section v-if="connectionOption.ssh.type == 'native'">
-        <div class="inline-block mr-10">
-          <label class="inline-block font-bold mr-9 w-28">{{ t('connect.waitingTime') }}</label>
-          <input
-            class="w-64 field__input"
-            :placeholder="t('connect.waitingTimeDesc')"
-            v-model="connectionOption.ssh.waitingTime"
-          />
+      <section v-if="connectionOption.ssh.type == 'native'" class="mt-2">
+        <div class="inline-block mb-2 mr-10">
+          <label class="inline-block w-32 mr-5 font-bold">{{ t('connect.waitingTime') }}</label>
+          <input class="w-64 field__input" :placeholder="t('connect.waitingTimeDesc')" v-model="connectionOption.ssh.waitingTime" />
         </div>
       </section>
     </div>
@@ -117,51 +95,32 @@ export default {
 </script>
 
 <style scoped>
-/* SSH 组件样式 - 使用 VS Code 主题变量 */
+/* el-select 与 input 对齐 */
 :deep(.el-select) {
-  width: 256px;
+  height: 28px;
 }
 
-/* 下拉选择器输入框 - 强制覆盖所有状态 */
-:deep(.el-select .el-input .el-input__inner),
-:deep(.el-select .el-input__inner) {
+:deep(.el-input__wrapper) {
   background-color: var(--vscode-input-background) !important;
-  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+:deep(.el-input__inner) {
   color: var(--vscode-input-foreground) !important;
   height: 28px !important;
   line-height: 28px !important;
 }
 
-/* 悬停状态 */
-:deep(.el-select .el-input .el-input__inner:hover),
-:deep(.el-select .el-input__inner:hover) {
-  background-color: var(--vscode-input-background) !important;
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* 聚焦状态 */
-:deep(.el-select .el-input .el-input__inner:focus),
-:deep(.el-select .el-input__inner:focus) {
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  background-color: var(--vscode-input-background) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* is-focus 状态 - 下拉框打开时 */
-:deep(.el-select .el-input.is-focus .el-input__inner) {
-  border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
-  background-color: var(--vscode-input-background) !important;
-  color: var(--vscode-input-foreground) !important;
-}
-
-/* placeholder */
-:deep(.el-select .el-input .el-input__inner::placeholder),
 :deep(.el-select .el-input__inner::placeholder) {
   color: var(--vscode-input-placeholderForeground) !important;
 }
 
-/* 下拉菜单弹出层 */
 :deep(.el-select-dropdown) {
   background-color: var(--vscode-dropdown-background) !important;
   border-color: var(--vscode-dropdown-border) !important;
@@ -171,7 +130,6 @@ export default {
   color: var(--vscode-dropdown-foreground) !important;
 }
 
-:deep(.el-select-dropdown__item.hover),
 :deep(.el-select-dropdown__item:hover) {
   background-color: var(--vscode-list-hoverBackground) !important;
 }
@@ -181,7 +139,6 @@ export default {
   font-weight: 600;
 }
 
-/* 单选框 */
 :deep(.el-radio__label) {
   color: var(--vscode-foreground) !important;
 }
@@ -191,7 +148,6 @@ export default {
   background-color: var(--vscode-button-background) !important;
 }
 
-/* 开关 */
 :deep(.el-switch__label) {
   color: var(--vscode-foreground) !important;
 }

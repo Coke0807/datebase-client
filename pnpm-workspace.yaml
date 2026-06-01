@@ -1,0 +1,7 @@
+allowBuilds:
+  bufferutil: true
+  cpu-features: true
+  esbuild: true
+  ssh2: true
+  utf-8-validate: true
+onlyBuiltDependencies: bufferutil

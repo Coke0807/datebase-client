@@ -1,14 +1,13 @@
 <template>
   <div class="mt-5">
     <section class="mb-2">
-      <div class="inline-block mr-10">
+      <div class="inline-block mb-2 mr-10">
         <label class="inline-block w-32 mr-5 font-bold">
           <span>{{ t('connect.url') }}</span>
           <span class="mr-1 text-red-600" title="required">*</span>
         </label>
         <input
-          class="field__input"
-          style="width: 28rem"
+          class="w-64 field__input"
           :placeholder="t('connect.esHostPlaceholder')"
           required
           v-model="connectionOption.host"
