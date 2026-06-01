@@ -21,6 +21,7 @@ import { Console } from "@/common/Console";
 import { MongoConnection } from "./connect/mongoConnection";
 import { ExasolConnection } from './connect/exasolConnection';
 import { H2Connection } from './connect/h2Connection';
+import { H2TcpConnection } from './connect/h2TcpConnection';
 
 interface ConnectionWrapper {
     connection: IConnection;
@@ -215,7 +216,9 @@ export class ConnectionManager {
             case DatabaseType.EXASOL:
                 return new ExasolConnection(opt);
             case DatabaseType.H2:
-                return new H2Connection(opt);
+                return opt.h2Mode === 'tcp'
+                    ? new H2TcpConnection(opt)
+                    : new H2Connection(opt);
         }
         return new MysqlConnection(opt)
     }

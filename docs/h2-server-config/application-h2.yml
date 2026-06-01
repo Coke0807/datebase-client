@@ -1,0 +1,54 @@
+# ============================================================
+# H2 数据库配置 - 随 Spring Boot 启动自动开启外部连接
+# ============================================================
+
+spring:
+  datasource:
+    # H2 数据库连接 URL
+    # - mem:testdb: 内存模式，重启后数据丢失
+    # - file:./data/testdb: 文件模式，数据持久化
+    # - DB_CLOSE_DELAY=-1: 内存数据库在 JVM 关闭前保持打开
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    
+    # 或者使用文件模式（推荐生产环境）
+    # url: jdbc:h2:file:./data/testdb;AUTO_SERVER=TRUE
+    
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+
+  h2:
+    # H2 Web Console（浏览器访问 http://localhost:8082）
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true  # 允许外部访问
+
+# ============================================================
+# H2 服务器配置（供 VS Code 扩展连接）
+# ============================================================
+h2:
+  server:
+    enabled: true           # 启用 H2 TCP/PG 服务器
+    tcp-port: 9092          # TCP 模式端口
+    pg-port: 5435           # PostgreSQL 协议模式端口
+
+# ============================================================
+# VS Code Database Client 扩展连接配置
+# ============================================================
+# TCP 模式：
+#   - Connection Mode: TCP Server
+#   - Host: 127.0.0.1
+#   - Port: 9092
+#   - Username: sa
+#   - Password: (留空)
+#   - Database Path: mem:testdb 或 ./data/testdb
+#
+# PostgreSQL 协议模式：
+#   - Connection Mode: PostgreSQL Protocol
+#   - Host: 127.0.0.1
+#   - Port: 5435
+#   - Username: sa
+#   - Password: (留空)
+#   - Database Path: mem:testdb 或 ./data/testdb

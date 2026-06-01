@@ -71,7 +71,6 @@
       <div v-if="connectionOption.h2Mode === 'tcp'" class="text-sm">
         <p class="mb-1">{{ t('connect.startH2TcpServer') }}:</p>
         <code class="block code-block p-2 rounded">java -cp h2.jar org.h2.tools.Server -tcp -tcpPort 9092</code>
-        <p class="mt-2 warning-text">⚠ {{ t('connect.h2TcpNotSupported') }}</p>
       </div>
       <div v-else class="text-sm">
         <p class="mb-1">{{ t('connect.springBootConfig') }}:</p>
