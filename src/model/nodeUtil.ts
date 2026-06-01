@@ -12,7 +12,7 @@ export abstract class NodeUtil {
             node.port=null;
         }
         if (node && !(node instanceof Node)) {
-            node.__proto__ = Node.prototype
+            Object.setPrototypeOf(node, Node.prototype)
         }
         if (node.dialect && !(node.dialect instanceof SqlDialect)) {
             node.dialect = ServiceManager.getDialect(node.dbType)

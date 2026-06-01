@@ -40,7 +40,7 @@ export class DumpService {
             if (Global.getConfig("showTrigger")) {
                 childrenList.push(...(await new TriggerGroup(node).getChildren()))
             }
-            const pickItems = childrenList.filter(item => item.contextValue != ModelType.INFO)
+            const pickItems = childrenList.filter(item => item.contextValue !== ModelType.INFO)
                 .map(node => { return { label: node.label, description: node.contextValue, picked: true }; });
             nodes = await vscode.window.showQuickPick(pickItems, { canPickMany: true, matchOnDescription: true, ignoreFocusOut: true })
             if (!nodes) {
@@ -65,11 +65,11 @@ export class DumpService {
 
     private dumpData(node: Node, dumpFilePath: string, withData: boolean, items: vscode.QuickPickItem[]): void {
 
-        const tables = items.filter(item => item.description == ModelType.TABLE).map(item => item.label)
-        const viewList = items.filter(item => item.description == ModelType.VIEW).map(item => item.label)
-        const procedureList = items.filter(item => item.description == ModelType.PROCEDURE).map(item => item.label)
-        const functionList = items.filter(item => item.description == ModelType.FUNCTION).map(item => item.label)
-        const triggerList = items.filter(item => item.description == ModelType.TRIGGER).map(item => item.label)
+        const tables = items.filter(item => item.description === ModelType.TABLE).map(item => item.label)
+        const viewList = items.filter(item => item.description === ModelType.VIEW).map(item => item.label)
+        const procedureList = items.filter(item => item.description === ModelType.PROCEDURE).map(item => item.label)
+        const functionList = items.filter(item => item.description === ModelType.FUNCTION).map(item => item.label)
+        const triggerList = items.filter(item => item.description === ModelType.TRIGGER).map(item => item.label)
 
         const option: Options = {
             dump: {
@@ -84,7 +84,7 @@ export class DumpService {
         Util.process(`Doing backup ${node.host}_${node.schema}...`, (done) => {
             mysqldump(option, node).then(() => {
                 vscode.window.showInformationMessage(`Backup ${node.getHost()}_${node.schema} success!`, 'open').then(action => {
-                    if (action == 'open') {
+                    if (action === 'open') {
                         vscode.commands.executeCommand('vscode.open', vscode.Uri.file(dumpFilePath));
                     }
                 })
@@ -103,12 +103,12 @@ export class DumpService {
                 const officegen = require('officegen')
                 var docx = officegen('docx')
                 docx.on('finalize', (written) => {
-                    console.log(
+                    Console.log(
                         'Finish to create Word file.\nTotal bytes created: ' + written + '\n'
                     )
                 })
                 docx.on('error', (err) => {
-                    console.log(err)
+                    Console.log(err)
                 })
                 let data = []
                 for (const tableNode of nodes) {
@@ -140,11 +140,11 @@ export class DumpService {
                 docx.createByJson(data)
                 var out = createWriteStream(generatePath.fsPath)
                 out.on('error', function (err) {
-                    console.log(err)
+                    Console.log(err)
                 })
                 out.on("close", () => {
                     vscode.window.showInformationMessage(`Generate ${node.schema} document success!`, 'open').then(action => {
-                        if (action == 'open') {
+                        if (action === 'open') {
                             vscode.commands.executeCommand('vscode.open', generatePath);
                         }
                     })

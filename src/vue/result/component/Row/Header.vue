@@ -18,7 +18,11 @@
 
 <script>
 export default {
-  props: ["scope", "result","index"],
+  props: {
+    scope: { type: Object, required: true },
+    result: { type: Object, required: true },
+    index: { type: Number, required: true }
+  },
   methods: {
     getTip(column, scopeColumn) {
       if (!column || !column.comment) return scopeColumn.title;
@@ -28,5 +32,19 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+/* 工具提示样式 - 使用 VS Code 主题变量 */
+:deep(.el-tooltip__popper) {
+  background-color: var(--vscode-editorHoverWidget-background) !important;
+  color: var(--vscode-editorHoverWidget-foreground) !important;
+  border-color: var(--vscode-editorHoverWidget-border) !important;
+}
+
+:deep(.el-tooltip__popper .popper__arrow) {
+  border-color: var(--vscode-editorHoverWidget-background) !important;
+}
+
+:deep(.el-tooltip__popper .popper__arrow::after) {
+  border-color: var(--vscode-editorHoverWidget-background) !important;
+}
 </style>

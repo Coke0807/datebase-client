@@ -22,7 +22,10 @@
 
 <script>
 export default {
-  props: ["connectionOption", "sqliteState"],
+  inject: ['connectionOption'],
+  props: {
+    sqliteState: { type: Boolean, default: false }
+  },
   methods: {
     install() {
       this.$emit("installSqlite");
@@ -31,4 +34,25 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+/* SQLite 组件样式 - 使用 VS Code 主题变量 */
+:deep(.el-alert) {
+  background-color: var(--vscode-inputValidation-warningBackground, rgba(255, 191, 0, 0.15)) !important;
+  border-color: var(--vscode-inputValidation-warningBorder, rgba(255, 191, 0, 0.5)) !important;
+  color: var(--vscode-foreground) !important;
+  padding: 8px 12px !important;
+}
+
+:deep(.el-alert__title) {
+  color: var(--vscode-foreground) !important;
+  font-size: var(--vscode-font-size) !important;
+}
+
+:deep(.el-alert__icon) {
+  color: var(--vscode-editorWarning-foreground, #cca700) !important;
+}
+
+:deep(.el-alert__closebtn) {
+  color: var(--vscode-foreground) !important;
+}
+</style>

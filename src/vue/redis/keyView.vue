@@ -26,7 +26,7 @@
           <el-button type="danger" @click="deleteKey" icon="el-icon-delete"></el-button>
           <el-button type="success" @click="refresh" icon="el-icon-refresh"></el-button>
           <template v-if="key.type=='string'">
-            <el-select v-model="selectedView" class='format-selector' :style='selectStyle' size='small'>
+            <el-select v-model="selectedView" class='format-selector' :style='selectStyle' size='small' :teleported="false">
               <template #prefix><span class="fa fa-sitemap"></span></template>
               <el-option v-for="item in viewers" :key="item.value" :label="item.text" :value="item.value">
               </el-option>
@@ -200,9 +200,22 @@ export default {
     changeByJson(event) {
       this.edit.content = event.target.innerText;
     },
+    /**
+     * Sanitize HTML from formatHighlight to prevent XSS.
+     * Only allows <span style="..."> tags, escapes everything else.
+     */
+    sanitizeHighlight(html) {
+      if (!html) return '';
+      // Remove all tags except <span> with style attribute
+      return html.replace(/<(?!\/?span\b[^>]*>)[^>]+>/gi, (match) => {
+        // Allow only <span style="..."> tags
+        if (/^<span\s+style="[^"]*"$/i.test(match)) return match;
+        return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      });
+    },
     jsonContent() {
       try {
-        return formatHighlight(JSON.parse(this.edit.content), {
+        const highlighted = formatHighlight(JSON.parse(this.edit.content), {
           keyColor: "#C792EA",
           numberColor: "#CE9178",
           stringColor: "#92D69E",
@@ -210,8 +223,8 @@ export default {
           falseColor: "#569cD6",
           nullColor: "#569cD6",
         });
+        return this.sanitizeHighlight(highlighted);
       } catch (error) {
-        console.log(error);
         return this.edit.content;
       }
     },
@@ -246,7 +259,6 @@ export default {
       });
     },
     rename() {
-      console.log(this.key.name);
       vscodeEvent.emit("rename", {
         key: { name: this.key.name, newName: this.edit.name },
       });
@@ -266,114 +278,167 @@ export default {
       });
     },
     deepClone(obj) {
-      let objClone = Array.isArray(obj) ? [] : {};
-      if (obj && typeof obj === "object") {
-        for (let key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            if (obj[key] && typeof obj[key] === "object") {
-              objClone[key] = this.deepClone(obj[key]);
-            } else {
-              objClone[key] = obj[key];
-            }
-          }
-        }
+      try {
+        return structuredClone(obj);
+      } catch {
+        // Fallback for non-cloneable values (e.g. functions)
+        return JSON.parse(JSON.stringify(obj));
       }
-      return objClone;
     },
   },
 };
 </script>
 <style scoped>
-.json-panel {
-  line-height: 1.3;
-  background: #292a2b;
-  font-family: var(--vscode-editor-font-family);
-}
-
-body {
-  background-color: #ffffff;
-  font-family: var(--vscode-font-family);
-}
-
-.value-panel {
-  overflow: scroll;
-}
-
+/* 主容器 */
 .key-tab-container {
   margin-top: 10px;
-  padding-left: 5px;
+  padding: 16px;
+  background-color: var(--vscode-editor-background);
 }
 
-.el-form-item{
-margin: 3px;
+/* JSON 面板 - 使用 VS Code 编辑器样式 */
+.json-panel {
+  line-height: 1.5;
+  background: var(--vscode-textCodeBlock-background, var(--vscode-editor-background));
+  font-family: var(--vscode-editor-font-family, var(--vscode-font-family));
+  color: var(--vscode-foreground);
+  padding: 12px;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+  overflow: auto;
+  min-height: 150px;
 }
 
+/* 值面板 */
+.value-panel {
+  overflow: auto;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+  padding: 8px;
+}
+
+/* 表单样式 */
+:deep(.el-form-item) {
+  margin: 4px 8px 4px 0 !important;
+}
+
+:deep(.el-input__inner) {
+  background-color: var(--vscode-input-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-input-foreground) !important;
+}
+
+:deep(.el-input-group__prepend) {
+  background-color: var(--vscode-dropdown-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-foreground) !important;
+}
+
+/* 头部信息 */
 .key-header-info {
-  margin-top: 15px;
+  margin-top: 16px;
 }
 
 .key-content-container {
-  margin-top: 15px;
+  margin-top: 16px;
 }
 
+/* 过滤输入框 */
 .key-detail-filter-value {
   width: 60%;
-  height: 24px;
-  padding: 0 5px;
+  height: 28px;
+  padding: 0 8px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border));
+  color: var(--vscode-input-foreground);
+  border-radius: 2px;
 }
 
-/*tooltip in table width limit*/
-.el-tooltip__popper {
-  max-width: 50%;
-}
-
+/* 二进制内容样式 */
 .content-binary {
-  color: #7ab3ef;
+  color: var(--vscode-symbolIcon-colorForeground, #7ab3ef);
   font-size: 80%;
   float: left;
 }
 
-/* header */
+/* Key 类型标签 */
 .key-detail-type {
   text-transform: capitalize;
   text-align: center;
-  width: 28px;
+  width: 32px;
   display: inline-block;
+  font-weight: 600;
+  color: var(--vscode-foreground);
 }
 
-/* viewer */
+/* 格式选择器 */
 .format-selector {
-  margin-left: 20px;
-  margin-right: 20px;
-  width: 122px;
+  margin-left: 16px;
+  margin-right: 16px;
+  width: 130px;
 }
 
-.format-selector .el-input__inner {
-  height: 22px;
+.format-selector :deep(.el-input__inner) {
+  height: 28px !important;
 }
 
-.dark-mode .text-formated-container {
-  border-color: #7f8ea5;
+/* 表格样式 */
+:deep(.el-table) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
 }
 
-/*key field span*/
-.vjs__tree span {
-  color: #616069;
+:deep(.el-table__header-wrapper th) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
 }
 
-.dark-mode .vjs__tree span:not([class^="vjs"]) {
-  color: #ebebec;
+:deep(.el-table td) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border-bottom-color: var(--vscode-panel-border, rgba(128, 128, 128, 0.2)) !important;
 }
 
-/*brackets*/
-.dark-mode .vjs__tree .vjs__tree__node {
-  color: #9e9ea2;
+:deep(.el-table--enable-row-hover .el-table__body tr:hover > td) {
+  background-color: var(--vscode-list-hoverBackground) !important;
 }
 
-.dark-mode .vjs__tree .vjs__tree__node:hover {
-  color: #20a0ff;
+/* 树形组件样式 */
+:deep(.vjs__tree) {
+  font-family: var(--vscode-editor-font-family, var(--vscode-font-family));
 }
 
+:deep(.vjs__tree span) {
+  color: var(--vscode-foreground);
+}
+
+:deep(.vjs__tree .vjs__tree__node) {
+  color: var(--vscode-symbolIcon-colorForeground);
+}
+
+:deep(.vjs__tree .vjs__tree__node:hover) {
+  color: var(--vscode-textLink-foreground);
+}
+
+/* 对话框样式 */
+:deep(.el-dialog) {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__title) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+/* 折叠容器 */
 .collapse-container {
   height: 27px;
 }
@@ -385,7 +450,7 @@ margin: 3px;
 
 .formater-binary {
   padding-left: 5px;
-  color: #7ab3ef;
+  color: var(--vscode-symbolIcon-colorForeground, #7ab3ef);
   font-size: 80%;
 }
 </style>

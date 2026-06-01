@@ -17,38 +17,37 @@ export class SSHTunnelService {
         }
     }
 
-    public createTunnel(node: Node, errorCallback: (error) => void): Promise<Node> {
-        return new Promise(async (resolve, reject) => {
-            const ssh = node.ssh
-            const key = node.getConnectId();
-            if (this.tunelMark[key]) {
-                resolve({ ...node, host: "127.0.0.1", port: this.tunelMark[key].tunnelPort } as Node)
-                return;
-            }
-            const port = await portfinder.getPortPromise();
-            node.ssh.tunnelPort = port
-            const config = {
-                username: ssh.username,
-                password: ssh.password,
-                host: ssh.host,
-                port: ssh.port,
-                dstHost: node.host,
-                dstPort: node.port,
-                localHost: '127.0.0.1',
-                localPort: port,
-                algorithms: ssh.algorithms,
-                passphrase: ssh.passphrase,
-                privateKey: (() => {
-                    if (ssh.privateKeyPath && existsSync(ssh.privateKeyPath)) {
-                        return require('fs').readFileSync(ssh.privateKeyPath)
-                    }
-                    return null
-                })()
-            };
+    public async createTunnel(node: Node, errorCallback: (error) => void): Promise<Node> {
+        const ssh = node.ssh
+        const key = node.getConnectId();
+        if (this.tunelMark[key]) {
+            return { ...node, host: "127.0.0.1", port: this.tunelMark[key].tunnelPort } as Node
+        }
+        const port = await portfinder.getPortPromise();
+        node.ssh.tunnelPort = port
+        const config = {
+            username: ssh.username,
+            password: ssh.password,
+            host: ssh.host,
+            port: ssh.port,
+            dstHost: node.host,
+            dstPort: node.port,
+            localHost: '127.0.0.1',
+            localPort: port,
+            algorithms: ssh.algorithms,
+            passphrase: ssh.passphrase,
+            privateKey: (() => {
+                if (ssh.privateKeyPath && existsSync(ssh.privateKeyPath)) {
+                    return require('fs').readFileSync(ssh.privateKeyPath)
+                }
+                return null
+            })()
+        };
 
-            this.adapterES(node, config);
+        this.adapterES(node, config);
 
-            if (ssh.type == 'native') {
+        return new Promise((resolve, reject) => {
+            if (ssh.type === 'native') {
                 let args = ['-TnNL', `${port}:${config.dstHost}:${config.dstPort}`, config.host, '-p', `${config.port}`];
                 if (ssh.privateKeyPath) {
                     args.push('-i', ssh.privateKeyPath)
@@ -56,7 +55,7 @@ export class SSHTunnelService {
                 const bat = spawn('ssh', args);
                 const successHandler = setTimeout(() => {
                     resolve({ ...node, host: "127.0.0.1", port } as Node)
-                }, ssh.watingTime);
+                }, ssh.waitingTime);
                 bat.stderr.on('data', (chunk) => {
                     if (chunk?.toString().match(/^[@\s]+$/)) return;
                     delete this.tunelMark[key]
@@ -90,7 +89,7 @@ export class SSHTunnelService {
     }
 
     private adapterES(node: Node, config: any) {
-        if (node.dbType == DatabaseType.ES) {
+        if (node.dbType === DatabaseType.ES) {
             let url = node.host;
             url = url.replace(/^(http|https):\/\//i, '')
             if (url.includes(":")) {

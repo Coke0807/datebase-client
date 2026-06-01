@@ -35,10 +35,10 @@ export class Util {
 
         if (origin) {
             const originType = typeof origin
-            if (originType == "string") {
+            if (originType === "string") {
                 return origin.trim()
             }
-            if (originType == "object") {
+            if (originType === "object") {
                 for (const key of Object.keys(origin)) {
                     origin[key] = this.trim(origin[key])
                 }
@@ -72,7 +72,7 @@ export class Util {
 
     public static confirm(placeHolder: string, callback: () => void) {
         vscode.window.showQuickPick([Confirm.YES, Confirm.NO], { placeHolder }).then((res) => {
-            if (res == Confirm.YES) {
+            if (res === Confirm.YES) {
                 callback()
             }
         })
@@ -84,7 +84,7 @@ export class Util {
 
     public static process(title: string, task: (done) => void) {
         vscode.window.withProgress({ title, location: vscode.ProgressLocation.Notification }, () => {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 try {
                     task(resolve)
                 } catch (error) {
@@ -108,7 +108,7 @@ export class Util {
 
     public static is(object: any, type: string): boolean {
         if (!object) return false;
-        return object.__proto__.constructor.name == type;
+        return Object.getPrototypeOf(object)?.constructor?.name === type;
     }
 
 

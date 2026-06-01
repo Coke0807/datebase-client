@@ -1,90 +1,374 @@
 # Database Client
 
-该项目是一个用于 Visual Studio Code 的数据库客户端扩展，支持 **MySQL/MariaDB、PostgreSQL、SQLite、Redis、ClickHouse、达梦** 和 **ElasticSearch** 等数据库的管理，并可用作 SSH 客户端，极大地提升您的生产力！
+<div align="center">
 
-[![Logo](./public/logo_dark.png)](https://database-client.com)
+![Database Client](resources/logo.png)
 
-## 安装
+[![Version](https://img.shields.io/badge/version-3.9.8-blue.svg)](https://github.com/Coke0807/datebase-client)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![VS Code](https://img.shields.io/badge/VS%20Code-1.80%2B-blue.svg)](https://code.visualstudio.com/)
 
-从 [Visual Studio Code 扩展商店](https://marketplace.visualstudio.com/items?itemName=coke0807.vscode-database-client) 或 [Open VSX](https://open-vsx.org/extension/coke0807/vscode-database-client) 安装
+**强大的 VS Code 数据库管理扩展**
 
-## 遥测报告
+[English](#english) | [中文](#中文)
 
-Database Client扩展会收集匿名使用数据并将其发送到Database Client服务器以帮助改进我们的产品和服务。阅读我们的[隐私声明](https://database-client.com/#/privacyPolicy)以了解更多信息。
+</div>
 
-遥测报告遵循 VS Code 的[遥测设置](https://code.visualstudio.com/docs/getstarted/telemetry)。此外，您可以通过设置 `"database-client.telemetry.usesOnlineServices": false` 单独禁用它。
+---
 
-## 连接
+## 中文
 
-1. 打开左侧数据库面板, 点击添加按钮
-2. 在连接页面配置相应的数据库信息
+### 📖 简介
 
-![connection](https://doc.database-client.com/images/connection.jpg)
+Database Client 是一个功能强大的 VS Code 扩展，为开发者提供便捷的数据库管理解决方案。支持多种主流数据库，提供直观的图形界面和丰富的功能特性。
 
-## 数据表
+### ✨ 核心特性
 
-1. 点击数据库表打开数据页, 点击表旁边的按钮则是打开新的数据页.
-2. 之后就可在页面进行CRUD、数据导出(**Excel、JSON**)等操作.
+#### 🔌 多数据库支持
 
-![query](https://doc.database-client.com/images/view.png)
+- **关系型数据库**
+  - MySQL / MariaDB
+  - PostgreSQL
+  - Microsoft SQL Server (MSSQL)
+  - SQLite
+  - Exasol
+  - H2 Database
 
-## 执行SQL
+- **NoSQL 数据库**
+  - MongoDB
+  - Redis
+  - ElasticSearch
 
-点击数据库节点的 `Open Query` 按钮.
-![newquery](https://doc.database-client.com/images/newquery.jpg)
+- **其他**
+  - FTP/SFTP 连接
 
-将会打开新的SQL编辑器, 可编辑和执行SQL, 提供了以下功能
+#### 🛠️ 主要功能
 
-1. SQL自动补全.
-2. snippets:`sel、del、ins、upd、joi.`
-3. 执行已选择或当前光标SQL (快捷键: Ctrl+Enter).
-4. 执行全部SQL (快捷键: Ctrl+Shift+Enter, 命令ID: `mysql.runSQL`).
+**数据库管理**
+- ✅ 连接管理（添加、编辑、删除、导入、导出连接配置）
+- ✅ 数据库创建与删除
+- ✅ 表结构设计与修改
+- ✅ 视图、存储过程、触发器管理
+- ✅ 用户权限管理
 
-![run](https://doc.database-client.com/images/run.jpg)
+**查询功能**
+- ✅ SQL 编辑器（语法高亮、智能提示）
+- ✅ 查询执行（选中执行、全部执行）
+- ✅ 查询历史记录
+- ✅ 结果集导出（CSV、JSON、Excel）
+- ✅ SQL 格式化
 
-可通过点击"Tables"右侧的搜索按钮对数据库进行全文搜索.
+**数据操作**
+- ✅ 数据导入（SQL 文件）
+- ✅ 数据导出（多种格式）
+- ✅ 表数据编辑
+- ✅ Mock 数据生成
 
-![1708594027208](image/README/1708594027208.png)
+**高级功能**
+- ✅ 数据库结构同步（Diff）
+- ✅ 数据库文档生成
+- ✅ SSH 隧道连接
+- ✅ 服务器状态监控
+- ✅ ER 图生成
 
-## 缓存
+#### 🎨 用户体验
 
-为了提高性能，缓存了数据库信息，如果你的数据库结构在外部发生了变更，需要点击以下按钮刷新缓存。
+- 🌐 中英文双语支持
+- 🎯 直观的树形视图
+- ⌨️ 丰富的快捷键
+- 📊 可视化数据展示
+- 🎨 多主题支持
 
-![](https://doc.database-client.com/image/connection/1638342622208.png)
+### 📦 安装
 
-## 备份/导入
+#### 从 VS Code 扩展市场安装
 
-在表或者数据库节点右击, 之后便可以进行数据的导入导出; 扩展实现了备份功能, 但不够稳定, 可将mysql_dump或pg_dump加到环境变量, 扩展就会使用这些工具进行备份.
+1. 打开 VS Code
+2. 按 `Ctrl+Shift+X` 打开扩展视图
+3. 搜索 "Database Client"
+4. 点击安装
 
-![bakcup](https://doc.database-client.com/images/Backup.jpg)
+#### 从源码构建
 
-## 设置
+```bash
+# 克隆仓库
+git clone https://github.com/Coke0807/datebase-client.git
 
-扩展提供了一些设置, 你可以参考以下操作前往控制台设置.
+# 进入项目目录
+cd datebase-client
 
-![1708593458624](image/README_CN/1708593458624.png)
+# 安装依赖
+pnpm install
 
-## 表过滤
+# 构建项目
+pnpm run build
 
-用于快速筛选表, 如果有输入框可简化搜索操作, 但不幸的是VSCode并不支持该功能.
+# 按 F5 启动调试
+```
 
-## 生成测试数据
+### 🚀 快速开始
 
-- 该扩展提供一键生成虚拟数据的功能, 再也不用为没有测试数据而烦恼.![mockData](https://doc.database-client.com/image/minor/mockData.jpg)
+#### 1. 添加数据库连接
 
-## 历史记录
+- 点击侧边栏的 **Database** 图标
+- 点击 **+** 按钮或按 `Ctrl+Shift+P` 输入 `MySQL: Add Connection`
+- 填写连接信息：
+  - 主机地址
+  - 端口号
+  - 用户名
+  - 密码
+  - 数据库名称（可选）
 
-- 点击历史记录按钮后可查看以往执行的Sql记录.![history](images/history.jpg)
+#### 2. 执行 SQL 查询
 
-## 致谢
+- 连接数据库后，右键点击数据库或表
+- 选择 **New Query** 创建新查询
+- 编写 SQL 语句
+- 按 `Ctrl+Enter` 执行选中 SQL 或 `Ctrl+Shift+Enter` 执行全部
 
-- [sql-formatter](https://github.com/zeroturnaround/sql-formatter) Sql格式化库.
-- [umy-ui](https://github.com/u-leo/umy-ui): 表数据渲染库.
-- [ssh2](https://github.com/mscdex/ssh2): SSH连接库.
-- 核心连接库:
+#### 3. 数据导入导出
 
-  - [node-mysql2](https://github.com/sidorares/node-mysql2) : MySQL连接库.
-  - [node-postgres](https://github.com/brianc/node-postgres): PostgreSQL连接库.
-  - [tedious](https://github.com/tediousjs/tedious): SqlServer连接库.
-  - [ioredis](https://github.com/luin/ioredis): Redis连接库.
-  - [vscode-sqlite](https://github.com/AlexCovizzi/vscode-sqlite): SQLite连接代码参考.
+- 右键点击表或数据库
+- 选择 **Export Data** 或 **Import SQL**
+- 选择导出格式（CSV、JSON、Excel 等）
+
+### ⌨️ 常用快捷键
+
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl+Enter` | 执行选中 SQL |
+| `Ctrl+Shift+Enter` | 执行全部 SQL |
+| `Ctrl+Shift+P` → `MySQL: Add Connection` | 添加连接 |
+| `Ctrl+Shift+P` → `MySQL: Open History` | 打开查询历史 |
+| `F5` | 刷新数据库列表 |
+
+### 🔧 配置
+
+#### 连接配置文件位置
+
+连接配置保存在 VS Code 的全局状态中，支持导入导出。
+
+#### SSH 隧道配置
+
+支持通过 SSH 隧道连接数据库，适用于远程服务器场景。
+
+```json
+{
+  "host": "localhost",
+  "port": 3306,
+  "username": "root",
+  "password": "password",
+  "ssh": {
+    "host": "remote.server.com",
+    "port": 22,
+    "username": "user",
+    "privateKey": "/path/to/private/key"
+  }
+}
+```
+
+### 🏗️ 项目结构
+
+```
+database-client/
+├── src/
+│   ├── extension.ts          # 扩展入口
+│   ├── common/               # 公共工具
+│   ├── model/                # 数据模型
+│   │   ├── database/         # 数据库节点模型
+│   │   ├── mongo/            # MongoDB 模型
+│   │   ├── redis/            # Redis 模型
+│   │   └── ...
+│   ├── service/              # 核心服务
+│   │   ├── connect/          # 连接服务
+│   │   ├── dialect/          # 数据库方言
+│   │   ├── export/           # 导出服务
+│   │   ├── import/           # 导入服务
+│   │   └── ...
+│   ├── provider/             # VS Code Provider
+│   └── vue/                  # Vue 前端组件
+├── syntaxes/                 # 语法高亮配置
+├── resources/                # 资源文件
+└── docs/                     # 文档
+```
+
+### 🛠️ 技术栈
+
+- **语言**: TypeScript 5.3.3
+- **编辑器 API**: VS Code Extension API 1.118
+- **前端框架**: Vue.js
+- **构建工具**: Webpack 5
+- **样式**: Tailwind CSS
+- **数据库驱动**:
+  - MySQL: `mysql2`
+  - PostgreSQL: `pg`
+  - MSSQL: `tedious`
+  - MongoDB: `mongodb`
+  - Redis: `ioredis`
+  - SQLite: `better-sqlite3`
+
+### 🤝 贡献
+
+欢迎贡献代码、报告问题或提出建议！
+
+#### 开发环境设置
+
+```bash
+# 安装依赖
+pnpm install
+
+# 启动开发模式
+pnpm run dev
+
+# 运行测试
+pnpm test
+
+# 构建生产版本
+pnpm run build
+```
+
+#### 提交规范
+
+请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
+
+### 📝 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解版本更新历史。
+
+### 📄 许可证
+
+本项目采用 [MIT License](LICENSE) 开源协议。
+
+### 🙏 致谢
+
+感谢所有贡献者和开源社区的支持！
+
+---
+
+## English
+
+### 📖 Introduction
+
+Database Client is a powerful VS Code extension that provides developers with a convenient database management solution. It supports multiple mainstream databases and offers an intuitive graphical interface with rich features.
+
+### ✨ Key Features
+
+#### 🔌 Multi-Database Support
+
+- **Relational Databases**
+  - MySQL / MariaDB
+  - PostgreSQL
+  - Microsoft SQL Server (MSSQL)
+  - SQLite
+  - Exasol
+  - H2 Database
+
+- **NoSQL Databases**
+  - MongoDB
+  - Redis
+  - ElasticSearch
+
+- **Others**
+  - FTP/SFTP Connections
+
+#### 🛠️ Main Functions
+
+**Database Management**
+- ✅ Connection management (add, edit, delete, import, export configurations)
+- ✅ Database creation and deletion
+- ✅ Table structure design and modification
+- ✅ View, stored procedure, trigger management
+- ✅ User permission management
+
+**Query Features**
+- ✅ SQL editor (syntax highlighting, intelligent suggestions)
+- ✅ Query execution (selected execution, full execution)
+- ✅ Query history
+- ✅ Result set export (CSV, JSON, Excel)
+- ✅ SQL formatting
+
+**Data Operations**
+- ✅ Data import (SQL files)
+- ✅ Data export (multiple formats)
+- ✅ Table data editing
+- ✅ Mock data generation
+
+**Advanced Features**
+- ✅ Database structure synchronization (Diff)
+- ✅ Database documentation generation
+- ✅ SSH tunnel connection
+- ✅ Server status monitoring
+- ✅ ER diagram generation
+
+### 📦 Installation
+
+#### Install from VS Code Marketplace
+
+1. Open VS Code
+2. Press `Ctrl+Shift+X` to open Extensions view
+3. Search for "Database Client"
+4. Click Install
+
+#### Build from Source
+
+```bash
+# Clone repository
+git clone https://github.com/Coke0807/datebase-client.git
+
+# Navigate to project directory
+cd datebase-client
+
+# Install dependencies
+pnpm install
+
+# Build project
+pnpm run build
+
+# Press F5 to start debugging
+```
+
+### 🚀 Quick Start
+
+#### 1. Add Database Connection
+
+- Click the **Database** icon in the sidebar
+- Click the **+** button or press `Ctrl+Shift+P` and type `MySQL: Add Connection`
+- Fill in connection details:
+  - Host
+  - Port
+  - Username
+  - Password
+  - Database name (optional)
+
+#### 2. Execute SQL Queries
+
+- After connecting to a database, right-click on the database or table
+- Select **New Query** to create a new query
+- Write SQL statements
+- Press `Ctrl+Enter` to execute selected SQL or `Ctrl+Shift+Enter` to execute all
+
+#### 3. Data Import/Export
+
+- Right-click on a table or database
+- Select **Export Data** or **Import SQL**
+- Choose export format (CSV, JSON, Excel, etc.)
+
+### 🤝 Contributing
+
+Contributions are welcome! Feel free to submit issues or pull requests.
+
+### 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+**如果这个项目对你有帮助，请给一个 ⭐️ Star 支持一下！**
+
+**If this project helps you, please give it a ⭐️ Star!**
+
+[![GitHub stars](https://img.shields.io/github/stars/Coke0807/datebase-client.svg?style=social&label=Star)](https://github.com/Coke0807/datebase-client)
+
+</div>

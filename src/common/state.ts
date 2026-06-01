@@ -28,7 +28,7 @@ export class WorkState {
 }
 export function getKey(key: string): string {
 
-    if (vscode.env.remoteName == "ssh-remote" && key.indexOf("ssh-remote") == -1) {
+    if (vscode.env.remoteName === "ssh-remote" && key.indexOf("ssh-remote") === -1) {
         return key + "ssh-remote";
     }
 

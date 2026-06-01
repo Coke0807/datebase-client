@@ -17,12 +17,12 @@
     <el-dialog :title="t('design.addIndex')" v-model="index.visible" top="3vh">
       <el-form :inline='true'>
         <el-form-item :label="t('design.column')">
-          <el-select v-model="index.column">
+          <el-select v-model="index.column" :teleported="false">
             <el-option :label="column.name" :value="column.name" :key="column.name" v-for="column in designData.columnList"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item :label="t('design.indexType')">
-          <el-select v-model="index.type">
+          <el-select v-model="index.type" :teleported="false">
             <el-option :label="'UNIQUE'" value="UNIQUE"></el-option>
             <el-option :label="'INDEX'" value="INDEX"></el-option>
             <el-option :label="'PRIMARY KEY'" value="PRIMARY KEY"></el-option>
@@ -96,5 +96,51 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+/* 索引面板样式 - 使用 VS Code 主题变量 */
+:deep(.el-dialog) {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__title) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__body) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-form-item__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+/* 下拉选择器样式 */
+:deep(.el-select .el-input__inner) {
+  background-color: var(--vscode-input-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-input-foreground) !important;
+}
+
+:deep(.el-select-dropdown) {
+  background-color: var(--vscode-dropdown-background) !important;
+  border-color: var(--vscode-dropdown-border) !important;
+}
+
+:deep(.el-select-dropdown__item) {
+  color: var(--vscode-dropdown-foreground) !important;
+}
+
+:deep(.el-select-dropdown__item:hover),
+:deep(.el-select-dropdown__item.hover) {
+  background-color: var(--vscode-list-hoverBackground) !important;
+}
+
+:deep(.el-select-dropdown__item.selected) {
+  color: var(--vscode-button-background) !important;
+}
 </style>

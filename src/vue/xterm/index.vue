@@ -14,7 +14,6 @@
     import { SearchAddon } from 'xterm-addon-search';
     import { SearchBarAddon } from './xterm-addon-search-bar';
     import { auto } from "./theme/auto";
-    import { eventNames } from 'process';
     require('xterm/css/xterm.css')
     import { inject } from "../mixin/vscodeInject";
     export default {
@@ -57,7 +56,11 @@
                     const event = e.domEvent;
                     if (event.code == "KeyC" && event.ctrlKey && !event.altKey && !event.shiftKey) {
                         if (terminal.hasSelection()) {
-                            document.execCommand('copy')
+                            // Use modern Clipboard API instead of deprecated execCommand
+                            const selection = terminal.getSelection();
+                            if (selection) {
+                                navigator.clipboard.writeText(selection);
+                            }
                         }
                         return;
                     } else if ((event.code == "KeyV" && event.ctrlKey && !event.altKey && !event.shiftKey) ||
@@ -72,6 +75,9 @@
                 terminal.open(container)
                 fitAddon.fit()
                 terminal.focus()
+                // Store references for cleanup in beforeUnmount
+                this._terminal = terminal;
+                this._fitAddon = fitAddon;
                 terminal.onData((data) => {
                     this.emit('data', data)
                 })
@@ -102,7 +108,11 @@
                 container.oncontextmenu = async (event) => {
                     event.stopPropagation()
                     if (terminal.hasSelection()) {
-                        document.execCommand('copy')
+                        // Use modern Clipboard API instead of deprecated execCommand
+                        const selection = terminal.getSelection();
+                        if (selection) {
+                            navigator.clipboard.writeText(selection);
+                        }
                         terminal.clearSelection()
                     } else {
                         this.emit('data', await navigator.clipboard.readText())
@@ -124,19 +134,19 @@
                     })
                     .on('status', (data) => {
                         resizeScreen()
-                        status.innerHTML = data
+                        status.textContent = data
                         status.style.backgroundColor = '#338c33'
                         // terminal.focus()
                     })
                     .on('ssherror', (data) => {
-                        status.innerHTML = data
+                        status.textContent = data
                         status.style.backgroundColor = 'red'
                         errorExists = true
                     })
                     .on('error', (err) => {
                         if (!errorExists) {
                             status.style.backgroundColor = 'red'
-                            status.innerHTML = 'ERROR: ' + err
+                            status.textContent = 'ERROR: ' + err
                         }
                     });
 
@@ -144,6 +154,10 @@
             }).init();
         },
         beforeUnmount() {
+            // Dispose terminal instance to free GPU/canvas resources
+            if (this._terminal) {
+                this._terminal.dispose();
+            }
             // R-03: Clean up event listeners to prevent memory leaks
             if (this._resizeHandler) {
                 window.removeEventListener('resize', this._resizeHandler);
@@ -159,14 +173,13 @@
 <style scoped>
     body,
     html {
-        font-family: helvetica, sans-serif, arial;
-        font-size: 1em;
-        color: #111;
-        /* background-color: #2f3032; */
-        color: rgb(240, 240, 240);
-        height: 100%;
-        margin: 0;
-        padding: 0;
+        font-family: var(--vscode-font-family) !important;
+        font-size: var(--vscode-font-size) !important;
+        color: var(--vscode-foreground) !important;
+        background-color: var(--vscode-editor-background) !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .dropup-content {
@@ -174,10 +187,10 @@
     }
 
     #header {
-        background-color: rgb(84, 84, 84);
-        color: #fafafa;
+        background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-titleBar-activeBackground)) !important;
+        color: var(--vscode-titleBar-activeForeground, var(--vscode-foreground)) !important;
         width: 100%;
-        border-color: white;
+        border-color: var(--vscode-panel-border, var(--vscode-dropdown-border));
         border-style: none none solid none;
         border-width: 1px;
         text-align: center;
@@ -187,7 +200,7 @@
     }
 
     #header a {
-        color: #fafafa;
+        color: var(--vscode-textLink-foreground) !important;
     }
 
     .box {
@@ -197,22 +210,19 @@
 
     #terminal-container {
         display: block;
-        width: calc(100% - 1 px);
+        width: calc(100% - 1px);
         margin: 0 auto;
-        /* padding-top: 2px;
-    padding-left: 3px; */
         height: 95vh;
     }
 
     #terminal-container .terminal {
-        background-color: #000000;
-        color: #fafafa;
-        /* padding: 2px; */
+        background-color: var(--vscode-terminal-background, #000000) !important;
+        color: var(--vscode-terminal-foreground, #fafafa) !important;
         height: 95vh;
     }
 
     #terminal-container .terminal:focus .terminal-cursor {
-        background-color: #fafafa;
+        background-color: var(--vscode-terminalCursor-foreground, #fafafa) !important;
     }
 
     #bottomdiv {
@@ -220,8 +230,8 @@
         left: 0;
         bottom: 0;
         width: 100%;
-        background-color: rgb(50, 50, 50);
-        border-color: white;
+        background-color: var(--vscode-statusBar-background, rgb(50, 50, 50)) !important;
+        border-color: var(--vscode-statusBar-border, var(--vscode-panel-border));
         border-style: solid none none none;
         border-width: 1px;
         z-index: 99;
@@ -229,11 +239,11 @@
     }
 
     #status {
-        background-color: #338c33;
+        background-color: var(--vscode-testing.iconPassed, #338c33) !important;
         display: inline-block;
         padding-left: 10px;
         padding-right: 10px;
-        border-color: white;
+        border-color: var(--vscode-panel-border, white);
         border-style: none solid none solid;
         border-width: 1px;
         text-align: left;

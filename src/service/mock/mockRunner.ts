@@ -52,7 +52,7 @@ export class MockRunner {
         const tableList = await new TableGroup(node).getChildren() as TableNode[]
         let tableNode: TableNode;
         for (const table of tableList) {
-            if (table.table == mockModel.table) {
+            if (table.table === mockModel.table) {
                 tableNode = table
             }
         }
@@ -69,7 +69,7 @@ export class MockRunner {
         if (mockStartIndex != null) {
             if (!isNaN(Number(mockStartIndex))) {
                 startIndex = mockStartIndex as number
-            } else if (mockStartIndex.toString().toLowerCase() == "auto") {
+            } else if (mockStartIndex.toString().toLowerCase() === "auto") {
                 startIndex = (await tableNode.getMaxPrimary()) + 1;
             }
 
@@ -78,8 +78,8 @@ export class MockRunner {
                 let tempInsertSql = insertSqlTemplate;
                 for (const column in mockData) {
                     let value = mockData[column].value;
-                    if (value && (typeof value == "string")) { value = value.replace(/^'|'$/g, "\\'") }
-                    if (value == this.MOCK_INDEX) { value = i; }
+                    if (value && (typeof value === "string")) { value = value.replace(/^'|'$/g, "\\'") }
+                    if (value === this.MOCK_INDEX) { value = i; }
                     tempInsertSql = tempInsertSql.replace(new RegExp("\\$+" + column + "(,|\\s)", 'ig'), this.wrapQuote(mockData[column].type, Mock.mock(value)) + "$1");
                 }
                 sqlList.push(tempInsertSql)
@@ -100,7 +100,7 @@ export class MockRunner {
             case "varchar": case "char": case "date": case "time": case "timestamp": case "datetime": case "set": case "json":
                 return `'${value}'`
             default:
-                if (type.indexOf("text") != -1 || type.indexOf("blob") != -1 || type.indexOf("binary") != -1) { return `'${value}'` }
+                if (type.indexOf("text") !== -1 || type.indexOf("blob") !== -1 || type.indexOf("binary") !== -1) { return `'${value}'` }
         }
         return value;
     }
@@ -118,15 +118,15 @@ export class MockRunner {
     private getValueByName(name: string) {
 
         name = name.toLowerCase()
-        if (name == "create_time" || name == "created_time" || name == "update_time" || name == "updated_time") {
+        if (name === "create_time" || name === "created_time" || name === "update_time" || name === "updated_time") {
             return "@now('yyyy-MM-dd HH:mm:ss')"
         }
 
-        if (name == "created_by" || name == "updated_by") {
+        if (name === "created_by" || name === "updated_by") {
             return "vscode-mysql-mock"
         }
 
-        if (name == "revision" || name == "version") {
+        if (name === "revision" || name === "version") {
             return "1"
         }
 

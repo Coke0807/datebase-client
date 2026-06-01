@@ -5,7 +5,7 @@
       </el-input>
     </template>
     <template v-else-if="!scope.row.isFilter && result.dbType=='ElasticSearch'">
-      <div class="edit-column" :contenteditable="editable" style="height: 100%; line-height: 33px;" @input="editListen($event,scope)" @contextmenu.prevent="onContextmenu($event,scope)" v-html='dataformat(scope.row[scope.column.title])'></div>
+      <div class="edit-column" :contenteditable="editable" style="height: 100%; line-height: 33px;" @input="editListen($event,scope)" @contextmenu.prevent="onContextmenu($event,scope)" v-text='dataformat(scope.row[scope.column.title])'></div>
     </template>
     <template v-else>
       <div class="edit-column" :contenteditable="editable" style="height: 100%; line-height: 33px;" @input="editListen($event,scope)" @contextmenu.prevent="onContextmenu($event,scope)">
@@ -24,7 +24,12 @@
 import { wrapByDb } from "@/common/wrapper";
 
 export default {
-  props: ["result", "scope", "editList","filterObj"],
+  props: {
+    result: { type: Object, required: true },
+    scope: { type: Object, required: true },
+    editList: { type: [Array, Object], required: true },
+    filterObj: { type: Object }
+  },
   methods: {
     dataformat(origin) {
       if (origin == undefined || origin == null) {
@@ -41,7 +46,6 @@ export default {
       if (!editList[rowIndex]) {
         editList[rowIndex] = { ...row };
         delete editList[rowIndex]._XID;
-        console.log(editList[rowIndex]);
       }
       editList[rowIndex][column.title] = event.target.textContent;
       this.$emit("sendToVscode", "dataModify");

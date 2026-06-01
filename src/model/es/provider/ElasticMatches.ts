@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ElasticMatch } from './ElasticMatch';
+import { Console } from '@/common/Console';
 
 export class ElasticMatches {
     Editor: vscode.TextEditor
@@ -9,7 +10,7 @@ export class ElasticMatches {
     public constructor(editor: vscode.TextEditor) {
 
         if (!editor) {
-            console.error("updateDecorations(): no active text editor.");
+            Console.log("updateDecorations(): no active text editor.");
             this.Matches = []
             return
         }

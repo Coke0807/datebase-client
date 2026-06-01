@@ -1,26 +1,645 @@
 /* https://code.visualstudio.com/api/references/theme-color */
 
 /**
-.el-tag 11253
-*/
+ * VS Code WebView 主题适配样式
+ * 使用 VS Code 提供的 CSS 变量实现与编辑器一致的外观
+ * 注意：此文件必须在 element-plus 样式之后加载
+ */
 
-:root {
-    --editor-color: var(--vscode-menu-foreground);
-    --input-color: var(--vscode-tab-activeForeground);
-    --primary-color: var(--vscode-tab-activeForeground);
-    --second-color: var(--vscode-input-placeholderForeground);
-    --border-color: var(--vscode-button-background);
-    --bg-color: var(--vscode-editor-background);
-    --disable-bg-color: var(--vscode-editor-background);
-    --second-bg-color: var(--vscode-editorSuggestWidget-background);
+/* ============================================
+   基础样式重置 - 最高优先级
+   ============================================ */
+
+html, body {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-foreground) !important;
+    font-family: var(--vscode-font-family) !important;
+    font-weight: var(--vscode-font-weight) !important;
+    font-size: var(--vscode-font-size) !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
-body {
-    background-color: var(--vscode-editor-background);
-    color: var(--editor-color);
-    font-family: var(--vscode-font-family);
-    font-weight: var(--vscode-font-weight);
-    font-size: var(--vscode-font-size);
+* {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   全局输入框样式 - 强制覆盖 Element Plus
+   ============================================ */
+
+input.field__input,
+input[type="text"].field__input,
+input[type="password"].field__input,
+input[type="number"].field__input {
+    background-color: var(--vscode-input-background) !important;
+    border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
+    padding: 6px 10px !important;
+    margin: 2px 0 !important;
+    font-family: var(--vscode-font-family) !important;
+    font-size: var(--vscode-font-size) !important;
+    outline: none !important;
+    border-radius: 2px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    height: 28px !important;
+    line-height: 28px !important;
+}
+
+input.field__input:focus,
+input[type="text"].field__input:focus,
+input[type="password"].field__input:focus,
+input[type="number"].field__input:focus {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder, transparent) !important;
+}
+
+input.field__input::placeholder {
+    color: var(--vscode-input-placeholderForeground) !important;
+    opacity: 0.7 !important;
+}
+
+input.field__input:disabled {
+    background-color: var(--vscode-disabledForeground) !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* ============================================
+   标签和文字样式
+   ============================================ */
+
+label, span, p, div {
+    color: var(--vscode-foreground);
+}
+
+label {
+    color: var(--vscode-foreground) !important;
+    font-size: var(--vscode-font-size) !important;
+}
+
+/* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--vscode-foreground) !important;
+    font-weight: 600 !important;
+    margin-top: 0 !important;
+}
+
+/* 链接样式 */
+a {
+    color: var(--vscode-textLink-foreground) !important;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--vscode-textLink-activeForeground);
+    text-decoration: underline;
+}
+
+/* ============================================
+   Element Plus 组件主题适配
+   ============================================ */
+
+/* Input 输入框 */
+.el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
+    border-radius: 2px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important;
+    font-size: var(--vscode-font-size) !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.el-input__inner:hover {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+.el-input__inner:focus {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder, transparent) !important;
+    background-color: var(--vscode-input-background) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+.el-input__inner::placeholder {
+    color: var(--vscode-input-placeholderForeground) !important;
+    opacity: 0.7 !important;
+}
+
+.el-input.is-disabled .el-input__inner {
+    background-color: var(--vscode-disabledForeground) !important;
+    opacity: 0.5 !important;
+}
+
+/* Textarea 文本域 */
+.el-textarea__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
+    border-radius: 2px !important;
+    padding: 6px 10px !important;
+    font-size: var(--vscode-font-size) !important;
+}
+
+.el-textarea__inner:focus {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+/* 按钮样式 - 主按钮 */
+.el-button {
+    background-color: var(--vscode-button-background) !important;
+    border-color: var(--vscode-button-background) !important;
+    color: var(--vscode-button-foreground) !important;
+    border-radius: 2px !important;
+    height: 28px !important;
+    padding: 0 14px !important;
+    font-size: var(--vscode-font-size) !important;
+    font-weight: 500 !important;
+    transition: background-color 0.2s !important;
+}
+
+.el-button:hover {
+    background-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+    border-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+}
+
+.el-button:active {
+    background-color: var(--vscode-button-background) !important;
+}
+
+/* 按钮 - 次要/默认样式 */
+.el-button--default {
+    background-color: var(--vscode-button-secondaryBackground, var(--vscode-button-background)) !important;
+    border-color: var(--vscode-button-secondaryBackground, var(--vscode-button-background)) !important;
+    color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground)) !important;
+}
+
+.el-button--default:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground)) !important;
+}
+
+/* 按钮 - 危险样式 */
+.el-button--danger {
+    background-color: var(--vscode-errorForeground, #f56c6c) !important;
+    border-color: var(--vscode-errorForeground, #f56c6c) !important;
+    color: #fff !important;
+}
+
+.el-button--danger:hover {
+    opacity: 0.9 !important;
+}
+
+/* 按钮 - 成功样式 */
+.el-button--success {
+    background-color: var(--vscode-testing.iconPassed, #67c23a) !important;
+    border-color: var(--vscode-testing.iconPassed, #67c23a) !important;
+    color: #fff !important;
+}
+
+/* ============================================
+   开关样式 - 完整覆盖
+   ============================================ */
+.el-switch {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    line-height: 28px;
+}
+
+.el-switch__core {
+    border: 1px solid var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+    border-radius: 12px !important;
+    height: 18px !important;
+    width: 36px !important;
+}
+
+.el-switch__core::after {
+    background-color: var(--vscode-foreground) !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.el-switch.is-checked .el-switch__core {
+    border-color: var(--vscode-button-background) !important;
+    background-color: var(--vscode-button-background) !important;
+}
+
+.el-switch.is-checked .el-switch__core::after {
+    background-color: var(--vscode-button-foreground) !important;
+    left: 100% !important;
+    transform: translateX(-100%) !important;
+    margin-left: -2px !important;
+}
+
+.el-switch__label {
+    color: var(--vscode-foreground) !important;
+    font-size: var(--vscode-font-size) !important;
+}
+
+.el-switch__label.is-active {
+    color: var(--vscode-button-background) !important;
+}
+
+/* ============================================
+   单选框样式
+   ============================================ */
+.el-radio {
+    color: var(--vscode-foreground) !important;
+}
+
+.el-radio__input.is-checked .el-radio__inner {
+    border-color: var(--vscode-button-background) !important;
+    background-color: var(--vscode-button-background) !important;
+}
+
+.el-radio__inner {
+    border-color: var(--vscode-checkbox-border, var(--vscode-foreground)) !important;
+    background-color: var(--vscode-checkbox-background, transparent) !important;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.el-radio__inner::after {
+    width: 6px !important;
+    height: 6px !important;
+    background-color: var(--vscode-button-foreground) !important;
+}
+
+.el-radio__label {
+    color: var(--vscode-foreground) !important;
+    font-size: var(--vscode-font-size) !important;
+}
+
+/* ============================================
+   复选框样式
+   ============================================ */
+.el-checkbox {
+    color: var(--vscode-foreground) !important;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner {
+    border-color: var(--vscode-button-background) !important;
+    background-color: var(--vscode-button-background) !important;
+}
+
+.el-checkbox__inner {
+    border-color: var(--vscode-checkbox-border, var(--vscode-foreground)) !important;
+    background-color: var(--vscode-checkbox-background, transparent) !important;
+}
+
+.el-checkbox__label {
+    color: var(--vscode-foreground) !important;
+}
+
+/* ============================================
+   下拉选择器 - 完整覆盖（最高优先级）
+   ============================================ */
+
+/* 使用 html body 前缀增加最高优先级 */
+html body .el-select {
+    display: inline-block;
+    position: relative;
+}
+
+/* 输入框样式 - 强制覆盖所有状态 */
+html body .el-select .el-input__inner,
+html body .el-select .el-input .el-input__inner,
+body .el-select .el-input__inner,
+body .el-select .el-input .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
+    cursor: pointer !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 10px !important;
+    font-size: var(--vscode-font-size) !important;
+    border-radius: 2px !important;
+}
+
+/* 悬停状态 */
+html body .el-select .el-input__inner:hover,
+html body .el-select .el-input .el-input__inner:hover,
+body .el-select .el-input__inner:hover,
+body .el-select .el-input .el-input__inner:hover {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    background-color: var(--vscode-input-background) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* 聚焦状态 */
+html body .el-select .el-input__inner:focus,
+html body .el-select .el-input .el-input__inner:focus,
+body .el-select .el-input__inner:focus,
+body .el-select .el-input .el-input__inner:focus {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    background-color: var(--vscode-input-background) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* placeholder */
+html body .el-select .el-input__inner::placeholder,
+html body .el-select .el-input .el-input__inner::placeholder,
+body .el-select .el-input__inner::placeholder,
+body .el-select .el-input .el-input__inner::placeholder {
+    color: var(--vscode-input-placeholderForeground) !important;
+    opacity: 0.7 !important;
+}
+
+/* 禁用状态 */
+html body .el-select .el-input.is-disabled .el-input__inner,
+body .el-select .el-input.is-disabled .el-input__inner {
+    background-color: var(--vscode-disabledForeground) !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+/* 后缀图标 */
+html body .el-select .el-input__suffix,
+body .el-select .el-input__suffix {
+    color: var(--vscode-foreground) !important;
+}
+
+html body .el-select .el-input__suffix .el-input__icon,
+body .el-select .el-input__suffix .el-input__icon {
+    color: var(--vscode-foreground) !important;
+}
+
+/* 下拉箭头颜色 */
+html body .el-select .el-icon-arrow-down::before,
+body .el-select .el-icon-arrow-down::before {
+    color: var(--vscode-foreground) !important;
+}
+
+/* 选中后的输入框样式 - 确保关闭后保持主题色 */
+html body .el-select .el-input.is-focus .el-input__inner,
+body .el-select .el-input.is-focus .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* ============================================
+   下拉弹出层 - 挂载到 body，需要全局覆盖
+   ============================================ */
+
+/* 弹出层容器 - 使用最高优先级 */
+html body .el-select-dropdown.el-popper,
+.el-select-dropdown.el-popper {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    border-radius: 2px !important;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 下拉列表 */
+html body .el-select-dropdown__list,
+.el-select-dropdown__list {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    padding: 4px 0 !important;
+    margin: 0 !important;
+}
+
+/* 下拉选项 - 最高优先级覆盖 */
+html body .el-select-dropdown__item,
+.el-select-dropdown__item {
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+    font-size: var(--vscode-font-size, 13px) !important;
+    padding: 0 12px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    background-color: transparent !important;
+}
+
+html body .el-select-dropdown__item.hover,
+html body .el-select-dropdown__item:hover,
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-foreground)) !important;
+}
+
+html body .el-select-dropdown__item.selected,
+.el-select-dropdown__item.selected {
+    color: var(--vscode-button-background, #409EFF) !important;
+    font-weight: 600 !important;
+    background-color: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.1)) !important;
+}
+
+html body .el-select-dropdown__item.selected.hover,
+.el-select-dropdown__item.selected.hover {
+    color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+}
+
+/* 空状态 */
+html body .el-select-dropdown__empty,
+.el-select-dropdown__empty {
+    color: var(--vscode-descriptionForeground, var(--vscode-foreground)) !important;
+    font-size: var(--vscode-font-size, 13px) !important;
+    padding: 10px 0 !important;
+    text-align: center !important;
+}
+
+/* 滚动条容器 */
+html body .el-select-dropdown__wrap,
+.el-select-dropdown__wrap {
+    max-height: 280px !important;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 弹出层阴影和箭头 */
+html body .el-popper.is-light,
+html body .el-popper.is-light.el-select-dropdown,
+.el-popper.is-light,
+.el-popper.is-light.el-select-dropdown {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+}
+
+html body .el-popper.is-light .el-popper__arrow::before,
+html body .el-select-dropdown.el-popper .el-popper__arrow::before,
+.el-popper.is-light .el-popper__arrow::before,
+.el-select-dropdown.el-popper .el-popper__arrow::before {
+    border-color: var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 下拉菜单 */
+.el-dropdown-menu {
+    background-color: var(--vscode-dropdown-background) !important;
+    border-color: var(--vscode-dropdown-border) !important;
+}
+
+.el-dropdown-menu__item {
+    color: var(--vscode-dropdown-foreground) !important;
+}
+
+.el-dropdown-menu__item:hover {
+    background-color: var(--vscode-list-hoverBackground) !important;
+    color: var(--vscode-list-hoverForeground) !important;
+}
+
+/* 提示框 */
+.el-tooltip__popper {
+    background-color: var(--vscode-editorHoverWidget-background) !important;
+    color: var(--vscode-editorHoverWidget-foreground) !important;
+    border-color: var(--vscode-editorHoverWidget-border) !important;
+}
+
+/* 卡片样式 */
+.el-card {
+    background-color: var(--vscode-editor-background) !important;
+    border-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+    color: var(--vscode-foreground) !important;
+}
+
+.el-card__header {
+    border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+    color: var(--vscode-foreground) !important;
+    padding: 12px 16px !important;
+}
+
+/* 表单样式 */
+.el-form-item__label {
+    color: var(--vscode-foreground) !important;
+    font-size: var(--vscode-font-size) !important;
+}
+
+.el-form-item {
+    margin-bottom: 12px !important;
+}
+
+/* 表格样式 */
+.el-table {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-foreground) !important;
+}
+
+.el-table__header-wrapper th {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-foreground) !important;
+    border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+    font-weight: 600 !important;
+}
+
+.el-table td {
+    background-color: var(--vscode-editor-background) !important;
+    color: var(--vscode-foreground) !important;
+    border-bottom-color: var(--vscode-panel-border, rgba(128, 128, 128, 0.2)) !important;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.1)) !important;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+    background-color: var(--vscode-list-hoverBackground) !important;
+}
+
+/* 对话框样式 */
+.el-dialog {
+    background-color: var(--vscode-editor-background) !important;
+    border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+    border-radius: 4px !important;
+}
+
+.el-dialog__title {
+    color: var(--vscode-foreground) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.el-dialog__header {
+    border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+    padding: 12px 16px !important;
+}
+
+.el-dialog__body {
+    color: var(--vscode-foreground) !important;
+    padding: 16px !important;
+}
+
+/* 消息提示样式 */
+.el-message {
+    background-color: var(--vscode-editor-background) !important;
+    border-color: var(--vscode-panel-border) !important;
+}
+
+.el-message__content {
+    color: var(--vscode-foreground) !important;
+}
+
+/* 标签样式 */
+.el-tag {
+    background-color: var(--vscode-badge-background) !important;
+    border-color: var(--vscode-badge-background) !important;
+    color: var(--vscode-badge-foreground) !important;
+}
+
+/* 分页样式 */
+.el-pagination {
+    color: var(--vscode-foreground) !important;
+}
+
+/* ============================================
+   Tabs 标签页样式 - 适配 VS Code 主题
+   ============================================ */
+
+.el-tabs__header {
+    margin: 0 0 16px 0 !important;
+    border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+.el-tabs__nav-wrap::after {
+    background-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+.el-tabs__item {
+    color: var(--vscode-tab-inactiveForeground, var(--vscode-foreground)) !important;
+    font-size: var(--vscode-font-size, 13px) !important;
+    padding: 0 16px !important;
+    height: 36px;
+    line-height: 36px;
+}
+
+.el-tabs__item:hover {
+    color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+    background-color: var(--vscode-tab-hoverBackground, transparent) !important;
+}
+
+.el-tabs__item.is-active {
+    color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+    font-weight: 500 !important;
+}
+
+.el-tabs__active-bar {
+    background-color: var(--vscode-tab-activeBorder, var(--vscode-button-background)) !important;
+}
+
+.el-pagination button {
+    background-color: var(--vscode-button-background) !important;
+    color: var(--vscode-button-foreground) !important;
+}
+
+.el-pagination .el-pager li {
+    background-color: var(--vscode-button-background) !important;
+    color: var(--vscode-button-foreground) !important;
+}
+
+.el-pagination .el-pager li.active {
+    background-color: var(--vscode-button-hoverBackground) !important;
+    color: var(--vscode-button-foreground) !important;
 }
 
 
@@ -1286,7 +1905,10 @@ body {
 
 .el-pagination .el-select .el-input .el-input__inner {
     padding-right: 25px;
-    border-radius: 3px
+    border-radius: 2px;
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
 }
 
 .el-pagination button {
@@ -1368,12 +1990,16 @@ body {
 }
 
 .el-pagination__sizes .el-input .el-input__inner {
-    font-size: 13px;
-    padding-left: 8px
+    font-size: var(--vscode-font-size, 13px);
+    padding-left: 8px;
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-input-foreground) !important;
 }
 
 .el-pagination__sizes .el-input .el-input__inner:hover {
-    border-color: #409EFF
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+    background-color: var(--vscode-input-background) !important;
 }
 
 .el-pagination__total {
@@ -2484,23 +3110,23 @@ body {
 .el-select-dropdown {
     position: absolute;
     z-index: 1001;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--vscode-editor-background);;
-    -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+    border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    border-radius: 2px !important;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     margin: 5px 0
 }
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.selected {
-    color: #409EFF;
-    background-color: var(--vscode-editor-background);
+    color: var(--vscode-button-background, #409EFF) !important;
+    background-color: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.1)) !important;
 }
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.selected.hover {
-    background-color: #F5F7FA
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important
 }
 
 .el-select-dropdown.is-multiple .el-select-dropdown__item.selected::after {
@@ -2522,53 +3148,59 @@ body {
     padding: 10px 0;
     margin: 0;
     text-align: center;
-    color: #999;
-    font-size: 14px
+    color: var(--vscode-descriptionForeground, var(--vscode-foreground)) !important;
+    font-size: var(--vscode-font-size, 14px) !important
 }
 
 .el-select-dropdown__wrap {
-    max-height: 274px
+    max-height: 274px;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important
 }
 
 .el-select-dropdown__list {
     list-style: none;
-    padding: 6px 0;
+    padding: 4px 0 !important;
     margin: 0;
     -webkit-box-sizing: border-box;
-    box-sizing: border-box
+    box-sizing: border-box;
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important
 }
 
 .el-select-dropdown__item {
-    font-size: 14px;
-    padding: 0 20px;
+    font-size: var(--vscode-font-size, 13px) !important;
+    padding: 0 12px !important;
     position: relative;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--input-color);
-    height: 34px;
-    line-height: 34px;
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+    height: 28px !important;
+    line-height: 28px !important;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    cursor: pointer
+    cursor: pointer;
+    background-color: transparent !important
 }
 
 .el-select-dropdown__item.is-disabled {
-    color: var(--editor-color);
-    cursor: not-allowed
+    color: var(--vscode-disabledForeground, var(--vscode-foreground)) !important;
+    cursor: not-allowed;
+    opacity: 0.5
 }
 
 .el-select-dropdown__item.is-disabled:hover {
-    background-color: var(--vscode-editor-background);
+    background-color: transparent !important;
 }
 
 .el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
-    background-color: var(--second-bg-color);
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-foreground)) !important
 }
 
 .el-select-dropdown__item.selected {
-    color: #409EFF;
-    font-weight: 700
+    color: var(--vscode-button-background, #409EFF) !important;
+    font-weight: 600 !important;
+    background-color: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.1)) !important
 }
 
 .el-select-group {
@@ -15301,4 +15933,191 @@ body {
 .el-popconfirm__action {
     text-align: right;
     margin: 0
+}
+
+/* ============================================
+   Element Plus 2.x 下拉菜单主题增强样式
+   针对 :teleported="false" 的下拉菜单
+   ============================================ */
+
+/* 确保未 teleport 的下拉菜单容器使用正确主题色 */
+.el-select-dropdown.el-popper:not(.is-light),
+.el-select-dropdown:not(.el-popper) {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border: 1px solid var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+}
+
+/* 下拉菜单列表背景 */
+.el-select-dropdown__list,
+.el-select-dropdown .el-scrollbar__view {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 下拉选项基础样式 */
+.el-select-dropdown__item {
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+    background-color: transparent !important;
+}
+
+/* 下拉选项悬停状态 */
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-foreground)) !important;
+}
+
+/* 下拉选项选中状态 */
+.el-select-dropdown__item.selected {
+    color: var(--vscode-button-background, #409EFF) !important;
+    font-weight: 600 !important;
+    background-color: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.1)) !important;
+}
+
+.el-select-dropdown__item.selected:hover,
+.el-select-dropdown__item.selected.hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+}
+
+/* 下拉菜单空状态 */
+.el-select-dropdown__empty {
+    color: var(--vscode-descriptionForeground, var(--vscode-foreground)) !important;
+}
+
+/* 下拉菜单滚动条容器 */
+.el-select-dropdown__wrap,
+.el-select-dropdown .el-scrollbar,
+.el-select-dropdown .el-scrollbar__wrap {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 弹出层箭头样式 */
+.el-popper__arrow::before,
+.el-select-dropdown .el-popper__arrow::before {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+}
+
+/* 确保 el-popper 主题一致 */
+.el-popper.is-light,
+.el-popper.is-dark {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+}
+
+/* 下拉菜单内部所有元素继承主题色 */
+.el-select-dropdown *,
+.el-select-dropdown__list *,
+.el-select-dropdown__item * {
+    background-color: inherit;
+}
+
+/* 修复 Element Plus 2.x 下拉菜单白色背景问题 */
+.el-select-dropdown.el-popper,
+.el-select-dropdown {
+    --el-bg-color-overlay: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    --el-border-color-light: var(--vscode-dropdown-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+    --el-text-color-regular: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+}
+
+/* 下拉选项的 CSS 变量覆盖 */
+.el-select-dropdown__item {
+    --el-text-color-regular: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+}
+
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item:hover {
+    --el-fill-color-light: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+}
+
+/* ============================================
+   Element Plus 2.x 输入框和下拉框终极修复
+   使用 html body 前缀确保最高优先级
+   ============================================ */
+
+/* 输入框 - 所有状态 */
+html body .el-input .el-input__inner,
+html body .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+html body .el-input .el-input__inner:hover,
+html body .el-input__inner:hover {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+html body .el-input .el-input__inner:focus,
+html body .el-input__inner:focus {
+    border-color: var(--vscode-focusBorder, var(--vscode-button-background)) !important;
+}
+
+/* 下拉选择器的输入框 */
+html body .el-select .el-input .el-input__inner,
+html body .el-select .el-input.is-focus .el-input__inner {
+    background-color: var(--vscode-input-background) !important;
+    border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* 下拉菜单弹窗 - 强制覆盖 Element Plus CSS 变量 */
+html body .el-select-dropdown.el-popper,
+html body .el-select-dropdown {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-bg-color-overlay: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    --el-border-color-light: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-popper-border-radius: 2px !important;
+}
+
+/* 下拉菜单列表容器 */
+html body .el-select-dropdown__list,
+html body .el-select-dropdown .el-scrollbar,
+html body .el-select-dropdown .el-scrollbar__view {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 滚动条容器 */
+html body .el-select-dropdown__wrap {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+}
+
+/* 单个选项 */
+html body .el-select-dropdown__item {
+    color: var(--vscode-dropdown-foreground, var(--vscode-foreground)) !important;
+    background-color: transparent !important;
+}
+
+/* 选项悬停 */
+html body .el-select-dropdown__item.hover,
+html body .el-select-dropdown__item:hover {
+    background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15)) !important;
+    color: var(--vscode-list-hoverForeground, var(--vscode-foreground)) !important;
+}
+
+/* 选项选中 */
+html body .el-select-dropdown__item.selected {
+    color: var(--vscode-button-background, #409EFF) !important;
+    background-color: var(--vscode-list-activeSelectionBackground, rgba(128, 128, 128, 0.1)) !important;
+}
+
+/* 空状态 */
+html body .el-select-dropdown__empty {
+    color: var(--vscode-descriptionForeground, var(--vscode-foreground)) !important;
+}
+
+/* 弹出层箭头 */
+html body .el-popper__arrow::before,
+html body .el-select-dropdown .el-popper__arrow::before {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+}
+
+/* 确保 popper 主题一致 */
+html body .el-popper.is-light,
+html body .el-popper.is-dark {
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
+    border-color: var(--vscode-dropdown-border, rgba(128, 128, 128, 0.35)) !important;
+    --el-bg-color-overlay: var(--vscode-dropdown-background, var(--vscode-editor-background)) !important;
 }

@@ -32,7 +32,7 @@ export class MongoConnection extends IConnection {
         super()
         this.option = {
             connectTimeoutMS: this.node.connectTimeout ?? 5000, waitQueueTimeoutMS: this.node.requestTimeout,
-            ssl: this.node.useSSL, sslValidate: false,
+            ssl: this.node.useSSL, sslValidate: node.caPath ? true : false,
             sslCert: (node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
             sslKey: (node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,
         } as MongoClientOptions;
@@ -120,7 +120,6 @@ export class MongoConnection extends IConnection {
         if (sql == 'show dbs') {
             this.client.db().admin().listDatabases().then((res) => {
                 callback(null, res.databases.map((db: any) => ({ Database: db.name })))
-                console.log(res)
             })
         } else {
             try {

@@ -17,6 +17,10 @@ build/
 .vscode/
 !.vscode/extensions.json
 .vscode-test/
+.playwright-mcp/
+.codeartsdoer/
+.agents/
+.vscode/
 
 # 锁文件
 package-lock.json

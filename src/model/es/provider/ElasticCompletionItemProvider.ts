@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Console } from "@/common/Console";
 import { ElasticMatch } from './ElasticMatch';
 import { ElasticMatches } from './ElasticMatches';
 import routington = require('routington');
@@ -59,7 +60,7 @@ export class ElasticCompletionItemProvider implements vscode.CompletionItemProvi
         else if (this.isPathParamCompletion(esMatch, position))
             return this.providePathParamCompletionItem(esMatch, restSpec);
 
-        console.log(esMatch.Body.Text);
+        Console.log(esMatch.Body.Text);
         return [];
     }
 

@@ -6,8 +6,8 @@
       </div>
       <Toolbar :page="page" :showFullBtn="showFullBtn" :search.sync="table.search" :costTime="result.costTime" @changePage="changePage" @sendToVscode="sendToVscode" @export="exportOption.visible = true" @insert="$refs.editor.openInsert()" @deleteConfirm="deleteConfirm" @run="info.message = false;execute(toolbar.sql);" />
       <div v-if="info.message ">
-        <div v-if="info.error" class="info-panel" style="color:red !important" v-html="info.message"></div>
-        <div v-if="!info.error" class="info-panel" style="color: green !important;" v-html="info.message"></div>
+        <div v-if="info.error" class="info-panel" style="color:red !important">{{ info.message }}</div>
+        <div v-if="!info.error" class="info-panel" style="color: green !important;">{{ info.message }}</div>
       </div>
     </div>
     <!-- trigger when click -->
@@ -18,7 +18,7 @@
           <Controller :result="result" :toolbar="toolbar" />
         </template>
       </vxe-column>
-      <vxe-column v-for="(field,index) in (result.fields||[]).filter(field=>toolbar.showColumns.includes(field.name.toLowerCase()))" :key="index" :resizable="true" :field="field.name" :title="field.name" :sortable="true" :width="computeWidth(field,0)">
+      <vxe-column v-for="(field,index) in (result.fields||[]).filter(field=>toolbar.showColumns.includes(field.name.toLowerCase()))" :key="index" :resizable="true" :field="field.name" :title="field.name" :sortable="true" :width="computeWidth(field,0)" show-overflow="tooltip">
         <template #header="scope">
           <Header :result="result" :scope="scope" :index="index" />
         </template>
@@ -168,7 +168,6 @@ export default {
     this._messageHandler = ({ data }) => {
       if (!data) return;
       const response = data.content;
-      console.log(data);
       this.result.transId=response.transId;
       this.table.loading = false;
       switch (data.type) {
@@ -225,7 +224,11 @@ export default {
     vscodeEvent.emit("init");
     this._copyKeyupHandler = (event) => {
       if (event.key == "c" && event.ctrlKey) {
-        document.execCommand("copy");
+        // Use modern Clipboard API instead of deprecated execCommand
+        const selection = window.getSelection();
+        if (selection && selection.toString()) {
+          navigator.clipboard.writeText(selection.toString());
+        }
       }
     };
     window.addEventListener("keyup", this._copyKeyupHandler);
@@ -372,21 +375,35 @@ export default {
     },
     /**
      * compute column row width, get maxium of fieldName or value or fieldType by top 10 row.
+     * 改进：考虑中文字符宽度（中文约等于2个英文字符宽度）
      */
     computeWidth(field, index) {
       // only compute once.
       let key = field.name;
       if (this.table.widthItem[key]) return this.table.widthItem[key];
       if (!index) index = 0;
-      if (!this.result.data[index] || index > 10) return 70;
+      if (!this.result.data[index] || index > 10) return 80;
+      
       const value = this.result.data[index][key];
-      var dynamic = Math.max(
-        (key + "").length * 10,
-        (value + "").length * 10,
-        (field.type + "").length * 10
-      );
-      if (dynamic > 150) dynamic = 150;
-      if (dynamic < 70) dynamic = 70;
+      
+      // 计算字符串视觉宽度（中文字符计为2，英文计为1）
+      const getVisualLength = (str) => {
+        if (str == null) return 0;
+        let length = 0;
+        for (let char of String(str)) {
+          length += (char.charCodeAt(0) > 127) ? 1.6 : 1;
+        }
+        return length;
+      };
+      
+      const keyWidth = Math.max(getVisualLength(key), getVisualLength(field.type)) * 8 + 20;
+      const valueWidth = getVisualLength(value) * 8 + 20;
+      
+      var dynamic = Math.max(keyWidth, valueWidth, 80);
+      // 限制最大宽度，避免过宽
+      if (dynamic > 300) dynamic = 300;
+      if (dynamic < 80) dynamic = 80;
+      
       var nextDynamic = this.computeWidth(field, index + 1);
       if (dynamic < nextDynamic) dynamic = nextDynamic;
       // cache column width

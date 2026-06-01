@@ -3,7 +3,8 @@
  */
 export class Trans {
     public static transId: string;
+    private static counter: number = 0;
     public static begin() {
-        this.transId=new Date().getTime()+"query";
+        this.transId = `${Date.now()}-${++this.counter}-query`;
     }
 }

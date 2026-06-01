@@ -131,6 +131,10 @@ export class ExportService {
 
     private exportToCsv(filePath: string, fields: FieldInfo[], rows: any) {
         let csvContent = "";
+        // Add header row with column names
+        if (fields && fields.length > 0) {
+            csvContent += fields.map(f => this.escapeCsv(f.name)).join(",") + "\n";
+        }
         for (const row of rows) {
             for (const key in row) {
                 csvContent += `${this.escapeCsv(row[key])},`

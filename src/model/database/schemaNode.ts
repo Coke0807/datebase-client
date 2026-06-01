@@ -27,7 +27,7 @@ export class SchemaNode extends Node implements CopyAble {
         this.cacheSelf()
         this.iconPath = this.getIcon()
         const lcp = ConnectionManager.activeNode;
-        if (this.isActive(lcp) && (lcp.database == this.database) && (lcp.schema == this.schema)) {
+        if (this.isActive(lcp) && (lcp.database === this.database) && (lcp.schema === this.schema)) {
             this.iconPath=this.getIcon(true)
             this.description = `Active`
         }
@@ -35,7 +35,7 @@ export class SchemaNode extends Node implements CopyAble {
 
     private getIcon(active?: boolean): vscode.ThemeIcon {
 
-        const iconId = this.dbType == DatabaseType.MYSQL ? "database" : "symbol-struct"
+        const iconId = this.dbType === DatabaseType.MYSQL ? "database" : "symbol-struct"
         if(Util.supportColorIcon()){
             return new vscode.ThemeIcon(iconId, new vscode.ThemeColor(active?'charts.blue':'dropdown.foreground'));
         }
@@ -44,7 +44,7 @@ export class SchemaNode extends Node implements CopyAble {
 
     public getChildren(): Promise<Node[]> | Node[] {
 
-        if(this.dbType==DatabaseType.MONGO_DB){
+        if(this.dbType===DatabaseType.MONGO_DB){
             return [ new MongoTableGroup(this) ]
         }
 
@@ -72,9 +72,9 @@ export class SchemaNode extends Node implements CopyAble {
 
     public dropDatatabase() {
 
-        const target = this.dbType == DatabaseType.MSSQL || this.dbType == DatabaseType.PG ? 'schema' : 'database';
+        const target = this.dbType === DatabaseType.MSSQL || this.dbType === DatabaseType.PG ? 'schema' : 'database';
         vscode.window.showInputBox({ prompt: `Are you sure you want to drop ${target} ${this.schema} ?     `, placeHolder: `Input ${target} name to confirm.` }).then(async (inputContent) => {
-            if (inputContent && inputContent.toLowerCase() == this.schema.toLowerCase()) {
+            if (inputContent && inputContent.toLowerCase() === this.schema.toLowerCase()) {
                 this.execute(`DROP ${target} ${this.wrap(this.schema)}`).then(async () => {
                     for (const child of await this.getChildren()) {
                         child.setChildCache(null)
@@ -95,7 +95,7 @@ export class SchemaNode extends Node implements CopyAble {
 
 
         vscode.window.showInputBox({ prompt: `Dangerous: Are you sure you want to truncate database ${this.schema} ?     `, placeHolder: 'Input database name to confirm.' }).then(async (inputContent) => {
-            if (inputContent && inputContent.toLowerCase() == this.schema.toLowerCase()) {
+            if (inputContent && inputContent.toLowerCase() === this.schema.toLowerCase()) {
                 const connection = await ConnectionManager.getConnection(this);
                 QueryUnit.queryPromise(connection, this.dialect.truncateDatabase(this.schema)).then(async (res: any) => {
                     await QueryUnit.runBatch(connection, res.map(data => data.trun))

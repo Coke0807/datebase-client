@@ -22,7 +22,21 @@ export abstract class ConnectionPool<T> extends IConnection {
                 return connection
             }
         }
-        this.waitQueue.push(callback)
+        // Add timeout to prevent permanent hangs
+        const wrappedCallback = callback;
+        const timeoutId = setTimeout(() => {
+            const idx = this.waitQueue.indexOf(wrapped);
+            if (idx !== -1) {
+                this.waitQueue.splice(idx, 1);
+                Console.log('Connection pool: wait queue timeout (30s)');
+                if (wrappedCallback) wrappedCallback(null);
+            }
+        }, 30000);
+        const wrapped = (connection: IpoolConnection<T>) => {
+            clearTimeout(timeoutId);
+            if (wrappedCallback) wrappedCallback(connection);
+        };
+        this.waitQueue.push(wrapped)
         this.fill()
     }
 
@@ -88,7 +102,9 @@ export abstract class ConnectionPool<T> extends IConnection {
     public endConnnection(poolConnection: IpoolConnection<T>): void {
         try {
             (poolConnection.actual as any).end();
-        } catch (error) { }
+        } catch (error) {
+            Console.log(`Connection pool: error ending connection: ${error}`);
+        }
         delete this.connections[poolConnection.id];
     }
     public end() {

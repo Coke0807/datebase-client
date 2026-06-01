@@ -10,7 +10,8 @@ export class SqliTeDialect extends SqlDialect{
         return `SELECT name index_name FROM sqlite_master WHERE type='index' and tbl_name='${tbl}' `;
     }
     dropIndex(table: string, indexName: string): string {
-        return `DROP INDEX ${indexName};`
+        const idx = this.validateIdentifier(indexName);
+        return `DROP INDEX ${idx};`
     }
     showSchemas(): string {
         throw new Error("Method not implemented.");
@@ -22,7 +23,8 @@ export class SqliTeDialect extends SqlDialect{
         throw new Error("Method not implemented.");
     }
     showColumns(database: string, table: string): string {
-        return `PRAGMA table_info(${table})`;
+        const tbl = this.validateIdentifier(table);
+        return `PRAGMA table_info(${tbl})`;
     }
     showViews(database: string): string {
         return `SELECT name, type FROM sqlite_master WHERE type="view" AND name <> 'sqlite_sequence' AND name <> 'sqlite_stat1' ORDER BY type ASC, name ASC;`;
@@ -43,7 +45,8 @@ export class SqliTeDialect extends SqlDialect{
         throw new Error("Method not implemented.");
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT * FROM ${table} LIMIT ${pageSize};`;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT * FROM ${tbl} LIMIT ${pageSize};`;
     }
     countSql(database: string, table: string): string {
         throw new Error("Method not implemented.");

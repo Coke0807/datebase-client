@@ -43,7 +43,7 @@ export class ConnectService {
                     } else {
                         handler.emit("connect")
                     }
-                    const exists = plat == 'win32' ? true : commandExistsSync("sqlite");
+                    const exists = plat === 'win32' ? true : commandExistsSync("sqlite");
                     handler.emit("sqliteState", exists)
                 }).on("installSqlite", () => {
                     let command: string;
@@ -98,7 +98,7 @@ export class ConnectService {
     }
 
     public async connect(connectionNode: Node): Promise<void> {
-        if (connectionNode.dbType == DatabaseType.SSH) {
+        if (connectionNode.dbType === DatabaseType.SSH) {
             connectionNode.ssh.key=connectionNode.key;
             await ClientManager.getSSH(connectionNode.ssh, {withSftp:false})
             return;
@@ -111,7 +111,7 @@ export class ConnectService {
         const configPath = resolve(FileManager.getPath("config.json"))
         return workspace.onDidSaveTextDocument(e => {
             const changePath = resolve(e.uri.fsPath);
-            if (changePath == configPath) {
+            if (changePath === configPath) {
                 this.saveConfig(configPath)
             }
         });

@@ -5,10 +5,14 @@ import { SqlDialect } from "./sqlDialect";
 
 export class MysqlDialect extends SqlDialect {
     createIndex(createIndexParam: CreateIndexParam): string {
-        return `ALTER TABLE ${createIndexParam.table} ADD ${createIndexParam.type} (${createIndexParam.column})`;
+        const tbl = this.validateIdentifier(createIndexParam.table);
+        const col = this.validateIdentifier(createIndexParam.column);
+        return `ALTER TABLE ${tbl} ADD ${createIndexParam.type} (${col})`;
     }
     dropIndex(table: string, indexName: string): string {
-        return `ALTER TABLE ${table} DROP INDEX ${indexName}`
+        const tbl = this.validateIdentifier(table);
+        const idx = this.validateIdentifier(indexName);
+        return `ALTER TABLE ${tbl} DROP INDEX ${idx}`
     }
     showIndex(database: string, table: string): string {
         const db = this.validateIdentifier(database);
@@ -25,8 +29,9 @@ export class MysqlDialect extends SqlDialect {
         return 'show processlist'
     }
     addColumn(table: string): string {
+        const tbl = this.validateIdentifier(table);
         return `ALTER TABLE
-        ${table} 
+        ${tbl} 
     ADD 
         COLUMN [column] [type] NOT NULL comment '';`;
     }
@@ -57,7 +62,8 @@ export class MysqlDialect extends SqlDialect {
             // mysql not using connection poll, so need ping connnection active.
             return "select 1";
         }
-        return `use \`${database}\``;
+        const db = this.validateIdentifier(database);
+        return `use \`${db}\``;
     }
     updateTable(update: UpdateTableParam): string {
         const { table, newTableName, comment, newComment } = update
@@ -77,7 +83,8 @@ export class MysqlDialect extends SqlDialect {
         return `SELECT Concat('TRUNCATE TABLE \`',table_schema,'\`.\`',TABLE_NAME, '\`;') trun FROM INFORMATION_SCHEMA.TABLES where  table_schema ='${db}' and TABLE_TYPE<>'VIEW';`
     }
     createDatabase(database: string): string {
-        return `create database \`${database}\` default character set = 'utf8mb4' `;
+        const db = this.validateIdentifier(database);
+        return `create database \`${db}\` default character set = 'utf8mb4' `;
     }
     showTableSource(database: string, table: string): string {
         const db = this.validateIdentifier(database);
@@ -126,10 +133,12 @@ export class MysqlDialect extends SqlDialect {
         return `SELECT TABLE_NAME name FROM information_schema.VIEWS  WHERE TABLE_SCHEMA = '${db}'`;
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT * FROM ${table} LIMIT ${pageSize};`;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT * FROM ${tbl} LIMIT ${pageSize};`;
     }
     countSql(database: string, table: string): string {
-        return `SELECT count(*) FROM ${table};`;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT count(*) FROM ${tbl};`;
     }
     showTables(database: string): string {
         const db = this.validateIdentifier(database);

@@ -13,8 +13,18 @@
 
 <script>
 export default {
-  props: ["connectionOption"],
+  inject: ['connectionOption'],
 };
 </script>
 
-<style></style>
+<style scoped>
+/* FTP 组件样式 - 使用 VS Code 主题变量 */
+:deep(.el-switch__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-switch__core) {
+  border-color: var(--vscode-button-background) !important;
+  background-color: var(--vscode-button-background) !important;
+}
+</style>

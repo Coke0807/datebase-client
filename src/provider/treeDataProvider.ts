@@ -34,30 +34,27 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
     }
 
     public async getChildren(element?: Node): Promise<Node[]> {
-        return new Promise(async (res, rej) => {
-            if (!element) {
-                res(this.getConnectionNodes())
-                return;
-            }
-            try {
-                let mark = setTimeout(() => {
-                    res([new InfoNode(`Connect time out!`)])
-                    mark = null;
-                }, element.connectTimeout ?? 5000);
-                const children = await element.getChildren();
-                if (mark) {
-                    clearTimeout(mark)
-                    for (const child of children) {
-                        child.parent = element;
-                    }
-                    res(children);
-                } else {
-                    this.reload(element)
+        if (!element) {
+            return this.getConnectionNodes();
+        }
+        try {
+            let mark = setTimeout(() => {
+                mark = null;
+                this.reload(element)
+            }, element.connectTimeout ?? 5000);
+            const children = await element.getChildren();
+            if (mark) {
+                clearTimeout(mark)
+                for (const child of children) {
+                    child.parent = element;
                 }
-            } catch (error) {
-                res([new InfoNode(error)])
+                return children;
+            } else {
+                return [new InfoNode(`Connect time out!`)];
             }
-        })
+        } catch (error) {
+            return [new InfoNode(error)];
+        }
     }
 
     public async openConnection(connectionNode: ConnectionNode) {
@@ -76,7 +73,7 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
         node.context = node.global ? this.context.globalState : this.context.workspaceState
 
         const isGlobal = (node as any).isGlobal;
-        const configNotChange = newKey == node.connectionKey && isGlobal == node.global
+        const configNotChange = newKey === node.connectionKey && isGlobal === node.global
         if (configNotChange) {
             await node.indent({ command: CommandKey.update })
             return;
@@ -96,7 +93,10 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
 
     private getKeyByNode(connectionNode: Node): string {
         const dbType = connectionNode.dbType;
-        if (dbType == DatabaseType.ES || dbType == DatabaseType.REDIS || dbType == DatabaseType.SSH || dbType == DatabaseType.FTP || dbType == DatabaseType.MONGO_DB) {
+        // H2 is not in NOSQL list → uses SQL connection path (DATBASE_CONECTIONS).
+        // H2 uses Catalog path (hasCatalog=true since dbType !== MYSQL),
+        // which calls showDatabases() → returns SCHEMA_NAME aliased as "Database".
+        if (dbType === DatabaseType.ES || dbType === DatabaseType.REDIS || dbType === DatabaseType.SSH || dbType === DatabaseType.FTP || dbType === DatabaseType.MONGO_DB) {
             return CacheKey.NOSQL_CONNECTION;
         }
         return CacheKey.DATBASE_CONECTIONS;
@@ -154,14 +154,14 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
         // 兼容老版本的连接信息
         if (!connectInfo.dbType) connectInfo.dbType = DatabaseType.MYSQL
         let node: Node;
-        if (connectInfo.dbType == DatabaseType.ES) {
+        if (connectInfo.dbType === DatabaseType.ES) {
             node = new EsConnectionNode(key, connectInfo);
-        } else if (connectInfo.dbType == DatabaseType.REDIS) {
+        } else if (connectInfo.dbType === DatabaseType.REDIS) {
             node = new RedisConnectionNode(key, connectInfo)
-        } else if (connectInfo.dbType == DatabaseType.SSH) {
+        } else if (connectInfo.dbType === DatabaseType.SSH) {
             connectInfo.ssh.key = connectInfo.key
             node = new SSHConnectionNode(key, connectInfo, connectInfo.ssh, connectInfo.name)
-        } else if (connectInfo.dbType == DatabaseType.FTP) {
+        } else if (connectInfo.dbType === DatabaseType.FTP) {
             node = new FTPConnectionNode(key, connectInfo)
         } else {
             node = new ConnectionNode(key, connectInfo)
@@ -188,7 +188,7 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
         const dbIdMap = new Map<string, Node>();
         const connectionNodes = await this.getConnectionNodes()
         for (const cNode of connectionNodes) {
-            if (cNode.dbType == DatabaseType.SQLITE) {
+            if (cNode.dbType === DatabaseType.SQLITE) {
                 const uid = cNode.label;
                 dbIdList.push(uid)
                 dbIdMap.set(uid, cNode)
@@ -196,7 +196,7 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
             }
 
             let schemaList: Node[];
-            if (cNode.dbType == DatabaseType.MSSQL || cNode.dbType == DatabaseType.PG) {
+            if (cNode.dbType === DatabaseType.MSSQL || cNode.dbType === DatabaseType.PG) {
                 const tempList = DatabaseCache.getSchemaListOfConnection(cNode.uid);
                 schemaList = [];
                 for (const catalogNode of tempList) {
@@ -210,7 +210,7 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
             for (const schemaNode of schemaList) {
                 if (schemaNode instanceof UserGroup || schemaNode instanceof CatalogNode) { continue }
                 let uid = `${cNode.label}#${schemaNode.schema}`
-                if (cNode.dbType == DatabaseType.PG || cNode.dbType == DatabaseType.MSSQL) {
+                if (cNode.dbType === DatabaseType.PG || cNode.dbType === DatabaseType.MSSQL) {
                     uid = `${cNode.label}#${schemaNode.database}#${schemaNode.schema}`
                 }
                 dbIdList.push(uid)
@@ -219,7 +219,7 @@ export class DbTreeDataProvider implements vscode.TreeDataProvider<Node> {
 
         }
 
-        if (dbIdList.length == 0) {
+        if (dbIdList.length === 0) {
             return;
         }
 

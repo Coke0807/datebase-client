@@ -20,7 +20,7 @@ export class CatalogNode extends Node implements CopyAble {
         this.init(this.parent)
         this.cacheSelf()
         const lcp = ConnectionManager.activeNode;
-        if (this.isActive(lcp) && (lcp.database == this.database)) {
+        if (this.isActive(lcp) && (lcp.database === this.database)) {
             if (Util.supportColorIcon()) {
                 this.iconPath=new vscode.ThemeIcon("database", new vscode.ThemeColor('charts.blue'));
             }else{
@@ -30,7 +30,7 @@ export class CatalogNode extends Node implements CopyAble {
     }
 
     public getChildren(): Promise<Node[]> | Node[] {
-          if(this.dbType==DatabaseType.MONGO_DB){
+          if(this.dbType===DatabaseType.MONGO_DB){
               return new MongoTableGroup(this).getChildren()
         }
         return this.parent.getChildren.call(this,true)
@@ -45,7 +45,7 @@ export class CatalogNode extends Node implements CopyAble {
     public dropDatatabase() {
 
         vscode.window.showInputBox({ prompt: `Are you sure you want to drop database ${this.schema} ?     `, placeHolder: 'Input database name to confirm.' }).then(async (inputContent) => {
-            if (inputContent && inputContent.toLowerCase() == this.database.toLowerCase()) {
+            if (inputContent && inputContent.toLowerCase() === this.database.toLowerCase()) {
                 this.execute(`DROP DATABASE ${this.wrap(this.database)}`).then(() => {
                     DatabaseCache.clearDatabaseCache(`${this.getConnectId()}`)
                     DbTreeDataProvider.refresh(this.parent);

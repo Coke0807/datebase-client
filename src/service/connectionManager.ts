@@ -25,7 +25,8 @@ import { H2Connection } from './connect/h2Connection';
 interface ConnectionWrapper {
     connection: IConnection;
     ssh: SSHConfig;
-    schema?: string
+    schema?: string;
+    lastUsedAt?: number;
 }
 
 export interface GetRequest {
@@ -38,6 +39,27 @@ export class ConnectionManager {
     public static activeNode: Node;
     private static alivedConnection: { [key: string]: ConnectionWrapper } = {};
     private static tunnelService = new SSHTunnelService();
+    private static readonly MAX_CONNECTIONS = 50;
+    private static readonly IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+    private static idleCheckTimer: ReturnType<typeof setInterval> | null = null;
+
+    /**
+     * Start periodic idle connection cleanup.
+     * Called lazily on first getConnection().
+     */
+    private static ensureIdleCheckRunning() {
+        if (this.idleCheckTimer) return;
+        this.idleCheckTimer = setInterval(() => {
+            const now = Date.now();
+            for (const key of Object.keys(this.alivedConnection)) {
+                const wrapper = this.alivedConnection[key];
+                if (wrapper && wrapper.lastUsedAt && (now - wrapper.lastUsedAt) > this.IDLE_TIMEOUT_MS) {
+                    Console.log(`ConnectionManager: closing idle connection '${key}' (idle > ${this.IDLE_TIMEOUT_MS / 60000}min)`);
+                    this.end(key, wrapper);
+                }
+            }
+        }, 5 * 60 * 1000); // check every 5 minutes
+    }
 
     public static tryGetConnection(): Node {
 
@@ -72,74 +94,105 @@ export class ConnectionManager {
         DbTreeDataProvider.refresh()
     }
 
-    public static getConnection(connectionNode: Node, getRequest: GetRequest = { retryCount: 1 }): Promise<IConnection> {
+    /**
+     * Clean up all active connections and SSH tunnels.
+     * Called on extension deactivation.
+     */
+    public static cleanup() {
+        if (this.idleCheckTimer) {
+            clearInterval(this.idleCheckTimer);
+            this.idleCheckTimer = null;
+        }
+        for (const key of Object.keys(this.alivedConnection)) {
+            try {
+                this.end(key, this.alivedConnection[key]);
+            } catch (error) {
+                Console.log(`ConnectionManager: error during cleanup '${key}': ${error}`);
+            }
+        }
+        this.alivedConnection = {};
+        this.activeNode = null;
+    }
+
+    public static async getConnection(connectionNode: Node, getRequest: GetRequest = { retryCount: 1 }): Promise<IConnection> {
         if (!connectionNode) {
             throw new Error("Connection is dead!")
         }
-        return new Promise(async (resolve, reject) => {
-            try {
-                NodeUtil.of(connectionNode)
-                if (!getRequest.retryCount) getRequest.retryCount = 1;
-                const key = getRequest.sessionId || connectionNode.getConnectId();
-                const connection = this.alivedConnection[key];
-                if (connection) {
-                    if (connection.connection.isAlive()) {
-                        if (connection.schema != connectionNode.schema) {
-                            const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
-                            try {
-                                if (sql) {
-                                    await QueryUnit.queryPromise(connection.connection, sql, false)
-                                }
-                                connection.schema = connectionNode.schema
-                                resolve(connection.connection);
-                                return;
-                            } catch (err) {
-                                ConnectionManager.end(key, connection);
-                            }
-                        } else {
-                            resolve(connection.connection);
-                            return;
+        this.ensureIdleCheckRunning();
+        NodeUtil.of(connectionNode)
+        if (!getRequest.retryCount) getRequest.retryCount = 1;
+        const key = getRequest.sessionId || connectionNode.getConnectId();
+        const connection = this.alivedConnection[key];
+        if (connection) {
+            if (connection.connection.isAlive()) {
+                connection.lastUsedAt = Date.now();
+                if (connection.schema != connectionNode.schema) {
+                    const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
+                    try {
+                        if (sql) {
+                            await QueryUnit.queryPromise(connection.connection, sql, false)
                         }
+                        connection.schema = connectionNode.schema
+                        return connection.connection;
+                    } catch (err) {
+                        ConnectionManager.end(key, connection);
                     }
+                } else {
+                    return connection.connection;
                 }
-
-                const ssh = connectionNode.ssh;
-                let connectOption = connectionNode;
-                if (connectOption.usingSSH) {
-                    connectOption = await this.tunnelService.createTunnel(connectOption, (err) => {
-                        reject(err?.message || err?.errno);
-                        if (err.errno == 'EADDRINUSE') { return; }
-                        this.alivedConnection[key] = null
-                    })
-                    if (!connectOption) {
-                        reject("create ssh tunnel fail!");
-                        return;
-                    }
-                }
-                const newConnection = this.create(connectOption);
-                this.alivedConnection[key] = { connection: newConnection, ssh };
-                newConnection.connect(async (err: Error) => {
-                    if (err) {
-                        this.end(key, this.alivedConnection[key])
-                        reject(err)
-                    } else {
-                        try {
-                            const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
-                            if (connectionNode.schema && sql) {
-                                await QueryUnit.queryPromise(newConnection, sql, false)
-                            }
-                        } catch (error) {
-                            console.log(error)
-                        }
-
-                        resolve(newConnection);
-                    }
-                });
-            } catch (err) {
-                reject(err);
             }
-        });
+        }
 
+        // Max connections limit — evict oldest idle connection if at capacity
+        const activeKeys = Object.keys(this.alivedConnection);
+        if (activeKeys.length >= this.MAX_CONNECTIONS) {
+            let oldestKey: string | null = null;
+            let oldestTime = Infinity;
+            for (const k of activeKeys) {
+                const w = this.alivedConnection[k];
+                if (w?.lastUsedAt && w.lastUsedAt < oldestTime) {
+                    oldestTime = w.lastUsedAt;
+                    oldestKey = k;
+                }
+            }
+            if (oldestKey && oldestKey !== key) {
+                Console.log(`ConnectionManager: evicting idle connection '${oldestKey}' (max ${this.MAX_CONNECTIONS} reached)`);
+                this.end(oldestKey, this.alivedConnection[oldestKey]);
+            }
+        }
+
+        const ssh = connectionNode.ssh;
+        let connectOption = connectionNode;
+        if (connectOption.usingSSH) {
+            connectOption = await this.tunnelService.createTunnel(connectOption, (err) => {
+                if (err.errno == 'EADDRINUSE') { return; }
+                this.alivedConnection[key] = null
+            })
+            if (!connectOption) {
+                throw new Error("create ssh tunnel fail!");
+            }
+        }
+        const newConnection = this.create(connectOption);
+        this.alivedConnection[key] = { connection: newConnection, ssh, lastUsedAt: Date.now() };
+
+        return new Promise<IConnection>((resolve, reject) => {
+            newConnection.connect(async (err: Error) => {
+                if (err) {
+                    this.end(key, this.alivedConnection[key])
+                    reject(err)
+                } else {
+                    try {
+                        const sql = connectionNode?.dialect?.pingDataBase(connectionNode.schema);
+                        if (connectionNode.schema && sql) {
+                            await QueryUnit.queryPromise(newConnection, sql, false)
+                        }
+                    } catch (error) {
+                        Console.log(error)
+                    }
+                    resolve(newConnection);
+                }
+            });
+        });
     }
 
     private static create(opt: Node) {
@@ -173,6 +226,7 @@ export class ConnectionManager {
             this.tunnelService.closeTunnel(key)
             connection.connection.end();
         } catch (error) {
+            Console.log(`ConnectionManager: error closing connection '${key}': ${error}`);
         }
     }
 

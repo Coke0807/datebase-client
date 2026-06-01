@@ -160,16 +160,16 @@
       </section>
     </template>
 
-    <section class="flex items-center">
+    <section class="switch-section flex flex-wrap items-center">
       <div
-        class="inline-block mb-2 mr-10"
+        class="switch-item inline-block mb-2 mr-10"
         v-if="connectionOption.dbType != 'SSH' && connectionOption.dbType != 'SQLite'"
       >
         <label class="mr-2 font-bold">{{ t('connect.sshTunnel') }}</label>
         <el-switch v-model="connectionOption.usingSSH"></el-switch>
       </div>
       <div
-        class="inline-block mb-2 mr-10"
+        class="switch-item inline-block mb-2 mr-10"
         v-if="
           connectionOption.dbType == 'MySQL' ||
           connectionOption.dbType == 'PostgreSQL' ||
@@ -180,11 +180,11 @@
         <label class="inline-block mr-5 font-bold w-18">{{ t('connect.useSSL') }}</label>
         <el-switch v-model="connectionOption.useSSL"></el-switch>
       </div>
-      <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
+      <div class="switch-item inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
         <label class="inline-block mr-5 font-bold w-18">{{ t('connect.srvRecord') }}</label>
         <el-switch v-model="connectionOption.srv"></el-switch>
       </div>
-      <div class="inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
+      <div class="switch-item inline-block mb-2 mr-10" v-if="connectionOption.dbType === 'MongoDB'">
         <label class="inline-block mr-5 font-bold w-18">{{ t('connect.useConnectionString') }}</label>
         <el-switch v-model="connectionOption.useConnectionString"></el-switch>
       </div>
@@ -229,6 +229,9 @@ let vscodeEvent;
 export default {
   name: "Connect",
   components: { ElasticSearch, SQLite, SQLServer, SSH, SSL, FTP, H2 },
+  provide() {
+    return { connectionOption: this.connectionOption };
+  },
   data() {
     return {
       connectionOption: {
@@ -258,7 +261,7 @@ export default {
           port: 22,
           username: "root",
           type: "password",
-          watingTime: 5000,
+          waitingTime: 5000,
           algorithms: {
             cipher: [],
           },
@@ -294,7 +297,6 @@ export default {
     vscodeEvent
       .on("edit", (node) => {
         this.editModel = true;
-        console.log(node);
         this.connectionOption = node;
       })
       .on("connect", (node) => {
@@ -425,48 +427,38 @@ export default {
           this.connectionOption.password = "";
           this.connectionOption.port = 9092;
           this.connectionOption.database = "test";
+          // 修复：H2 切换时确保 h2Mode 有有效值，否则下拉框显示空白
+          if (!this.connectionOption.h2Mode) {
+            this.connectionOption.h2Mode = "pg";
+          }
           break;
       }
       this.$forceUpdate();
     },
     "connectionOption.connectionUrl"(value) {
-      let connectionUrl = this.connectionOption.connectionUrl;
-
-      const srvRegex = /(?<=mongodb\+).+?(?=:\/\/)/;
-      const srv = connectionUrl.match(srvRegex);
-      if (srv) {
-        this.connectionOption.srv = true;
-        connectionUrl = connectionUrl.replace(srvRegex, "");
-      }
-      const userRegex = /(?<=\/\/).+?(?=\:)/;
-      const user = connectionUrl.match(userRegex);
-      if (user) {
-        this.connectionOption.user = user[0];
-        connectionUrl = connectionUrl.replace(userRegex, "");
-      }
-      const passwordRegex = /(?<=\/\/:).+?(?=@)/;
-      const password = connectionUrl.match(passwordRegex);
-      if (password) {
-        this.connectionOption.password = password[0];
-        connectionUrl = connectionUrl.replace(passwordRegex, "");
-      }
-
-      const hostRegex = /(?<=@).+?(?=[:\/])/;
-      const host = connectionUrl.match(hostRegex);
-      if (host) {
-        this.connectionOption.host = host[0];
-        connectionUrl = connectionUrl.replace(hostRegex, "");
-      }
-
-      if (!this.connectionOption.srv) {
-        const portRegex = /(?<=\:).\d+/;
-        const port = connectionUrl.match(portRegex);
-        if (port) {
-          this.connectionOption.port = port[0];
-          connectionUrl = connectionUrl.replace(portRegex, "");
+      try {
+        // L12: Use URL constructor for reliable parsing instead of sequential regex
+        let rawUrl = this.connectionOption.connectionUrl;
+        // Detect SRV protocol (mongodb+srv://)
+        const srvMatch = rawUrl.match(/mongodb\+/);
+        if (srvMatch) {
+          this.connectionOption.srv = true;
+          // Normalize to standard mongodb:// for URL parsing
+          rawUrl = rawUrl.replace(/\+srv/, '');
+        } else {
+          this.connectionOption.srv = false;
         }
+        const parsed = new URL(rawUrl);
+        if (parsed.username) this.connectionOption.user = decodeURIComponent(parsed.username);
+        if (parsed.password) this.connectionOption.password = decodeURIComponent(parsed.password);
+        if (parsed.hostname) this.connectionOption.host = parsed.hostname;
+        if (parsed.port) this.connectionOption.port = parsed.port;
+        if (parsed.pathname && parsed.pathname.length > 1) {
+          this.connectionOption.database = parsed.pathname.substring(1);
+        }
+      } catch (e) {
+        // Invalid URL — leave fields as-is
       }
-
       this.$forceUpdate();
     },
   },
@@ -474,74 +466,243 @@ export default {
 </script>
 
 <style scoped>
+/* 强制使用 VS Code 主题背景 */
 .connect-container {
   width: 100%;
   max-width: 1300px;
+  padding: 16px;
+  background-color: var(--vscode-editor-background);
+  min-height: 100vh;
 }
 
+/* 标签页样式 - 类似 VS Code 的 Tab 样式 */
 .tab {
-  border-bottom: 1px solid var(--vscode-dropdown-border);
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
   display: flex;
   padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+  gap: 2px;
+  background-color: var(--vscode-editor-background);
 }
 
 .tab__item {
   list-style: none;
   cursor: pointer;
   font-size: 13px;
-  padding: 7px 10px;
-  color: var(--vscode-foreground);
-  border-bottom: 1px solid transparent;
+  padding: 8px 12px;
+  color: var(--vscode-tab-inactiveForeground, var(--vscode-foreground)) !important;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  border-radius: 4px 4px 0 0;
+  background-color: transparent;
 }
 
 .tab__item:hover {
-  color: var(--vscode-panelTitle-activeForeground);
+  color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+  background-color: var(--vscode-tab-hoverBackground, var(--vscode-list-hoverBackground));
 }
 
 .tab__item--active {
-  color: var(--vscode-panelTitle-activeForeground);
-  border-bottom-color: var(--vscode-panelTitle-activeForeground);
+  color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+  border-bottom-color: var(--vscode-tab-activeBorder, var(--vscode-button-background));
+  background-color: var(--vscode-tab-activeBackground, transparent);
+  font-weight: 500;
 }
 
+/* 数字输入框去除箭头 */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* 按钮样式 - 与 VS Code 按钮一致 */
 .button {
-  padding: 4px 14px;
+  padding: 6px 16px;
   border: 0;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   outline: none;
-  @apply font-bold;
+  font-weight: 500;
   cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  font-size: var(--vscode-font-size);
+  height: 28px;
+  line-height: 1;
 }
 
 .button--primary {
-  color: var(--vscode-button-foreground);
-  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground) !important;
+  background-color: var(--vscode-button-background) !important;
+  border: 1px solid var(--vscode-button-background) !important;
 }
 
 .button--primary:hover {
-  background-color: var(--vscode-button-hoverBackground);
+  background-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+  border-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
 }
 
+.button--primary:active {
+  background-color: var(--vscode-button-background) !important;
+}
+
+.button--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 面板样式 - 用于错误和成功提示 */
 .panel {
-  border-left-width: 5px;
+  border-left-width: 4px;
   border-left-style: solid;
-  background: var(--vscode-textBlockQuote-background);
+  background: var(--vscode-textBlockQuote-background, var(--vscode-editor-background));
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px;
+  margin: 8px 0;
 }
 
 .error {
-  border-color: var(--vscode-inputValidation-errorBorder);
+  border-color: var(--vscode-inputValidation-errorBorder, #f14c4c);
+  background-color: var(--vscode-inputValidation-errorBackground, rgba(241, 76, 76, 0.15));
 }
 
 .success {
-  border-color: green;
+  border-color: var(--vscode-testing.iconPassed, #4ec9b0);
+  background-color: rgba(78, 201, 176, 0.15);
 }
 
 .panel__text {
-  line-height: 2;
+  line-height: 1.6;
+  color: var(--vscode-foreground) !important;
+}
+
+/* 表单区域样式 */
+section {
+  margin-bottom: 4px;
+  background-color: var(--vscode-editor-background);
+}
+
+/* 必填标记样式 */
+.text-red-600 {
+  color: var(--vscode-errorForeground, #f14c4c) !important;
+}
+
+/* 标签样式 - 强制覆盖 */
+label {
+  color: var(--vscode-foreground) !important;
+  font-size: var(--vscode-font-size) !important;
+  font-weight: 500;
+}
+
+/* 标题样式 */
+h1 {
+  color: var(--vscode-foreground) !important;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  padding: 16px 0 12px 0;
+  background-color: var(--vscode-editor-background);
+}
+
+/* 确保所有文字都使用 VS Code 主题色 */
+span, div, p {
+  color: var(--vscode-foreground);
+}
+
+/* 输入框容器 */
+.inline-block {
+  background-color: var(--vscode-editor-background);
+}
+
+/* 开关区域布局 - 修复错位 */
+.switch-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 32px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  min-height: 32px;
+  background-color: var(--vscode-editor-background);
+}
+
+.switch-item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  min-height: 28px;
+  background-color: var(--vscode-editor-background);
+  line-height: 1;
+}
+
+.switch-item label {
+  margin-right: 8px;
+  margin-bottom: 0;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Element Plus 开关样式强制覆盖 */
+:deep(.el-switch) {
+  display: inline-flex;
+  align-items: center;
+  height: 22px !important;
+  line-height: 22px !important;
+  vertical-align: middle;
+}
+
+:deep(.el-switch__core) {
+  border: 1px solid var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+  background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+  border-radius: 12px !important;
+  height: 20px !important;
+  width: 38px !important;
+  margin: 0 2px !important;
+}
+
+:deep(.el-switch__core::after) {
+  background-color: var(--vscode-foreground) !important;
+  width: 14px !important;
+  height: 14px !important;
+  top: 2px !important;
+  left: 2px !important;
+}
+
+:deep(.el-switch.is-checked .el-switch__core) {
+  border-color: var(--vscode-button-background) !important;
+  background-color: var(--vscode-button-background) !important;
+}
+
+:deep(.el-switch.is-checked .el-switch__core::after) {
+  background-color: var(--vscode-button-foreground) !important;
+  left: 100% !important;
+  transform: translateX(-100%) !important;
+  margin-left: -2px !important;
+}
+
+/* 单选框样式 */
+:deep(.el-radio) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-radio__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: var(--vscode-button-background) !important;
+  background-color: var(--vscode-button-background) !important;
+}
+
+:deep(.el-radio__input.is-checked + .el-radio__label) {
+  color: var(--vscode-button-background) !important;
 }
 </style>

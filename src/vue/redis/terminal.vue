@@ -220,14 +220,7 @@ export default {
 </script>
 
 <style scoped>
-body {
-  padding: 0;
-  margin-left: 1px;
-  background-color: #303845;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", Arial, sans-serif;
-}
-
+/* L8: body styles moved to non-scoped block below since body doesn't carry scoped attributes */
 .cli-dailog .el-dialog__body {
   padding: 0 20px;
 }
@@ -237,32 +230,44 @@ body {
   line-height: 34px !important;
 }
 
-.input-suggestion input {
-  color: #babdc1;
-  background: #263238;
-  border-top: 0px;
-  border-radius: 0 0 4px 4px;
+/* 输入建议框 - 终端样式 */
+.input-suggestion :deep(.el-input__inner) {
+  color: var(--vscode-foreground) !important;
+  background: var(--vscode-terminal-background, var(--vscode-input-background)) !important;
+  border-top: 0 !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  border-radius: 0 0 4px 4px !important;
+  font-family: var(--vscode-editor-font-family, monospace) !important;
 }
 
-.dark-mode .input-suggestion input {
-  color: #f7f7f7;
-  background: #324148;
+.input-suggestion :deep(.el-input__inner::-webkit-input-placeholder) {
+  color: var(--vscode-input-placeholderForeground) !important;
 }
 
-.input-suggestion input::-webkit-input-placeholder {
-  color: #8a8b8e;
-}
-
+/* CLI 内容区 - 终端样式 */
 #cli-content {
-  color: #babdc1;
-  background: #263238;
-  border-bottom: 0px;
-  border-radius: 4px 4px 0 0;
-  cursor: text;
+  color: var(--vscode-foreground) !important;
+  background: var(--vscode-terminal-background, var(--vscode-input-background)) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+  border-bottom: 0 !important;
+  border-radius: 4px 4px 0 0 !important;
+  cursor: text !important;
+  font-family: var(--vscode-editor-font-family, monospace) !important;
 }
 
-.dark-mode #cli-content {
-  color: #f7f7f7;
-  background: #324148;
+#cli-content :deep(.el-textarea__inner) {
+  background-color: transparent !important;
+  color: var(--vscode-foreground) !important;
+  border: none !important;
+}
+</style>
+
+<style>
+/* body 样式 - 终端页面使用终端背景 */
+body {
+  padding: 0;
+  margin-left: 1px;
+  background-color: var(--vscode-terminal-background, var(--vscode-editor-background)) !important;
+  font-family: var(--vscode-font-family, var(--vscode-editor-font-family)) !important;
 }
 </style>

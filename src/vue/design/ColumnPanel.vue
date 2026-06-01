@@ -176,5 +176,62 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+/* 复选框样式 - 使用 VS Code 主题变量 */
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: var(--vscode-button-background) !important;
+  border-color: var(--vscode-button-background) !important;
+}
+
+:deep(.el-checkbox__inner) {
+  background-color: var(--vscode-checkbox-background, var(--vscode-input-background)) !important;
+  border-color: var(--vscode-checkbox-border, var(--vscode-input-border, rgba(128, 128, 128, 0.35))) !important;
+}
+
+:deep(.el-checkbox__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+  color: var(--vscode-button-background) !important;
+}
+
+:deep(.el-checkbox__input.is-disabled .el-checkbox__inner) {
+  background-color: var(--vscode-disabledForeground, var(--vscode-input-placeholderForeground)) !important;
+  border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+}
+
+:deep(.el-checkbox__input.is-disabled.is-checked .el-checkbox__inner) {
+  background-color: var(--vscode-disabledForeground, var(--vscode-input-placeholderForeground)) !important;
+  border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+}
+
+:deep(.el-checkbox__input.is-disabled.is-checked .el-checkbox__inner::after) {
+  border-color: var(--vscode-foreground) !important;
+}
+
+/* 对话框样式 */
+:deep(.el-dialog) {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__title) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__body) {
+  color: var(--vscode-foreground) !important;
+}
+
+/* 输入框样式 */
+:deep(.el-input__inner) {
+  background-color: var(--vscode-input-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-input-foreground) !important;
+}
 </style>

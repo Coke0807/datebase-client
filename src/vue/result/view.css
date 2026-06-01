@@ -1,45 +1,141 @@
+/* ============================================
+   Result 页面样式 - VS Code 主题适配
+   ============================================ */
+
 body {
   font-family: var(--vscode-font-family);
   padding: 0;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
 }
 
+/* 提示信息 */
 .hint {
   box-sizing: border-box;
-  padding-left: 5px;
-  font-size: 1.1em;
-  color: #444;
+  padding: 8px 12px;
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
   width: 95vw;
   display: inline-block;
   margin-top: 8px;
+  background-color: var(--vscode-editor-background);
 }
 
-.plx-header--column.col--checkbox > .plx-cell .plx-cell--title{
-overflow: unset;
-}
-
-.sql-pannel{
-  width:100%;
+/* SQL 面板 */
+.sql-pannel {
+  width: 100%;
   font-size: var(--vscode-font-size);
 }
-.sql-pannel textarea{
-  font-family: var(--vscode-editor-font-family);
-  padding-top: 0;
-  padding-left: 10px;
+
+.sql-pannel textarea {
+  font-family: var(--vscode-editor-font-family, var(--vscode-font-family));
+  padding: 8px 12px;
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, var(--vscode-dropdown-border));
+  color: var(--vscode-input-foreground);
+  border-radius: 4px;
+  resize: vertical;
 }
 
-.hint {
-  color: var(--editor-color);
+.sql-pannel textarea:focus {
+  border-color: var(--vscode-focusBorder, var(--vscode-button-background));
+  outline: none;
 }
 
+/* 信息面板 */
 .info-panel {
-  color: #444;
+  color: var(--vscode-foreground);
   font-size: var(--vscode-font-size);
-  border: 1px solid #dcdfe6;
-  border-radius: 5px;
-  padding: 10px;
-  margin-left: 6px;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 8px 6px;
+  background-color: var(--vscode-panel-background, var(--vscode-editor-background));
 }
 
-.el-popover__reference{
-  background-color: #409EFF;
+/* 表格相关样式 */
+.plx-header--column.col--checkbox > .plx-cell .plx-cell--title {
+  overflow: unset;
+}
+
+/* Element Plus 组件样式覆盖 */
+.el-popover__reference {
+  background-color: var(--vscode-button-background);
+}
+
+/* 按钮样式 */
+.el-button {
+  background-color: var(--vscode-button-background) !important;
+  border-color: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
+}
+
+.el-button:hover {
+  background-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+  border-color: var(--vscode-button-hoverBackground, var(--vscode-button-background)) !important;
+}
+
+/* 输入框样式 */
+.el-input__inner {
+  background-color: var(--vscode-input-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-input-foreground) !important;
+}
+
+/* 下拉选择器样式 */
+.el-select .el-input__inner {
+  background-color: var(--vscode-dropdown-background) !important;
+  border-color: var(--vscode-dropdown-border) !important;
+  color: var(--vscode-dropdown-foreground) !important;
+}
+
+/* 分页样式 */
+.el-pagination {
+  color: var(--vscode-foreground) !important;
+}
+
+.el-pagination button {
+  background-color: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
+}
+
+/* 标签样式 */
+.el-tag {
+  background-color: var(--vscode-badge-background) !important;
+  border-color: var(--vscode-badge-background) !important;
+  color: var(--vscode-badge-foreground) !important;
+}
+
+/* 对话框样式 */
+.el-dialog {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+.el-dialog__title {
+  color: var(--vscode-foreground) !important;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  background-color: var(--vscode-scrollbarSlider-background);
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--vscode-editor-background);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background-color: var(--vscode-scrollbarSlider-background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }

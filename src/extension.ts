@@ -336,6 +336,12 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
+    // Clean up all active connections and SSH tunnels on extension deactivation
+    try {
+        ConnectionManager.cleanup();
+    } catch (error) {
+        // Silently fail during deactivation
+    }
 }
 
 function detectActive(): void {

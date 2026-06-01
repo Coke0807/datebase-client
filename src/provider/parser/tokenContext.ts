@@ -33,7 +33,7 @@ export class TokenContext {
             case ")":
                 const startToken = this.bracketStart.pop()
                 const endToken = this.splitToken(i, j, char);
-                if (startToken?.type == 'bracketStart') {
+                if (startToken?.type === 'bracketStart') {
                     this.scopes.push(new Range(startToken.range.start, endToken.range.end))
                 }
                 break;
@@ -74,11 +74,11 @@ export class TokenContext {
     private getType(): string {
         const preivous = this.getToken(-1);
         if (preivous) {
-            if ((preivous.content.match(/into|from|update|table|join/i)) || (preivous.type == 'schema_dot')) {
+            if ((preivous.content.match(/into|from|update|table|join/i)) || (preivous.type === 'schema_dot')) {
                 return 'table'
             }
-            if (preivous.content == '(' &&
-                (this.word.toLowerCase() == 'select' || this.getToken(-2)?.type=='table')
+            if (preivous.content === '(' &&
+                (this.word.toLowerCase() === 'select' || this.getToken(-2)?.type==='table')
             ) {
                 preivous.type = 'bracketStart'
             }

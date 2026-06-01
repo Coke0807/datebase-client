@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { Console } from "@/common/Console";
 import { Node } from "@/model/interface/node";
 import { IConnection, queryCallback } from "./connection";
 import { EsIndexGroup } from "@/model/es/model/esIndexGroupNode";
@@ -22,11 +23,11 @@ export class EsConnection extends IConnection {
             callback = values;
         }
         const splitIndex = sql.indexOf('\n')
-        let [type, path] = (splitIndex == -1 ? sql : sql.substring(0, splitIndex)).split(' ')
+        let [type, path] = (splitIndex === -1 ? sql : sql.substring(0, splitIndex)).split(' ')
         if (path?.charAt(0) != "/") {
             path = "/" + path
         }
-        const body = splitIndex == -1 ? null : sql.substring(splitIndex + 1) + "\n"
+        const body = splitIndex === -1 ? null : sql.substring(splitIndex + 1) + "\n"
 
         let config: AxiosRequestConfig = {
             method: type,
@@ -42,13 +43,13 @@ export class EsConnection extends IConnection {
         this.bindAuth(config);
 
         axios(config).then(async ({ data }) => {
-            if (values == "dontParse") {
+            if (values === "dontParse") {
                 callback(null, data)
                 return;
             }
             if (data.count) {
                 callback(null, [{ count: data.count }], [{ name: 'count', nullable: 'YES' }])
-            } else if (data.items || data?.result == 'created' || data?.result == 'updated' || data?.result == 'deleted') {
+            } else if (data.items || data?.result === 'created' || data?.result === 'updated' || data?.result === 'deleted') {
                 callback(null, { affectedRows: data.items ? data.items.length : 1 })
             } else if (data?.hits?.hits) {
                 this.handleSearch(path, data, callback);
@@ -61,17 +62,17 @@ export class EsConnection extends IConnection {
                 callback(new Error(reason))
                 return;
             }
-            console.log(err)
+            Console.log(err)
             callback(err)
         })
     }
     bindAuth(config: AxiosRequestConfig) {
-        if (this.opt.esAuth == 'account' && this.opt.user && this.opt.password) {
+        if (this.opt.esAuth === 'account' && this.opt.user && this.opt.password) {
             config.auth = {
                 username: this.opt.user,
                 password: this.opt.password
             }
-        } else if (this.opt.esAuth == 'token' && this.opt.esToken) {
+        } else if (this.opt.esAuth === 'token' && this.opt.esToken) {
             if (config.headers) {
                 config.headers.Authorization = this.opt.esToken;
             } else {
@@ -107,7 +108,7 @@ export class EsConnection extends IConnection {
         });
         if (!fields) {
             const indexName = path.split('/')[1];
-            const indexNode = (await new EsIndexGroup(this.opt).getChildren()).filter(node => node.label == indexName)[0]
+            const indexNode = (await new EsIndexGroup(this.opt).getChildren()).filter(node => node.label === indexName)[0]
             fields = (await indexNode?.getChildren())?.map((node: any) => { return { name: node.label, type: node.type, nullable: 'YES' }; }) as any;
         }
         fields.unshift({ name: "_id" }, { name: "_score" });

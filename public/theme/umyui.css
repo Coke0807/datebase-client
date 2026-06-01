@@ -42,10 +42,16 @@ https://www.umyui.com/
 
 .cell {
   overflow: hidden !important;
-  text-overflow: unset !important;
+  text-overflow: ellipsis !important;
   white-space: nowrap !important;
   user-select: text !important;
   padding: 1px !important;
+}
+
+/* 编辑状态下的单元格允许换行 */
+.cell.edit-column {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
 }
 
 
@@ -98,7 +104,7 @@ https://www.umyui.com/
 }
 
 .null-column {
-  color: #666;
+  color: var(--vscode-input-placeholderForeground);
   font-weight: 400;
 }
 

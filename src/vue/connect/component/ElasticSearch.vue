@@ -52,8 +52,18 @@
 
 <script>
 export default {
-  props: ["connectionOption"],
+  inject: ['connectionOption'],
 };
 </script>
 
-<style></style>
+<style scoped>
+/* ElasticSearch 组件样式 - 使用 VS Code 主题变量 */
+:deep(.el-radio__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: var(--vscode-button-background) !important;
+  background-color: var(--vscode-button-background) !important;
+}
+</style>

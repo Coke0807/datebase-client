@@ -1,5 +1,6 @@
 import { Node } from "../../model/interface/node";
-import { exec } from "child_process";
+import { spawn } from "child_process";
+import * as fs from "fs";
 import { Console } from "../../common/Console";
 import { NodeUtil } from "../../model/nodeUtil";
 import { ImportService } from "./importService";
@@ -13,13 +14,19 @@ export class MysqlImportService extends ImportService {
             NodeUtil.of(node)
             const host = node.usingSSH ? "127.0.0.1" : node.host
             const port = node.usingSSH ? NodeUtil.getTunnelPort(node.getConnectId()) : node.port;
-            const command = `mysql -h ${host} -P ${port} -u ${node.user} ${node.password ? `-p${node.password}` : ""} ${node.schema || ""} < ${importPath}`
-            Console.log(`Executing: ${command.replace(/-p.+? /, "-p****** ")}`);
-            const cp=exec(command, (err,stdout,stderr) => {
-                Console.log(err||stdout||stderr);
-            })
-            cp.on("close",(code,singal)=>{
-                Console.log(code===0?'Import Done.':"Import Occur Error!");
+            const args = ['-h', host, '-P', String(port), '-u', node.user];
+            if (node.schema) {
+                args.push(node.schema);
+            }
+            Console.log(`Executing: mysql -h ${host} -P ${port} -u ${node.user} -p****** ${node.schema || ""} < ${importPath}`);
+            const child = spawn('mysql', args, {
+                env: { ...process.env, ...(node.password ? { MYSQL_PWD: node.password } : {}) }
+            });
+            fs.createReadStream(importPath).pipe(child.stdin);
+            child.stdout.on('data', (data) => Console.log(data.toString()));
+            child.stderr.on('data', (data) => Console.log(data.toString()));
+            child.on("close", (code) => {
+                Console.log(code === 0 ? 'Import Done.' : "Import Occur Error!");
             })
         } else {
             super.importSql(importPath,node)

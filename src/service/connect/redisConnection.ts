@@ -22,7 +22,7 @@ export class RedisConnection extends IConnection {
                 ca: (node.caPath) ? fs.readFileSync(node.caPath) : null,
                 cert: ( node.clientCertPath) ? fs.readFileSync(node.clientCertPath) : null,
                 key: ( node.clientKeyPath) ? fs.readFileSync(node.clientKeyPath) : null,
-                minVersion: 'TLSv1'
+                minVersion: 'TLSv1.2'
             }
         }
         this.client = new Redis(config);

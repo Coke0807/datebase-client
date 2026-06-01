@@ -80,7 +80,7 @@ const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
 
 assert.ok(tsconfig.compilerOptions.target === 'ES2020', 'target 应该是 ES2020');
 assert.ok(tsconfig.compilerOptions.skipLibCheck === true, 'skipLibCheck 应该开启');
-assert.ok(tsconfig.compilerOptions.strict === false, 'strict 应该关闭（暂不开启）');
+assert.ok(tsconfig.compilerOptions.strict === false, 'strict 暂关闭（代码库尚未适配 strict 模式）');
 
 console.log('   ✓ TypeScript 配置正确\n');
 

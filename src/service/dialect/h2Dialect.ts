@@ -13,16 +13,21 @@ import { UpdateTableParam } from "./param/updateTableParam";
 export class H2Dialect extends SqlDialect {
 
     createIndex(createIndexParam: CreateIndexParam): string {
-        return `CREATE INDEX ${createIndexParam.table}_idx ON ${createIndexParam.table} (${createIndexParam.column});`;
+        const tbl = this.validateIdentifier(createIndexParam.table);
+        const col = this.validateIdentifier(createIndexParam.column);
+        return `CREATE INDEX ${tbl}_idx ON ${tbl} (${col});`;
     }
 
     dropIndex(table: string, indexName: string): string {
-        return `DROP INDEX IF EXISTS ${indexName};`;
+        const idx = this.validateIdentifier(indexName);
+        return `DROP INDEX IF EXISTS ${idx};`;
     }
 
     updateColumnSql(updateColumnParam: any): string {
         const { table, column, type, nullable } = updateColumnParam;
-        return `ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${nullable === 'NO' ? 'NOT NULL' : 'NULL'};`;
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(column);
+        return `ALTER TABLE ${tbl} ALTER COLUMN ${col} ${type} ${nullable === 'NO' ? 'NOT NULL' : 'NULL'};`;
     }
 
     showIndex(database: string, table: string): string {
@@ -38,7 +43,7 @@ export class H2Dialect extends SqlDialect {
     }
 
     showDatabases(): string {
-        return `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA ORDER BY SCHEMA_NAME;`;
+        return `SELECT SCHEMA_NAME as "Database" FROM INFORMATION_SCHEMA.SCHEMATA ORDER BY SCHEMA_NAME;`;
     }
 
     showSchemas(): string {
@@ -47,7 +52,7 @@ export class H2Dialect extends SqlDialect {
 
     showTables(database: string): string {
         const db = this.validateIdentifier(database);
-        return `SELECT TABLE_NAME as name 
+        return `SELECT TABLE_NAME as "name" 
         FROM INFORMATION_SCHEMA.TABLES 
         WHERE TABLE_SCHEMA = '${db}' AND TABLE_TYPE = 'TABLE'
         ORDER BY TABLE_NAME;`;
@@ -108,15 +113,20 @@ export class H2Dialect extends SqlDialect {
     }
 
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT * FROM ${database}.${table} LIMIT ${pageSize};`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT * FROM ${db}.${tbl} LIMIT ${pageSize};`;
     }
 
     countSql(database: string, table: string): string {
-        return `SELECT COUNT(*) as count FROM ${database}.${table};`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT COUNT(*) as count FROM ${db}.${tbl};`;
     }
 
     createDatabase(database: string): string {
-        return `CREATE SCHEMA IF NOT EXISTS ${database};`;
+        const db = this.validateIdentifier(database);
+        return `CREATE SCHEMA IF NOT EXISTS ${db};`;
     }
 
     truncateDatabase(database: string): string {
@@ -146,7 +156,8 @@ WHERE TABLE_SCHEMA = '${db}' AND TABLE_TYPE = 'TABLE';`;
     }
 
     addColumn(table: string): string {
-        return `ALTER TABLE ${table} ADD COLUMN column_name VARCHAR(255);`;
+        const tbl = this.validateIdentifier(table);
+        return `ALTER TABLE ${tbl} ADD COLUMN column_name VARCHAR(255);`;
     }
 
     showTableSource(database: string, table: string): string {

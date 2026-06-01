@@ -81,6 +81,9 @@ export default {
     startH2TcpServer: "Start H2 TCP Server",
     startH2PgServer: "Start H2 PostgreSQL Protocol Server",
     pgModeNote: "Note: In PG mode, you can also use PostgreSQL connection type.",
+    h2TcpNotSupported: "TCP mode is not supported yet. Please use PostgreSQL protocol mode.",
+    springBootConfig: "Spring Boot project config (connect after backend starts)",
+    h2PgStandalone: "Start standalone H2 PG server",
     // ElasticSearch related
     url: "URL",
     esHostPlaceholder: "The host of connection",

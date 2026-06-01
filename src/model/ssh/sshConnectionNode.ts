@@ -61,12 +61,14 @@ export class SSHConnectionNode extends Node {
     }
 
     public startSocksProxy() {
-        var exec = require('child_process').exec;
+        // 使用 spawn + 数组参数避免命令注入（C1）
+        const { spawn } = require('child_process');
+        const args: string[] = ['-qTnN', '-D', '127.0.0.1:1080'];
         if (this.sshConfig.privateKeyPath) {
-            exec(`cmd /c start ssh -i ${this.sshConfig.privateKeyPath} -qTnN -D 127.0.0.1:1080 root@${this.sshConfig.host}`)
-        } else {
-            exec(`cmd /c start ssh -qTnN -D 127.0.0.1:1080 root@${this.sshConfig.host}`)
+            args.push('-i', this.sshConfig.privateKeyPath);
         }
+        args.push(`${this.sshConfig.username}@${this.sshConfig.host}`);
+        spawn('ssh', args, { detached: true, stdio: 'ignore' }).unref();
     }
 
     private forwardService = new ForwardService()
@@ -213,9 +215,9 @@ export class SSHConnectionNode extends Node {
 
     async getChildren(): Promise<Node[]> {
 
-        return new Promise(async (resolve) => {
-            try {
-                const ssh = await ClientManager.getSSH(this.sshConfig)
+        try {
+            const ssh = await ClientManager.getSSH(this.sshConfig)
+            return new Promise((resolve) => {
                 ssh.sftp.readdir(this.file ? this.parentName + this.name : '/', (err, fileList) => {
                     if (err) {
                         resolve([new InfoNode(err.message)]);
@@ -226,10 +228,10 @@ export class SSHConnectionNode extends Node {
                         resolve(this.build(fileList, parent))
                     }
                 })
-            } catch (err) {
-                resolve([new InfoNode(err.message)])
-            }
-        })
+            })
+        } catch (err) {
+            return [new InfoNode(err.message)]
+        }
     }
 
     build(entryList: FileEntry[], parentName: string): Node[] {

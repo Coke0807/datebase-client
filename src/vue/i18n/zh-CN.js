@@ -81,6 +81,9 @@ export default {
     startH2TcpServer: "启动H2 TCP服务器",
     startH2PgServer: "启动H2 PostgreSQL协议服务器",
     pgModeNote: "注意：在PG模式下，您也可以使用PostgreSQL连接类型。",
+    h2TcpNotSupported: "TCP模式暂不支持，请使用PostgreSQL协议模式。",
+    springBootConfig: "Spring Boot 项目配置（后端启动后即可连接）",
+    h2PgStandalone: "独立启动 H2 PG 服务器",
     // ElasticSearch 相关
     url: "URL",
     esHostPlaceholder: "连接主机",

@@ -6,10 +6,14 @@ import { SqlDialect } from "./sqlDialect";
 
 export class MssqlDIalect extends SqlDialect {
     createIndex(createIndexParam:CreateIndexParam): string{
-        return `ALTER TABLE ${createIndexParam.table} ADD ${createIndexParam.type} (${createIndexParam.column})`;
+        const tbl = this.validateIdentifier(createIndexParam.table);
+        const col = this.validateIdentifier(createIndexParam.column);
+        return `ALTER TABLE [${tbl}] ADD ${createIndexParam.type} ([${col}])`;
     }
     dropIndex(table: string, indexName: string): string {
-        return `DROP INDEX ${table}.${indexName}`
+        const tbl = this.validateIdentifier(table);
+        const idx = this.validateIdentifier(indexName);
+        return `DROP INDEX [${tbl}].[${idx}]`
     }
     showIndex(database: string, table: string): string {
         const tbl = this.validateIdentifier(table);
@@ -39,8 +43,9 @@ export class MssqlDIalect extends SqlDialect {
         return 'sp_who'
     }
     addColumn(table: string): string {
+        const tbl = this.validateIdentifier(table);
         return `ALTER TABLE
-        ${table} 
+        [${tbl}] 
     ADD 
         [column] [type];`;
     }
@@ -48,10 +53,12 @@ export class MssqlDIalect extends SqlDialect {
         return `CREATE LOGIN [name] WITH PASSWORD = 'password'`;
     }
     updateColumn(table: string, column: string, type: string, comment: string, nullable: string): string {
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(column);
         const defaultDefinition = nullable == "YES" ? "NULL":"NOT NULL" ;
-        comment = comment ? ` comment '${comment}'` : "";
-        return `EXEC sp_rename '${table}.${column}', '${column}', 'COLUMN'
-ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
+        const safeComment = comment ? ` comment '${this.escapeValue(comment)}'` : "";
+        return `EXEC sp_rename '[${tbl}].[${col}]', '${col}', 'COLUMN'
+ALTER TABLE [${tbl}] ALTER COLUMN [${col}] ${type} ${defaultDefinition};
 `;
     }
     updateColumnSql(updateColumnParam: UpdateColumnParam): string {
@@ -68,14 +75,17 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
     }
     updateTable(update: UpdateTableParam):string{
         const {database,table,newTableName}=update
-        return `sp_rename '${table}', '${newTableName}'`;
+        const tbl = this.validateIdentifier(table);
+        const newTbl = this.validateIdentifier(newTableName);
+        return `sp_rename '[${tbl}]', '[${newTbl}]'`;
     }
     truncateDatabase(database: string): string {
         const db = this.validateIdentifier(database);
         return `SELECT Concat('TRUNCATE TABLE [',table_schema,'].[',TABLE_NAME, '];') trun FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'  AND TABLE_SCHEMA='${db}'`
     }
     createDatabase(database: string): string {
-        return `create database ${database}`;
+        const db = this.validateIdentifier(database);
+        return `create database [${db}]`;
     }
     showTableSource(database: string, table: string): string {
         return ``
@@ -132,10 +142,14 @@ ALTER TABLE ${table} ALTER COLUMN ${column} ${type} ${defaultDefinition};
         return `SELECT name FROM sys.all_views t where SCHEMA_NAME(t.schema_id)='${db}' order by name`;
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT TOP ${pageSize} * FROM ${database}.${table};`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT TOP ${pageSize} * FROM ${db}.${tbl};`;
     }
     countSql(database: string, table: string): string {
-        return `SELECT count(*) count FROM ${database}.${table};`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT count(*) count FROM ${db}.${tbl};`;
     }
     showTables(database: string): string {
         const db = this.validateIdentifier(database);

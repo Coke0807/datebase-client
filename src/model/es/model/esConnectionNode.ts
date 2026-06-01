@@ -1,3 +1,4 @@
+import { Console } from "@/common/Console";
 import { Global } from "@/common/global";
 import { Util } from "@/common/util";
 import { QueryGroup } from "@/model/query/queryGroup";
@@ -53,7 +54,7 @@ export class EsConnectionNode extends Node {
                 EsConnectionNode.versionMap[this.label]=this.description
                 DbTreeDataProvider.refresh(this)
             }).catch(err=>{
-                console.log(err)
+                Console.log(err)
             })
         }
 

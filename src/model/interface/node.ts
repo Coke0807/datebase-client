@@ -74,6 +74,11 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
     public dbPath?: string;
 
     /**
+     * h2 only — connection mode: 'tcp' or 'pg'
+     */
+    public h2Mode?: 'tcp' | 'pg';
+
+    /**
       * mssql only
       */
     public encrypt?: boolean;
@@ -136,6 +141,7 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
         this.encrypt = source.encrypt
         this.instanceName = source.instanceName
         this.dbPath = source.dbPath
+        this.h2Mode = source.h2Mode
         this.domain = source.domain
         this.authType = source.authType
         this.disable = source.disable
@@ -145,7 +151,7 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
         if (!this.provider) this.provider = source.provider
         if (!this.context) this.context = source.context
         // init dialect
-        if (!this.dialect && this.dbType != DatabaseType.REDIS) {
+        if (!this.dialect && this.dbType !== DatabaseType.REDIS) {
             this.dialect = ServiceManager.getDialect(this.dbType)
         }
         if (this.disable) {
@@ -224,9 +230,9 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
 
     public static nodeCache = {};
     public cacheSelf() {
-        if (this.contextValue == ModelType.CONNECTION || this.contextValue == ModelType.ES_CONNECTION) {
+        if (this.contextValue === ModelType.CONNECTION || this.contextValue === ModelType.ES_CONNECTION) {
             Node.nodeCache[`${this.getConnectId()}`] = this;
-        } else if (this.contextValue == ModelType.SCHEMA) {
+        } else if (this.contextValue === ModelType.SCHEMA) {
             Node.nodeCache[`${this.getConnectId({ withSchema: true })}`] = this;
         } else {
             Node.nodeCache[`${this.uid}`] = this;
@@ -252,9 +258,9 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
 
     public initUid() {
         if (this.uid) return;
-        if (this.contextValue == ModelType.CONNECTION || this.contextValue == ModelType.CATALOG) {
+        if (this.contextValue === ModelType.CONNECTION || this.contextValue === ModelType.CATALOG) {
             this.uid = this.getConnectId();
-        } else if (this.contextValue == ModelType.SCHEMA || this.contextValue == ModelType.REDIS_CONNECTION) {
+        } else if (this.contextValue === ModelType.SCHEMA || this.contextValue === ModelType.REDIS_CONNECTION) {
             this.uid = `${this.getConnectId({ withSchema: true })}`;
         } else {
             this.uid = `${this.getConnectId({ withSchema: true })}#${this.label}`;
@@ -262,7 +268,7 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
     }
 
     public isActive(cur: Node) {
-        return cur && cur.getConnectId() == this.getConnectId();
+        return cur && cur.getConnectId() === this.getConnectId();
     }
 
     public getConnectId(opt?: SwitchOpt): string {
@@ -273,7 +279,7 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
         uid = `${this.key}@@${uid}`
 
         const database = this.database;
-        if (database && this?.contextValue != ModelType.CONNECTION) {
+        if (database && this?.contextValue !== ModelType.CONNECTION) {
             uid = `${uid}@${database}`;
         }
 
@@ -303,23 +309,38 @@ export abstract class Node extends vscode.TreeItem implements CopyAble {
     }
 
 
+    /**
+     * 转义 shell 参数，防止命令注入（C1）
+     * Windows: 用双引号包裹，转义内部双引号
+     * Unix: 用单引号包裹，转义内部单引号
+     */
+    private static escapeShellArg(arg: string): string {
+        if (!arg) return '""';
+        const s = String(arg);
+        if (platform() === 'win32') {
+            return '"' + s.replace(/"/g, '\\"') + '"';
+        }
+        return "'" + s.replace(/'/g, "'\\''") + "'";
+    }
+
     public openTerminal() {
+        const esc = Node.escapeShellArg;
         let command: string;
-        if (this.dbType == DatabaseType.MYSQL) {
+        if (this.dbType === DatabaseType.MYSQL) {
             this.checkCommand('mysql');
-            command = `mysql -u ${this.user} -p${this.password} -h ${this.host} -P ${this.port} \n`;
-        } else if (this.dbType == DatabaseType.PG) {
+            command = `mysql -u ${esc(this.user)} -p${esc(this.password)} -h ${esc(this.host)} -P ${this.port} \n`;
+        } else if (this.dbType === DatabaseType.PG) {
             this.checkCommand('psql');
-            let prefix = platform() == 'win32' ? 'set' : 'export';
-            command = `${prefix} "PGPASSWORD=${this.password}" && psql -U ${this.user} -h ${this.host} -p ${this.port} -d ${this.database} \n`;
-        } else if (this.dbType == DatabaseType.REDIS) {
+            let prefix = platform() === 'win32' ? 'set' : 'export';
+            command = `${prefix} "PGPASSWORD=${this.password}" && psql -U ${esc(this.user)} -h ${esc(this.host)} -p ${this.port} -d ${esc(this.database)} \n`;
+        } else if (this.dbType === DatabaseType.REDIS) {
             this.checkCommand('redis-cli');
-            command = `redis-cli -h ${this.host} -p ${this.port} \n`;
-        } else if (this.dbType == DatabaseType.MONGO_DB) {
+            command = `redis-cli -h ${esc(this.host)} -p ${this.port} \n`;
+        } else if (this.dbType === DatabaseType.MONGO_DB) {
             this.checkCommand('mongo');
-            command = `mongo --host ${this.host} --port ${this.port} ${this.user && this.password ? ` -u ${this.user} -p ${this.password}` : ''} \n`;
-        } else if (this.dbType == DatabaseType.SQLITE) {
-            command = `${getSqliteBinariesPath()} ${this.dbPath} \n`;
+            command = `mongo --host ${esc(this.host)} --port ${this.port} ${this.user && this.password ? ` -u ${esc(this.user)} -p ${esc(this.password)}` : ''} \n`;
+        } else if (this.dbType === DatabaseType.SQLITE) {
+            command = `${getSqliteBinariesPath()} ${esc(this.dbPath)} \n`;
         } else {
             vscode.window.showErrorMessage(`Database type ${this.dbType} not support open terminal.`)
             return;

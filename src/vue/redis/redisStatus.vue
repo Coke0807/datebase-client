@@ -195,6 +195,9 @@ export default {
   },
   methods: {
     refreshInit() {
+      if (this.refreshTimer) {
+        clearInterval(this.refreshTimer);
+      }
       this.refreshTimer=setInterval(() => {
         if (this.autoRefresh) {
           vscodeEvent.emit("route-" + this.$route.name)
@@ -263,11 +266,7 @@ export default {
 </script>
 
 <style scoped>
-body {
-  background-color: #f7f7f7;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
-}
-
+/* L8: body styles moved to non-scoped block below since body doesn't carry scoped attributes */
 .el-row.status-card {
   margin-top: 20px;
 }
@@ -280,9 +279,58 @@ body {
   width: 100%;
   overflow-x: hidden;
   text-overflow: ellipsis;
+  background-color: var(--vscode-badge-background) !important;
+  border-color: var(--vscode-badge-background) !important;
+  color: var(--vscode-badge-foreground) !important;
 }
 
 .server-status-text {
-  color: #43b50b;
+  color: var(--vscode-testing.iconPassed, #43b50b);
+}
+
+/* 卡片样式 */
+:deep(.el-card) {
+  background-color: var(--vscode-editor-background) !important;
+  border-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-card__header) {
+  border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-foreground) !important;
+  background-color: var(--vscode-editor-inactiveSelectionBackground, rgba(128, 128, 128, 0.05)) !important;
+}
+
+/* 开关样式 */
+:deep(.el-switch__core) {
+  border-color: var(--vscode-input-border, rgba(128, 128, 128, 0.35)) !important;
+  background-color: var(--vscode-input-background) !important;
+}
+
+:deep(.el-switch.is-checked .el-switch__core) {
+  border-color: var(--vscode-button-background) !important;
+  background-color: var(--vscode-button-background) !important;
+}
+
+/* 标签样式 */
+:deep(.el-tag) {
+  background-color: var(--vscode-badge-background) !important;
+  border-color: var(--vscode-badge-background) !important;
+  color: var(--vscode-badge-foreground) !important;
+}
+
+/* 工具提示 */
+:deep(.el-tooltip__popper) {
+  background-color: var(--vscode-editorHoverWidget-background) !important;
+  color: var(--vscode-editorHoverWidget-foreground) !important;
+  border-color: var(--vscode-editorHoverWidget-border) !important;
+}
+</style>
+
+<style>
+/* body 样式 */
+body {
+  background-color: var(--vscode-editor-background) !important;
+  font-family: var(--vscode-font-family) !important;
 }
 </style>

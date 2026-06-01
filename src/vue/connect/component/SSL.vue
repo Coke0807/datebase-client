@@ -25,8 +25,6 @@
 
 <script>
 export default {
-  props: ["connectionOption"],
+  inject: ['connectionOption'],
 };
 </script>
-
-<style></style>

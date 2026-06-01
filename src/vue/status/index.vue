@@ -136,9 +136,20 @@ export default {
       .init();
     this.emit("processList").emit("variableList").emit("statusList");
     this.sendLoadDashBoard();
-    setInterval(() => {
+    this.dashBoardTimer = setInterval(() => {
       this.sendLoadDashBoard();
     }, 1000);
+  },
+  beforeUnmount() {
+    if (this.dashBoardTimer) {
+      clearInterval(this.dashBoardTimer);
+    }
+    // Destroy G2 chart instances to prevent memory leaks
+    ['sessions', 'queries', 'traffic'].forEach(key => {
+      if (this.dashBoard[key]?.chart?.chart) {
+        this.dashBoard[key].chart.chart.destroy();
+      }
+    });
   },
   methods: {
     remainHeight() {
@@ -169,12 +180,68 @@ export default {
 };
 </script>
 
-<style >
+<style scoped>
 .status-container {
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", Arial, sans-serif;
+  padding: 16px;
+  font-family: var(--vscode-font-family);
 }
-.el-tabs__header {
-  margin: 0 !important;
+
+/* Tabs 样式优化 */
+:deep(.el-tabs__header) {
+  margin: 0 0 16px 0 !important;
+  border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-tabs__nav-wrap::after) {
+  background-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-tabs__item) {
+  color: var(--vscode-tab-inactiveForeground, var(--vscode-foreground)) !important;
+  font-size: var(--vscode-font-size) !important;
+  padding: 0 16px !important;
+  height: 36px;
+  line-height: 36px;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+}
+
+:deep(.el-tabs__item.is-active) {
+  color: var(--vscode-tab-activeForeground, var(--vscode-foreground)) !important;
+  font-weight: 500;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: var(--vscode-tab-activeBorder, var(--vscode-button-background)) !important;
+}
+
+/* 图表容器样式 */
+:deep(#queries),
+:deep(#traffic),
+:deep(#sessions) {
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+  padding: 8px;
+}
+
+/* 表格样式 */
+:deep(.vxe-table) {
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+}
+
+:deep(.vxe-header--row) {
+  background-color: var(--vscode-editor-background) !important;
+}
+
+:deep(.vxe-body--row) {
+  background-color: var(--vscode-editor-background) !important;
+}
+
+:deep(.vxe-body--row:hover) {
+  background-color: var(--vscode-list-hoverBackground) !important;
 }
 </style>

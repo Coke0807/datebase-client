@@ -13,7 +13,7 @@ export const auto = () => {
         brightBlack: get('--vscode-terminal-ansiBrightBlack'),
         black: get('--vscode-terminal-ansiBlack'),
 
-        brightBlue: get('--vscode-terminal-ansBrightiBlue'),
+        brightBlue: get('--vscode-terminal-ansiBrightBlue'),
         blue: get('--vscode-terminal-ansiBlue'),
 
         brightGreen: get('--vscode-terminal-ansiBrightGreen'),

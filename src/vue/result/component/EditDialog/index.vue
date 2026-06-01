@@ -1,5 +1,5 @@
 <template>
-  <el-dialog ref="editDialog" :title="editorTilte" v-model="visible" width="60%" top="3vh" :closeOnClickModal="false">
+  <el-dialog ref="editDialog" :title="editorTitle" v-model="visible" width="60%" top="3vh" :closeOnClickModal="false">
     <el-form ref="infoForm" :model="editModel" :inline="true">
       <el-form-item :prop="column.name" :key="column.name" v-for="column in columnList">
         <template>
@@ -33,7 +33,15 @@ import { wrapByDb } from "@/common/wrapper";
 export default {
   mixins: [util],
   components: { CellEditor },
-  props: ["result","dbType","database", "table", "primaryKey","primaryKeyList", "columnList"],
+  props: {
+    result: { type: Object, required: true },
+    dbType: { type: String, required: true },
+    database: { type: String },
+    table: { type: String, required: true },
+    primaryKey: { type: String },
+    primaryKeyList: { type: Array },
+    columnList: { type: Array, required: true }
+  },
   data() {
     return {
       model: "insert",
@@ -159,7 +167,6 @@ export default {
           updateSql=`${updateSql} AND ${ pkName }=${this.wrapQuote(pkType, oldRow[pkName])}`
         }
       }
-      console.log(updateSql)
       return updateSql+";";
     },
     confirmUpdate(row, oldRow) {
@@ -215,7 +222,7 @@ export default {
     },
   },
   computed: {
-    editorTilte() {
+    editorTitle() {
       if (this.model == "insert") {
         return "Insert To " + this.table;
       } else if (this.model == "update") {
@@ -235,5 +242,44 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+/* 对话框样式 - 使用 VS Code 主题变量 */
+:deep(.el-dialog) {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__title) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__body) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-form-item__label) {
+  color: var(--vscode-foreground) !important;
+}
+
+/* 按钮样式 */
+:deep(.el-button--primary) {
+  background-color: var(--vscode-button-background) !important;
+  border-color: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
+}
+
+:deep(.el-button:not(.el-button--primary)) {
+  background-color: var(--vscode-button-secondaryBackground, var(--vscode-input-background)) !important;
+  border-color: var(--vscode-button-secondaryBackground, var(--vscode-input-border)) !important;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground)) !important;
+}
+
+/* 表单标签 */
+:deep(.el-form-item label) {
+  color: var(--vscode-foreground) !important;
+}
 </style>

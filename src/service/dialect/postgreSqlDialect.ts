@@ -6,10 +6,13 @@ import { SqlDialect } from "./sqlDialect";
 export class PostgreSqlDialect extends SqlDialect {
     createIndex(createIndexParam: CreateIndexParam): string {
         const indexType = createIndexParam.indexType || "btree"
-        return `CREATE INDEX ${createIndexParam.column}_${new Date().getTime()}_index ON ${createIndexParam.table} USING ${indexType} (${createIndexParam.column});`;
+        const tbl = this.validateIdentifier(createIndexParam.table);
+        const col = this.validateIdentifier(createIndexParam.column);
+        return `CREATE INDEX ${col}_${new Date().getTime()}_index ON ${tbl} USING ${indexType} (${col});`;
     }
     dropIndex(table: string, indexName: string): string {
-        return `DROP INDEX ${indexName}`
+        const idx = this.validateIdentifier(indexName);
+        return `DROP INDEX ${idx}`
     }
     showIndex(database: string, table: string): string {
         const db = this.validateIdentifier(database);
@@ -83,8 +86,9 @@ export class PostgreSqlDialect extends SqlDialect {
         c.relname ASC`
     }
     addColumn(table: string): string {
+        const tbl = this.validateIdentifier(table);
         return `ALTER TABLE
-        ${table} 
+        ${tbl} 
     ADD 
         COLUMN [column] [type];`;
     }
@@ -92,9 +96,10 @@ export class PostgreSqlDialect extends SqlDialect {
         return `CREATE USER [name] WITH PASSWORD 'password'`
     }
     updateColumn(table: string, column: string, type: string, comment: string, nullable: string): string {
-        comment = comment ? ` comment '${comment}'` : "";
-        return `ALTER TABLE ${table} ALTER COLUMN ${column} TYPE ${type};
-ALTER TABLE ${table} ALTER RENAME COLUMN ${column} TO [newColumnName];`;
+        const tbl = this.validateIdentifier(table);
+        const col = this.validateIdentifier(column);
+        return `ALTER TABLE ${tbl} ALTER COLUMN ${col} TYPE ${type};
+ALTER TABLE ${tbl} ALTER RENAME COLUMN ${col} TO [newColumnName];`;
     }
     updateColumnSql(updateColumnParam: UpdateColumnParam): string {
         let { columnName, columnType, newColumnName, comment, nullable, table } = updateColumnParam
@@ -119,7 +124,8 @@ ALTER TABLE ${tbl} ALTER COLUMN ${col} ${defaultDefinition};`;
         if (!database) {
             return "select 1";
         }
-        return `set schema '${database}';`;
+        const db = this.validateIdentifier(database);
+        return `set schema '${db}';`;
     }
     updateTable(update: UpdateTableParam): string {
         const { table, newTableName, comment, newComment } = update
@@ -139,7 +145,8 @@ ALTER TABLE ${tbl} ALTER COLUMN ${col} ${defaultDefinition};`;
         return `SELECT Concat('TRUNCATE TABLE "',TABLE_NAME, '";') trun FROM INFORMATION_SCHEMA.TABLES WHERE  table_schema ='${db}' AND table_type='BASE TABLE';`
     }
     createDatabase(database: string): string {
-        return `create database "${database}"`;
+        const db = this.validateIdentifier(database);
+        return `create database "${db}"`;
     }
     showTableSource(database: string, table: string): string {
         return '';
@@ -195,10 +202,12 @@ ALTER TABLE ${tbl} ALTER COLUMN ${col} ${defaultDefinition};`;
         return `select table_name "name" from information_schema.tables where table_schema='${db}' and table_type='VIEW' order by "name";`
     }
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT * FROM ${table} LIMIT ${pageSize};`;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT * FROM ${tbl} LIMIT ${pageSize};`;
     }
     countSql(database: string, table: string): string {
-        return `SELECT count(*) FROM ${table};`;
+        const tbl = this.validateIdentifier(table);
+        return `SELECT count(*) FROM ${tbl};`;
     }
     showTables(database: string): string {
         const db = this.validateIdentifier(database);
@@ -253,7 +262,8 @@ FOR EACH ROW
 EXECUTE PROCEDURE [tri_fun]();`
     }
     dropTriggerTemplate(name: string) {
-        return `DROP TRIGGER ${name} on [table_name]`;
+        const n = this.validateIdentifier(name);
+        return `DROP TRIGGER ${n} on [table_name]`;
     }
     functionTemplate(): string {
         return `CREATE FUNCTION [name]() 

@@ -1,11 +1,12 @@
 import { Console } from "@/common/Console";
-import { Util } from "@/common/util";
 import { Node } from "@/model/interface/node";
 import { TableNode } from "@/model/main/tableNode";
 import { ViewNode } from "@/model/main/viewNode";
 import { NodeUtil } from "@/model/nodeUtil";
 import { DumpService } from "./dumpService";
 import * as vscode from "vscode";
+import { spawn } from "child_process";
+import * as fs from "fs";
 import { sync as commandExistsSync } from 'command-exists';
 
 export class MysqlDumpService extends DumpService {
@@ -22,17 +23,36 @@ export class MysqlDumpService extends DumpService {
                 const isTable = node instanceof TableNode || node instanceof ViewNode;
                 const host = node.usingSSH ? "127.0.0.1" : node.host
                 const port = node.usingSSH ? NodeUtil.getTunnelPort(node.getConnectId()) : node.port;
-                const data = withData ? '' : ' --no-data';
                 const tables = isTable ? ` --skip-triggers ${node.label}` : '';
-                const command = `mysqldump -h ${host} -P ${port} -u ${node.user} -p${node.password}${data} --skip-add-locks ${node.schema} ${tables}>${folderPath.fsPath}`
-                // Console.log(`Executing: ${command}`);
-                Util.execute(command).then(() => {
-                    vscode.window.showInformationMessage(`Backup ${node.getHost()}_${node.schema} success!`, 'open').then(action => {
-                        if (action == 'open') {
-                            vscode.commands.executeCommand('vscode.open', vscode.Uri.file(folderPath.fsPath));
+                const args = ['-h', host, '-P', String(port), '-u', node.user, '--skip-add-locks'];
+                if (!withData) args.push('--no-data');
+                if (isTable) {
+                    args.push('--skip-triggers', String(node.label));
+                }
+                args.push(node.schema);
+                const logCmd = `mysqldump -h ${host} -P ${port} -u ${node.user} -p****** --skip-add-locks ${node.schema} ${tables}`;
+                Console.log(`Executing: ${logCmd}`);
+                await new Promise<void>((resolve, reject) => {
+                    const child = spawn('mysqldump', args, {
+                        env: { ...process.env, ...(node.password ? { MYSQL_PWD: node.password } : {}) }
+                    });
+                    const outStream = fs.createWriteStream(folderPath.fsPath);
+                    child.stdout.pipe(outStream);
+                    child.stderr.on('data', (data) => Console.log(data.toString()));
+                    child.on('error', (err) => reject(err));
+                    child.on('close', (code) => {
+                        if (code === 0) {
+                            resolve();
+                        } else {
+                            reject(new Error(`mysqldump exited with code ${code}`));
                         }
-                    })
-                }).catch(err => Console.log(err.message))
+                    });
+                });
+                vscode.window.showInformationMessage(`Backup ${node.getHost()}_${node.schema} success!`, 'open').then(action => {
+                    if (action === 'open') {
+                        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(folderPath.fsPath));
+                    }
+                });
             }
             return Promise.reject("Dump canceled.");
         }

@@ -24,9 +24,9 @@ export class DatabaseCache {
     public static getElementState(element?: Node) {
 
         const contextValue = element.contextValue;
-        if (!contextValue || contextValue == ModelType.COLUMN || contextValue == ModelType.INFO || contextValue == ModelType.FUNCTION
-            || contextValue == ModelType.TRIGGER || contextValue == ModelType.PROCEDURE || contextValue == ModelType.USER
-            || contextValue == ModelType.DIAGRAM || contextValue == ModelType.ES_COLUMN || contextValue == ModelType.COLUMN
+        if (!contextValue || contextValue === ModelType.COLUMN || contextValue === ModelType.INFO || contextValue === ModelType.FUNCTION
+            || contextValue === ModelType.TRIGGER || contextValue === ModelType.PROCEDURE || contextValue === ModelType.USER
+            || contextValue === ModelType.DIAGRAM || contextValue === ModelType.ES_COLUMN || contextValue === ModelType.COLUMN
         ) {
             return TreeItemCollapsibleState.None;
         }
@@ -35,7 +35,7 @@ export class DatabaseCache {
 
         if (element.uid && collpaseState[element.uid]) {
             return collpaseState[element.uid];
-        } else if (contextValue == ModelType.CONNECTION || contextValue == ModelType.TABLE_GROUP) {
+        } else if (contextValue === ModelType.CONNECTION || contextValue === ModelType.TABLE_GROUP) {
             return TreeItemCollapsibleState.Expanded;
         } else {
             return TreeItemCollapsibleState.Collapsed;
@@ -51,7 +51,7 @@ export class DatabaseCache {
      */
     public static storeElementState(element?: Node, collapseState?: TreeItemCollapsibleState) {
 
-        if (element.contextValue == ModelType.COLUMN || element.contextValue == ModelType.INFO) {
+        if (element.contextValue === ModelType.COLUMN || element.contextValue === ModelType.INFO) {
             return;
         }
 

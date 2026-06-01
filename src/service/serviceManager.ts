@@ -174,6 +174,8 @@ export class ServiceManager {
                 return new EsPageService();
             case DatabaseType.EXASOL:
                 return new MysqlPageSerivce();
+            case DatabaseType.H2:
+                return new MysqlPageSerivce();
         }
 
         return new MysqlPageSerivce();

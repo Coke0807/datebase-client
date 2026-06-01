@@ -160,3 +160,87 @@
     }
   };
 </script>
+
+<style scoped>
+.forward-container {
+  padding: 16px;
+}
+
+/* 错误面板样式 */
+.panel {
+  border-left-width: 4px;
+  border-left-style: solid;
+  background: var(--vscode-textBlockQuote-background, var(--vscode-editor-background));
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px;
+  margin: 0 0 16px 0;
+  border-color: var(--vscode-inputValidation-errorBorder, #f14c4c);
+  background-color: var(--vscode-inputValidation-errorBackground, rgba(241, 76, 76, 0.1));
+}
+
+.panel__text {
+  line-height: 1.6;
+  color: var(--vscode-foreground);
+  margin: 0;
+}
+
+/* 表格样式 */
+:deep(.el-table) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border));
+  border-radius: 4px;
+}
+
+:deep(.el-table__header-wrapper th) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border-bottom-color: var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+  font-weight: 600 !important;
+}
+
+:deep(.el-table td) {
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-foreground) !important;
+  border-bottom-color: var(--vscode-panel-border, rgba(128, 128, 128, 0.2)) !important;
+}
+
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped td) {
+  background-color: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.1)) !important;
+}
+
+:deep(.el-table--enable-row-hover .el-table__body tr:hover > td) {
+  background-color: var(--vscode-list-hoverBackground) !important;
+}
+
+:deep(.el-table::before) {
+  display: none;
+}
+</style>
+
+<style scoped>
+/* 对话框样式 */
+:deep(.el-dialog) {
+  background-color: var(--vscode-editor-background) !important;
+  border: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__title) {
+  color: var(--vscode-foreground) !important;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid var(--vscode-panel-border, var(--vscode-dropdown-border)) !important;
+}
+
+:deep(.el-dialog__body) {
+  color: var(--vscode-foreground) !important;
+}
+
+/* 输入框样式 */
+:deep(.el-input__inner) {
+  background-color: var(--vscode-input-background) !important;
+  border-color: var(--vscode-input-border, var(--vscode-dropdown-border)) !important;
+  color: var(--vscode-input-foreground) !important;
+}
+</style>

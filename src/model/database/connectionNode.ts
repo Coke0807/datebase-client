@@ -27,7 +27,7 @@ export class ConnectionNode extends Node implements CopyAble {
         super(key)
         this.init(parent)
         this.label = (this.usingSSH) ? `${this.ssh.host}@${this.ssh.port}` : `${this.host}@${this.instanceName ? this.instanceName : this.port}`;
-        if (this.dbType == DatabaseType.SQLITE) {
+        if (this.dbType === DatabaseType.SQLITE) {
             this.label = this.dbPath;
         }
         this.cacheSelf()
@@ -37,14 +37,16 @@ export class ConnectionNode extends Node implements CopyAble {
             preferName ? this.label = parent.name : this.description = parent.name;
         }
         // https://www.iloveimg.com/zh-cn/resize-image/resize-svg
-        if (this.dbType == DatabaseType.PG) {
+        if (this.dbType === DatabaseType.PG) {
             this.iconPath = path.join(Constants.RES_PATH, "icon/pg_server.svg");
-        } else if (this.dbType == DatabaseType.MSSQL) {
+        } else if (this.dbType === DatabaseType.MSSQL) {
             this.iconPath = path.join(Constants.RES_PATH, "icon/mssql_server.png");
-        } else if (this.dbType == DatabaseType.SQLITE) {
+        } else if (this.dbType === DatabaseType.SQLITE) {
             this.iconPath = path.join(Constants.RES_PATH, "icon/sqlite-icon.svg");
-        } else if (this.dbType == DatabaseType.MONGO_DB) {
+        } else if (this.dbType === DatabaseType.MONGO_DB) {
             this.iconPath = path.join(Constants.RES_PATH, "icon/mongodb-icon.svg");
+        } else if (this.dbType === DatabaseType.H2) {
+            this.iconPath = new vscode.ThemeIcon("database");
         }
         if (this.disable) {
             this.collapsibleState = vscode.TreeItemCollapsibleState.None;
@@ -65,7 +67,7 @@ export class ConnectionNode extends Node implements CopyAble {
     public async getChildren(isRresh: boolean = false): Promise<Node[]> {
 
 
-        if (this.dbType == DatabaseType.SQLITE) {
+        if (this.dbType === DatabaseType.SQLITE) {
             return [new TableGroup(this), new ViewGroup(this)];
         }
 
@@ -73,16 +75,16 @@ export class ConnectionNode extends Node implements CopyAble {
         if (dbNodes && !isRresh) {
             // update active state.
             return dbNodes.map(dbNode => {
-                if (dbNode.contextValue == ModelType.USER_GROUP) {
+                if (dbNode.contextValue === ModelType.USER_GROUP) {
                     return new UserGroup(dbNode.label, this)
-                } else if (dbNode.contextValue == ModelType.CATALOG) {
+                } else if (dbNode.contextValue === ModelType.CATALOG) {
                     return new CatalogNode(dbNode.label, this)
                 }
                 return new SchemaNode(dbNode.label, this)
             });
         }
 
-        const hasCatalog = this.dbType != DatabaseType.MYSQL && this.contextValue == ModelType.CONNECTION;
+        const hasCatalog = this.dbType !== DatabaseType.MYSQL && this.contextValue === ModelType.CONNECTION;
         const sql = hasCatalog ? this.dialect.showDatabases() : this.dialect.showSchemas();
         return this.execute<any[]>(sql)
             .then((databases) => {
@@ -90,7 +92,7 @@ export class ConnectionNode extends Node implements CopyAble {
                 const usingInclude = this.includeDatabases && includeDatabaseArray && includeDatabaseArray.length >= 1;
                 const databaseNodes = databases.filter((db) => {
                     if (usingInclude && !db.schema) {
-                        return includeDatabaseArray.indexOf(db.Database.toLocaleLowerCase()) != -1;
+                        return includeDatabaseArray.indexOf(db.Database.toLocaleLowerCase()) !== -1;
                     }
                     return true;
                 }).map<SchemaNode | CatalogNode>((database) => {
@@ -118,10 +120,10 @@ export class ConnectionNode extends Node implements CopyAble {
         let childMap = {};
         const dbNameList = (await this.getChildren()).filter((databaseNode) => (databaseNode instanceof SchemaNode || databaseNode instanceof CatalogNode)).map((databaseNode) => {
             childMap[databaseNode.uid] = databaseNode
-            return this.dbType == DatabaseType.MYSQL ? databaseNode.schema : databaseNode.database;
+            return this.dbType === DatabaseType.MYSQL ? databaseNode.schema : databaseNode.database;
         });
         let dbName: string;
-        if (dbNameList.length == 1) {
+        if (dbNameList.length === 1) {
             dbName = dbNameList[0]
         }
         if (dbNameList.length > 1) {

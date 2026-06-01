@@ -128,7 +128,7 @@ export class QueryUnit {
 
             });
         } catch (error) {
-            console.log(error)
+            Console.log(error)
         }
     }
     public static runBatch(connection: IConnection, sqlList: string[]) {

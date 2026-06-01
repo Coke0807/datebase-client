@@ -3,7 +3,9 @@ import { CreateIndexParam } from "./param/createIndexParam";
 
 export class ExasolDialect extends SqlDialect {
     createIndex(createIndexParam: CreateIndexParam): string {
-        return `CREATE INDEX ${createIndexParam.table}_idx ON ${createIndexParam.table} (${createIndexParam.column});`;
+        const tbl = this.validateIdentifier(createIndexParam.table);
+        const col = this.validateIdentifier(createIndexParam.column);
+        return `CREATE INDEX ${tbl}_idx ON ${tbl} (${col});`;
     }
 
     showVersion(): string {
@@ -132,11 +134,15 @@ END;`;
     }
 
     buildPageSql(database: string, table: string, pageSize: number): string {
-        return `SELECT * FROM "${database}"."${table}" LIMIT 1000`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT * FROM "${db}"."${tbl}" LIMIT 1000`;
     }
 
     countSql(database: string, table: string): string {
-        return `SELECT COUNT(1) as count FROM "${database}"."${table}"`;
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT COUNT(1) as count FROM "${db}"."${tbl}"`;
     }
 
     updateTable(): string {
@@ -144,41 +150,51 @@ END;`;
     }
 
     showTableSource(database: string, table: string): string {
-        return `SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_DEFAULT, 
+        const db = this.validateIdentifier(database);
+        const tbl = this.validateIdentifier(table);
+        return `SELECT COLUMN_NAME, COLUMN_TYPE, COLUMN_DEFAULT,
             CASE WHEN COLUMN_IS_NULLABLE = 'YES' THEN 'NULL' ELSE 'NOT NULL' END as nullable,
             COLUMN_COMMENT
-        FROM SYS.EXA_ALL_COLUMNS 
-        WHERE COLUMN_SCHEMA = '${database}' 
-        AND COLUMN_TABLE = '${table}' 
+        FROM SYS.EXA_ALL_COLUMNS
+        WHERE COLUMN_SCHEMA = '${db}'
+        AND COLUMN_TABLE = '${tbl}'
         ORDER BY COLUMN_ORDINAL_POSITION`;
     }
 
     showViewSource(database: string, view: string): string {
-        return `SELECT VIEW_TEXT 
-        FROM SYS.EXA_ALL_VIEWS 
-        WHERE VIEW_SCHEMA = '${database}' 
-        AND VIEW_NAME = '${view}'`;
+        const db = this.validateIdentifier(database);
+        const vw = this.validateIdentifier(view);
+        return `SELECT VIEW_TEXT
+        FROM SYS.EXA_ALL_VIEWS
+        WHERE VIEW_SCHEMA = '${db}'
+        AND VIEW_NAME = '${vw}'`;
     }
 
     showProcedureSource(database: string, procedure: string): string {
-        return `SELECT PROCEDURE_TEXT 
-        FROM SYS.EXA_ALL_PROCEDURES 
-        WHERE PROCEDURE_SCHEMA = '${database}' 
-        AND PROCEDURE_NAME = '${procedure}'`;
+        const db = this.validateIdentifier(database);
+        const proc = this.validateIdentifier(procedure);
+        return `SELECT PROCEDURE_TEXT
+        FROM SYS.EXA_ALL_PROCEDURES
+        WHERE PROCEDURE_SCHEMA = '${db}'
+        AND PROCEDURE_NAME = '${proc}'`;
     }
 
     showFunctionSource(database: string, function_name: string): string {
-        return `SELECT FUNCTION_TEXT 
-        FROM SYS.EXA_ALL_FUNCTIONS 
-        WHERE FUNCTION_SCHEMA = '${database}' 
-        AND FUNCTION_NAME = '${function_name}'`;
+        const db = this.validateIdentifier(database);
+        const fn = this.validateIdentifier(function_name);
+        return `SELECT FUNCTION_TEXT
+        FROM SYS.EXA_ALL_FUNCTIONS
+        WHERE FUNCTION_SCHEMA = '${db}'
+        AND FUNCTION_NAME = '${fn}'`;
     }
 
     showTriggerSource(database: string, trigger: string): string {
-        return `SELECT TRIGGER_TEXT 
-        FROM SYS.EXA_ALL_TRIGGERS 
-        WHERE TRIGGER_SCHEMA = '${database}' 
-        AND TRIGGER_NAME = '${trigger}'`;
+        const db = this.validateIdentifier(database);
+        const trg = this.validateIdentifier(trigger);
+        return `SELECT TRIGGER_TEXT
+        FROM SYS.EXA_ALL_TRIGGERS
+        WHERE TRIGGER_SCHEMA = '${db}'
+        AND TRIGGER_NAME = '${trg}'`;
     }
 
     showVariables(): string {
